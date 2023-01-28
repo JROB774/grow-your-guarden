@@ -336,9 +336,8 @@ int main(int argc, char** argv)
 
     EM_ASM
     (
-        // @Setup: Change these names!
-        FS.mkdir("/GAME");
-        FS.mount(IDBFS, {}, "/GAME");
+        FS.mkdir("/WINTER");
+        FS.mount(IDBFS, {}, "/WINTER");
         FS.syncfs(true, function(err)
         {
             assert(!err);
