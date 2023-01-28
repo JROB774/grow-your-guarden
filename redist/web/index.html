@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+  <head>
+    <style type="text/css">
+      canvas { width: 1280px; height: 720px; border: 4px solid black; background-image: url("loading.png"); margin-bottom: 40px; }
+      body { border: 0px; margin: 0px; }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" tabindex=-1></canvas>
+    <script>
+      window.onload = function () { window.focus(); }
+      window.onclick = function () { window.focus(); }
+      var Module = {
+        print: (function() {
+          var element = document.getElementById('output');
+          return function(text) {};
+        })(),
+        printErr: function(text) {
+        },
+        canvas: (function() {
+          var canvas = document.getElementById('canvas');
+          return canvas;
+        })()
+      };
+    </script>
+    <script src="game.js"></script>
+  </body>
+</html>

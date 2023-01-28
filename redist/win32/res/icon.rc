@@ -1,0 +1,5 @@
+#include <winuser.h>
+
+#define IDI_ICON 100
+
+IDI_ICON ICON "icon.ico"
