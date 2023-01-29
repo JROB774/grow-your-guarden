@@ -1,5 +1,6 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
+GLOBAL void controller_init      (void);
 GLOBAL void controller_tick      (nkF32 dt);
 GLOBAL void controller_draw      (void);
 GLOBAL void set_controller_camera(void);

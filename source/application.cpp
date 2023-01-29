@@ -39,6 +39,7 @@
 #include "animation.hpp"
 #include "renderer.hpp"
 #include "controller.hpp"
+#include "plant.hpp"
 #include "world.hpp"
 
 #include "utility.cpp"
@@ -51,6 +52,7 @@
 #include "animation.cpp"
 #include "renderer.cpp"
 #include "controller.cpp"
+#include "plant.cpp"
 #include "world.cpp"
 
 struct AppContext
@@ -145,6 +147,7 @@ GLOBAL void app_init(void)
     enable_vertex_buffer_attrib(g_app.screen_buffer, 0, AttribType_Float, 4, 0);
 
     world_init();
+    controller_init();
 
     show_cursor(NK_FALSE);
 }

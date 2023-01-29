@@ -51,6 +51,7 @@ GLOBAL nkString potentially_append_slash(const nkChar* file_path);
 
 // Collision.
 GLOBAL NKFORCEINLINE nkBool point_vs_rect(nkF32 px, nkF32 py, nkF32 rx, nkF32 ry, nkF32 rw, nkF32 rh);
+GLOBAL NKFORCEINLINE nkBool point_vs_rect(const nkVec2& p, nkF32 rx, nkF32 ry, nkF32 rw, nkF32 rh);
 
 // Random number generation.
 GLOBAL void   rng_seed(nkU32 seed);

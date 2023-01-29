@@ -1,31 +1,13 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
-NK_ENUM(TileID, nkU32)
-{
-    TileID_GrassLight,
-    TileID_GrassDark,
-    TileID_TOTAL
-};
-
-struct Tile
-{
-    TileID id;
-};
-
-struct World
-{
-    nkS32 width, height;
-    Tile* tilemap;
-};
-
-INTERNAL World g_world;
-
 GLOBAL void world_init(void)
 {
-    g_world.width  = 9;
-    g_world.height = 6;
+    g_world.width  = 24;
+    g_world.height = 18;
 
     g_world.tilemap = NK_CALLOC_TYPES(Tile, g_world.width*g_world.height);
+
+    nk_array_reserve(&g_world.plants, g_world.width * g_world.height);
 
     TileID id = TileID_GrassLight;
 
@@ -56,6 +38,7 @@ GLOBAL void world_init(void)
 
 GLOBAL void world_quit(void)
 {
+    nk_array_free(&g_world.plants);
     NK_FREE(g_world.tilemap);
 }
 
@@ -66,6 +49,7 @@ GLOBAL void world_tick(nkF32 dt)
 
 GLOBAL void world_draw(void)
 {
+    // Draw the world tiles.
     for(nkS32 y=0; y<g_world.height; ++y)
     {
         for(nkS32 x=0; x<g_world.width; ++x)
@@ -87,6 +71,53 @@ GLOBAL void world_draw(void)
             imm_texture(texture, tx,ty);
         }
     }
+
+    // Draw the plants.
+    for(nkU64 i=0; i<g_world.plants.length; ++i)
+    {
+        Plant* p = &g_world.plants[i];
+
+        Texture icon = NULL;
+        switch(p->id)
+        {
+            case PlantID_Flower: icon = asset_manager_load<Texture>("flower.png"); break;
+        }
+        if(icon)
+        {
+            nkF32 px = NK_CAST(nkF32, p->x * TILE_WIDTH) + (NK_CAST(nkF32,TILE_WIDTH) * 0.5f);
+            nkF32 py = NK_CAST(nkF32, p->y * TILE_HEIGHT) + (NK_CAST(nkF32,TILE_HEIGHT) * 0.5f);
+
+            imm_texture(icon, px,py);
+        }
+    }
+}
+
+GLOBAL nkBool place_plant(PlantID id, nkS32 x, nkS32 y)
+{
+    // Is the spot in bounds.
+    if(x < 0 || x >= g_world.width || y < 0 || y >= g_world.height)
+    {
+        return NK_FALSE;
+    }
+
+    // Check if the spot is already occupied.
+    for(nkU64 i=0; i<g_world.plants.length; ++i)
+    {
+        Plant* p = &g_world.plants[i];
+        if(p->x == x && p->y == y)
+        {
+            return NK_FALSE;
+        }
+    }
+
+    Plant plant;
+    plant.id = id;
+    plant.x  = x;
+    plant.y  = y;
+
+    nk_array_append(&g_world.plants, plant);
+
+    return NK_TRUE;
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/
