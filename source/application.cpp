@@ -51,7 +51,8 @@
 
 GLOBAL void app_main(AppDesc* desc)
 {
-    // Nothing...
+    desc->title = "PLANT";
+    desc->name  = "PLANT";
 }
 
 GLOBAL void app_init(void)

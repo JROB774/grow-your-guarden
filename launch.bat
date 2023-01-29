@@ -2,7 +2,7 @@
 setlocal
 
 pushd binary\win32
-game.exe
+plant.exe
 popd
 
 endlocal

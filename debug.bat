@@ -1,6 +1,6 @@
 @echo off
 setlocal
 
-devenv binary/win32/game.exe
+devenv binary/win32/plant.exe
 
 endlocal

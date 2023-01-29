@@ -336,8 +336,8 @@ int main(int argc, char** argv)
 
     EM_ASM
     (
-        FS.mkdir("/WINTER");
-        FS.mount(IDBFS, {}, "/WINTER");
+        FS.mkdir("/PLANT");
+        FS.mount(IDBFS, {}, "/PLANT");
         FS.syncfs(true, function(err)
         {
             assert(!err);
