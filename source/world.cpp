@@ -44,7 +44,8 @@ GLOBAL void world_quit(void)
 
 GLOBAL void world_tick(nkF32 dt)
 {
-    // Nothing...
+    // Update the plants.
+    plant_tick(g_world.plants.data, g_world.plants.length, dt);
 }
 
 GLOBAL void world_draw(void)
@@ -73,27 +74,13 @@ GLOBAL void world_draw(void)
     }
 
     // Draw the plants.
-    for(nkU64 i=0; i<g_world.plants.length; ++i)
-    {
-        Plant* p = &g_world.plants[i];
-
-        Texture icon = NULL;
-        switch(p->id)
-        {
-            case PlantID_Flower: icon = asset_manager_load<Texture>("flower.png"); break;
-        }
-        if(icon)
-        {
-            nkF32 px = NK_CAST(nkF32, p->x * TILE_WIDTH) + (NK_CAST(nkF32,TILE_WIDTH) * 0.5f);
-            nkF32 py = NK_CAST(nkF32, p->y * TILE_HEIGHT) + (NK_CAST(nkF32,TILE_HEIGHT) * 0.5f);
-
-            imm_texture(icon, px,py);
-        }
-    }
+    plant_draw(g_world.plants.data, g_world.plants.length);
 }
 
 GLOBAL nkBool place_plant(PlantID id, nkS32 x, nkS32 y)
 {
+    NK_ASSERT(id < PlantID_TOTAL);
+
     // Is the spot in bounds.
     if(x < 0 || x >= g_world.width || y < 0 || y >= g_world.height)
     {
@@ -110,10 +97,19 @@ GLOBAL nkBool place_plant(PlantID id, nkS32 x, nkS32 y)
         }
     }
 
+    const PlantDesc& desc = PLANT_DESC_TABLE[id];
+
     Plant plant;
-    plant.id = id;
-    plant.x  = x;
-    plant.y  = y;
+
+    plant.id         = id;
+    plant.x          = x;
+    plant.y          = y;
+    plant.health     = desc.health;
+    plant.phase      = 0;
+    plant.width      = desc.width;
+    plant.height     = desc.height;
+    plant.anim_timer = rng_f32(0.0f, PLANT_ANIM_SPEED);
+    plant.anim_frame = 0;
 
     nk_array_append(&g_world.plants, plant);
 

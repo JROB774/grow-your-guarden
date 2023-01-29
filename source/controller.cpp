@@ -148,21 +148,18 @@ GLOBAL void controller_draw(void)
     nkF32 hy = roundf(NK_CAST(nkF32, get_texture_height(hotbar)) * 0.5f);
     imm_texture(hotbar, hx,hy);
 
+    Texture icons = asset_manager_load<Texture>("icon.png");
+
     nkF32 ix = 24.0f;
     nkF32 iy = 24.0f;
 
     for(nkS32 i=0,n=NK_ARRAY_SIZE(g_controller.hotbar); i<n; ++i)
     {
-        Texture icon = NULL;
-
-        switch(g_controller.hotbar[i])
+        if(g_controller.hotbar[i] != PlantID_None)
         {
-            case PlantID_Flower: icon = asset_manager_load<Texture>("flower.png"); break;
-        }
+            ImmClip clip = get_plant_id_icon_clip(g_controller.hotbar[i]);
 
-        if(icon)
-        {
-            imm_texture(icon, ix,iy);
+            imm_texture(icons, ix,iy, &clip);
 
             if(g_controller.selected == g_controller.hotbar[i])
             {
