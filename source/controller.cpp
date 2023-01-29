@@ -1,6 +1,6 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
-INTERNAL constexpr nkS32 STARTING_MONEY = 800;
+INTERNAL constexpr nkS32 STARTING_MONEY = 1200;
 
 struct Controller
 {
@@ -53,6 +53,30 @@ INTERNAL nkVec2 mouse_pos_to_screen(nkVec2 pos, nkBool apply_offset)
     screen_mouse.y /= floorf(s);
 
     return screen_mouse;
+}
+
+// https://stackoverflow.com/a/1449859
+INTERNAL void number_to_string_with_commas(nkString* str, nkS32 number)
+{
+    NK_ASSERT(str);
+
+    if(number < 0)
+    {
+        nk_string_append(str, '-');
+        number_to_string_with_commas(str, -number);
+    }
+    else if(number < 1000)
+    {
+        nkString append = format_string("%d", number);
+        nk_string_append(str, &append);
+        return;
+    }
+    else
+    {
+        number_to_string_with_commas(str, number/1000);
+        nkString append = format_string(",%03d", number % 1000);
+        nk_string_append(str, &append);
+    }
 }
 
 GLOBAL void controller_init(void)
@@ -220,6 +244,16 @@ GLOBAL void controller_draw(void)
 
             imm_texture(icons, ix,iy, &clip, color);
 
+            // Draw the cost of the plant.
+            TrueTypeFont font = asset_manager_load<TrueTypeFont>("helsinki.ttf");
+            set_truetype_font_size(font, 10);
+            nkString string;
+            number_to_string_with_commas(&string, desc.cost);
+            nkF32 text_x = ix - 16.0f;
+            nkF32 text_y = iy + 16.0f;
+            draw_truetype_text(font, text_x+2,text_y+2, string.cstr, NK_V4_BLACK * color);
+            draw_truetype_text(font, text_x,text_y, string.cstr, NK_V4_WHITE * color);
+
             /*
             if(g_controller.selected == g_controller.hotbar[i])
             {
@@ -240,7 +274,8 @@ GLOBAL void controller_draw(void)
     // Draw the money counter.
     TrueTypeFont font = asset_manager_load<TrueTypeFont>("helsinki.ttf");
     set_truetype_font_size(font, 20);
-    nkString string = format_string("$%d", g_controller.money);
+    nkString string = "$";
+    number_to_string_with_commas(&string, g_controller.money);
     nkF32 text_x = 4.0f;
     nkF32 text_y = get_texture_height(hotbar) + get_truetype_line_height(font);
     draw_truetype_text(font, text_x+2,text_y+2, string.cstr, NK_V4_BLACK);
