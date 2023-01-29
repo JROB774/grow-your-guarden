@@ -97,6 +97,9 @@ GLOBAL nkBool place_plant(PlantID id, nkS32 x, nkS32 y)
         }
     }
 
+    Sound sound = asset_manager_load<Sound>("shovel_000.wav"); // @Incomplete: Randomize!
+    play_sound(sound);
+
     const PlantDesc& desc = PLANT_DESC_TABLE[id];
 
     Plant plant;
@@ -114,6 +117,54 @@ GLOBAL nkBool place_plant(PlantID id, nkS32 x, nkS32 y)
     nk_array_append(&g_world.plants, plant);
 
     return NK_TRUE;
+}
+
+GLOBAL nkBool remove_plant(nkS32 x, nkS32 y)
+{
+    // Is the spot in bounds.
+    if(x < 0 || x >= g_world.width || y < 0 || y >= g_world.height)
+    {
+        return NK_FALSE;
+    }
+
+    // Check for a plant and if so remove it.
+    for(nkU64 i=0; i<g_world.plants.length; ++i)
+    {
+        Plant* p = &g_world.plants[i];
+        if(p->x == x && p->y == y)
+        {
+            Sound sound = asset_manager_load<Sound>("shovel_001.wav"); // @Incomplete: Randomize!
+            play_sound(sound);
+            nk_array_remove(&g_world.plants, i);
+            return NK_TRUE;
+        }
+    }
+
+    return NK_FALSE;
+}
+
+GLOBAL nkBool water_plant(nkS32 x, nkS32 y)
+{
+    // Is the spot in bounds.
+    if(x < 0 || x >= g_world.width || y < 0 || y >= g_world.height)
+    {
+        return NK_FALSE;
+    }
+
+    // Check for a plant to water.
+    for(nkU64 i=0; i<g_world.plants.length; ++i)
+    {
+        Plant* p = &g_world.plants[i];
+        if(p->x == x && p->y == y)
+        {
+            Sound sound = asset_manager_load<Sound>("water_pour.wav");
+            play_sound(sound);
+            // @Incomplete: Do the watering logic...
+            return NK_TRUE;
+        }
+    }
+
+    return NK_FALSE;
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/
