@@ -5,12 +5,18 @@ INTERNAL void plant_tick__flower(Plant* p, nkF32 dt)
     // @Incomplete: ...
 }
 
+INTERNAL void plant_tick__bramble(Plant* p, nkF32 dt)
+{
+    // @Incomplete: ...
+}
+
 /*////////////////////////////////////////////////////////////////////////////*/
 
 GLOBAL constexpr PlantDesc PLANT_DESC_TABLE[] =
 {
-{ NULL,               NULL,         0, 0,0, { 0,0,0,0,0,0,0,0 } }, // None
-{ plant_tick__flower, "flower.png", 3, 1,1, { 5,5,0,0,0,0,0,0 } }, // Flower
+{ NULL,                NULL,          0, 0,0, { 0,0,0,0,0,0,0,0 } }, // None
+{ plant_tick__flower,  "flower.png",  3, 1,1, { 5,5,0,0,0,0,0,0 } }, // Flower
+{ plant_tick__bramble, "bramble.png", 3, 1,1, { 2,2,2,0,0,0,0,0 } }, // Bramble
 };
 
 NK_STATIC_ASSERT(NK_ARRAY_SIZE(PLANT_DESC_TABLE) == PlantID_TOTAL, plant_desc_size_mismatch);

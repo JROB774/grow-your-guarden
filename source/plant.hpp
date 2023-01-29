@@ -4,6 +4,7 @@ NK_ENUM(PlantID, nkU32)
 {
     PlantID_None,
     PlantID_Flower,
+    PlantID_Bramble,
     PlantID_TOTAL
 };
 

@@ -58,8 +58,9 @@ GLOBAL void controller_init(void)
     g_controller.camera_pos.x = NK_CAST(nkF32, (g_world.width * TILE_WIDTH)) * 0.5f;
     g_controller.camera_pos.y = NK_CAST(nkF32, (g_world.height * TILE_HEIGHT)) * 0.5f;
 
-    // For now we are just starting with the flower plant.
+    // @Incomplete: Just giving some plants for testing.
     g_controller.hotbar[0] = PlantID_Flower;
+    g_controller.hotbar[1] = PlantID_Bramble;
 }
 
 GLOBAL void controller_tick(nkF32 dt)
