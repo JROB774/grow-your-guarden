@@ -605,7 +605,7 @@ INTERNAL ImmContext g_imm;
 
 GLOBAL void imm_init(void)
 {
-    g_imm.shader = asset_manager_load<Shader>("simple_basic.shader");
+    g_imm.shader = asset_manager_load<Shader>("basic.shader");
     g_imm.buffer = create_vertex_buffer();
     set_vertex_buffer_stride   (g_imm.buffer, sizeof(ImmVertex));
     enable_vertex_buffer_attrib(g_imm.buffer, 0, AttribType_Float, 2, offsetof(ImmVertex, pos));
@@ -655,6 +655,13 @@ GLOBAL void imm_set_model(nkMat4 model)
 GLOBAL void imm_set_viewport(nkVec4 viewport)
 {
     set_viewport(viewport.x,viewport.y,viewport.z,viewport.w);
+}
+
+GLOBAL void imm_reset(void)
+{
+    g_imm.projection = nk_m4_identity();
+    g_imm.view = nk_m4_identity();
+    g_imm.model = nk_m4_identity();
 }
 
 GLOBAL void imm_begin(DrawMode draw_mode, Texture tex, Shader shader)

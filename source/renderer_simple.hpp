@@ -125,6 +125,8 @@ GLOBAL void imm_set_model     (nkMat4 model);
 
 GLOBAL void imm_set_viewport(nkVec4 viewport);
 
+GLOBAL void imm_reset(void);
+
 GLOBAL void imm_begin (DrawMode draw_mode, Texture tex, Shader shader);
 GLOBAL void imm_end   (void);
 GLOBAL void imm_vertex(ImmVertex v);

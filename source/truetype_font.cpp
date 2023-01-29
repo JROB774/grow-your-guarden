@@ -140,7 +140,7 @@ GLOBAL void init_truetype_font_system(void)
     g_truetype.font_shader = asset_manager_load<Shader>("advanced_text.shader");
     #endif // USE_RENDERER_ADVANCED
     #if defined(USE_RENDERER_SIMPLE)
-    g_truetype.font_shader = asset_manager_load<Shader>("simple_text.shader");
+    g_truetype.font_shader = asset_manager_load<Shader>("text.shader");
     #endif // USE_RENDERER_SIMPLE
 
     FT_Init_FreeType(&g_truetype.freetype);

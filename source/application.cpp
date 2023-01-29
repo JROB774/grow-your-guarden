@@ -38,6 +38,8 @@
 #include "truetype_font.hpp"
 #include "animation.hpp"
 #include "renderer.hpp"
+#include "controller.hpp"
+#include "world.hpp"
 
 #include "utility.cpp"
 #include "platform.cpp"
@@ -48,6 +50,8 @@
 #include "truetype_font.cpp"
 #include "animation.cpp"
 #include "renderer.cpp"
+#include "controller.cpp"
+#include "world.cpp"
 
 struct AppContext
 {
@@ -67,6 +71,8 @@ INTERNAL void begin_frame_draw(void)
 
     bind_render_target(g_app.screen_target);
 
+    clear_screen(0.2f,0.2f,0.2f);
+
     imm_set_viewport({ vx,vy,vw,vh });
     imm_set_projection(nk_orthographic(0,vw,vh,0,0,1));
     imm_set_view(nk_m4_identity());
@@ -84,7 +90,7 @@ INTERNAL void end_frame_draw(void)
 
     set_viewport(0.0f,0.0f,ww,wh);
 
-    clear_screen(0.0f,0.0f,0.0f,1.0f);
+    clear_screen(0,0,0);
 
     nkF32 dstw = SCREEN_WIDTH;
     nkF32 dsth = SCREEN_HEIGHT;
@@ -130,29 +136,42 @@ GLOBAL void app_main(AppDesc* desc)
 
 GLOBAL void app_init(void)
 {
+    // Setup the necessary resources for rendering the off-screen target.
     g_app.screen_target = create_render_target(SCREEN_WIDTH,SCREEN_HEIGHT, SamplerFilter_Nearest, SamplerWrap_Clamp);
     g_app.screen_shader = asset_manager_load<Shader>("copy.shader");
     g_app.screen_buffer = create_vertex_buffer();
 
     set_vertex_buffer_stride   (g_app.screen_buffer, sizeof(nkF32)*4);
     enable_vertex_buffer_attrib(g_app.screen_buffer, 0, AttribType_Float, 4, 0);
+
+    world_init();
+
+    show_cursor(NK_FALSE);
 }
 
 GLOBAL void app_quit(void)
 {
+    world_quit();
+
     free_vertex_buffer(g_app.screen_buffer);
     free_render_target(g_app.screen_target);
 }
 
 GLOBAL void app_tick(nkF32 dt)
 {
-    // Nothing...
+    controller_tick(dt);
+    world_tick(dt);
 }
 
 GLOBAL void app_draw(void)
 {
     begin_frame_draw();
-    clear_screen(1.0f, 0.0f, 1.0f);
+
+    set_controller_camera();
+
+    world_draw();
+    controller_draw();
+
     end_frame_draw();
 }
 
