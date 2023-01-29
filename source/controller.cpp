@@ -8,6 +8,8 @@ struct Controller
     nkVec2  cursor_pos;
     nkBool  panning;
     nkBool  occluded;
+    nkBool  watering;
+    nkBool  removing;
 };
 
 INTERNAL Controller g_controller;
@@ -78,7 +80,7 @@ GLOBAL void controller_tick(nkF32 dt)
     nkF32 hh = NK_CAST(nkF32, get_texture_height(hotbar));
     g_controller.occluded = point_vs_rect(g_controller.cursor_pos, 0.0f,0.0f,hw,hh);
 
-    // Select the hovered plant.
+    // Select the hovered plant/tool.
     if(g_controller.occluded && is_mouse_button_pressed(MouseButton_Left))
     {
         nkF32 ix = 8.0f;
@@ -89,35 +91,69 @@ GLOBAL void controller_tick(nkF32 dt)
             if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f,32.0f))
             {
                 g_controller.selected = g_controller.hotbar[i];
+                g_controller.watering = NK_FALSE;
+                g_controller.removing = NK_FALSE;
             }
 
             ix += 40.0f;
         }
+
+        ix += 8.0f;
+        if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f,32.0f))
+        {
+            g_controller.selected = PlantID_None;
+            g_controller.watering = !g_controller.watering;
+            g_controller.removing = NK_FALSE;
+        }
+
+        ix += 40.0f;
+        if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f,32.0f))
+        {
+            g_controller.selected = PlantID_None;
+            g_controller.watering = NK_FALSE;
+            g_controller.removing = !g_controller.removing;
+        }
     }
-    // De-select current plant.
-    if(g_controller.selected != PlantID_None && is_mouse_button_pressed(MouseButton_Right))
+
+    // De-select current plant/tool.
+    if(is_mouse_button_pressed(MouseButton_Right))
     {
         g_controller.selected = PlantID_None;
+        g_controller.watering = NK_FALSE;
+        g_controller.removing = NK_FALSE;
     }
-    // Place current plant.
-    if(g_controller.selected != PlantID_None && !g_controller.occluded && !g_controller.panning && is_mouse_button_pressed(MouseButton_Left))
+
+    // Place current plant / perform the current tool action.
+    if(!g_controller.occluded && !g_controller.panning && is_mouse_button_pressed(MouseButton_Left))
     {
-        nkF32 cx = g_controller.cursor_pos.x + (g_controller.camera_pos.x - (NK_CAST(nkF32, SCREEN_WIDTH) * 0.5f));
-        nkF32 cy = g_controller.cursor_pos.y + (g_controller.camera_pos.y - (NK_CAST(nkF32, SCREEN_HEIGHT) * 0.5f));
+        if(g_controller.watering)
+        {
+            // @Incomplete: ...
+        }
+        if(g_controller.removing)
+        {
+            // @Incomplete: ...
+        }
 
-        iPoint tile;
+        if(g_controller.selected != PlantID_None)
+        {
+            nkF32 cx = g_controller.cursor_pos.x + (g_controller.camera_pos.x - (NK_CAST(nkF32, SCREEN_WIDTH) * 0.5f));
+            nkF32 cy = g_controller.cursor_pos.y + (g_controller.camera_pos.y - (NK_CAST(nkF32, SCREEN_HEIGHT) * 0.5f));
 
-        tile.x = NK_CAST(nkS32, cx / TILE_WIDTH);
-        tile.y = NK_CAST(nkS32, cy / TILE_HEIGHT);
+            iPoint tile;
 
-        place_plant(g_controller.selected, tile.x, tile.y);
+            tile.x = NK_CAST(nkS32, cx / TILE_WIDTH);
+            tile.y = NK_CAST(nkS32, cy / TILE_HEIGHT);
+
+            place_plant(g_controller.selected, tile.x, tile.y);
+        }
     }
 }
 
 GLOBAL void controller_draw(void)
 {
     // Draw the highlighted tile if not panning.
-    if(!g_controller.panning && !g_controller.occluded && g_controller.selected != PlantID_None)
+    if(!g_controller.panning && !g_controller.occluded && (g_controller.selected != PlantID_None || g_controller.watering || g_controller.removing))
     {
         Texture highlight = asset_manager_load<Texture>("highlight.png");
 
@@ -171,11 +207,44 @@ GLOBAL void controller_draw(void)
         ix += 40.0f;
     }
 
+    ix += 8.0f;
+    imm_texture(asset_manager_load<Texture>("watercan.png"), ix,iy);
+    if(g_controller.watering)
+    {
+        Texture highlight = asset_manager_load<Texture>("highlight.png");
+        imm_texture(highlight, ix,iy);
+    }
+
+    ix += 40.0f;
+    imm_texture(asset_manager_load<Texture>("shovel.png"), ix,iy);
+    if(g_controller.removing)
+    {
+        Texture highlight = asset_manager_load<Texture>("highlight.png");
+        imm_texture(highlight, ix,iy);
+    }
+
     // Draw the cursor.
-    Texture cursor = asset_manager_load<Texture>("cursor.png");
-    nkF32 cx = g_controller.cursor_pos.x + (NK_CAST(nkF32, get_texture_width(cursor) * 0.5f)) - 4;
-    nkF32 cy = g_controller.cursor_pos.y + (NK_CAST(nkF32, get_texture_height(cursor) * 0.5f)) - 4;
-    imm_texture(cursor, cx,cy);
+    if(g_controller.watering)
+    {
+        Texture cursor = asset_manager_load<Texture>("watercan.png");
+        nkF32 cx = g_controller.cursor_pos.x;
+        nkF32 cy = g_controller.cursor_pos.y;
+        imm_texture(cursor, cx,cy);
+    }
+    else if(g_controller.removing)
+    {
+        Texture cursor = asset_manager_load<Texture>("shovel.png");
+        nkF32 cx = g_controller.cursor_pos.x;
+        nkF32 cy = g_controller.cursor_pos.y;
+        imm_texture(cursor, cx,cy);
+    }
+    else
+    {
+        Texture cursor = asset_manager_load<Texture>("cursor.png");
+        nkF32 cx = g_controller.cursor_pos.x + (NK_CAST(nkF32, get_texture_width(cursor) * 0.5f)) - 4;
+        nkF32 cy = g_controller.cursor_pos.y + (NK_CAST(nkF32, get_texture_height(cursor) * 0.5f)) - 4;
+        imm_texture(cursor, cx,cy);
+    }
 }
 
 GLOBAL void set_controller_camera(void)
