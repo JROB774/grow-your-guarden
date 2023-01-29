@@ -29,8 +29,4 @@ GLOBAL void world_quit(void);
 GLOBAL void world_tick(nkF32 dt);
 GLOBAL void world_draw(void);
 
-GLOBAL nkBool place_plant (PlantID id, nkS32 x, nkS32 y);
-GLOBAL nkBool remove_plant(nkS32 x, nkS32 y);
-GLOBAL nkBool water_plant (nkS32 x, nkS32 y);
-
 /*////////////////////////////////////////////////////////////////////////////*/
