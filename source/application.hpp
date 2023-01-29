@@ -1,5 +1,8 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
+GLOBAL constexpr nkS32 SCREEN_WIDTH  = 640;
+GLOBAL constexpr nkS32 SCREEN_HEIGHT = 360;
+
 struct AppDesc
 {
     const nkChar* title       = "Template Game"; // Display name of the game (shown in the title bar).

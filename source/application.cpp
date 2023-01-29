@@ -49,20 +49,99 @@
 #include "animation.cpp"
 #include "renderer.cpp"
 
+struct AppContext
+{
+    RenderTarget screen_target;
+    VertexBuffer screen_buffer;
+    Shader       screen_shader;
+};
+
+INTERNAL AppContext g_app;
+
+INTERNAL void begin_frame_draw(void)
+{
+    nkF32 vx = 0.0f;
+    nkF32 vy = 0.0f;
+    nkF32 vw = NK_CAST(nkF32, get_texture_width(g_app.screen_target->color_target));
+    nkF32 vh = NK_CAST(nkF32, get_texture_height(g_app.screen_target->color_target));
+
+    bind_render_target(g_app.screen_target);
+
+    imm_set_viewport({ vx,vy,vw,vh });
+    imm_set_projection(nk_orthographic(0,vw,vh,0,0,1));
+    imm_set_view(nk_m4_identity());
+    imm_set_model(nk_m4_identity());
+}
+
+INTERNAL void end_frame_draw(void)
+{
+    RenderTarget output = g_app.screen_target;
+
+    bind_render_target(NULL);
+
+    nkF32 ww = NK_CAST(nkF32, get_window_width());
+    nkF32 wh = NK_CAST(nkF32, get_window_height());
+
+    set_viewport(0.0f,0.0f,ww,wh);
+
+    clear_screen(0.0f,0.0f,0.0f,1.0f);
+
+    nkF32 dstw = SCREEN_WIDTH;
+    nkF32 dsth = SCREEN_HEIGHT;
+
+    while((dstw+SCREEN_WIDTH <= ww) && (dsth+SCREEN_HEIGHT <= wh))
+    {
+        dstw += SCREEN_WIDTH;
+        dsth += SCREEN_HEIGHT;
+    }
+
+    nkF32 dstx0 = (ww-dstw)*0.5f;
+    nkF32 dsty0 = (wh-dsth)*0.5f;
+    nkF32 dstx1 = dstx0+dstw;
+    nkF32 dsty1 = dsty0+dsth;
+
+    nkVec4 vertices[4];
+
+    vertices[0] = { dstx0,dsty1, 0.0f,0.0f };
+    vertices[1] = { dstx0,dsty0, 0.0f,1.0f };
+    vertices[2] = { dstx1,dsty1, 1.0f,0.0f };
+    vertices[3] = { dstx1,dsty0, 1.0f,1.0f };
+
+    nkMat4 projection = nk_orthographic(0,ww,wh,0,0,1);
+
+    set_blend_mode(BlendMode_PremultipliedAlpha);
+
+    bind_texture(output->color_target, 0);
+    bind_shader(g_app.screen_shader);
+
+    set_shader_mat4(g_app.screen_shader, "u_projection", projection);
+
+    update_vertex_buffer(g_app.screen_buffer, vertices, sizeof(vertices), BufferType_Dynamic);
+    draw_vertex_buffer(g_app.screen_buffer, DrawMode_TriangleStrip, NK_ARRAY_SIZE(vertices));
+}
+
 GLOBAL void app_main(AppDesc* desc)
 {
-    desc->title = "PLANT";
-    desc->name  = "PLANT";
+    desc->title       = "PLANT";
+    desc->name        = "PLANT";
+    desc->window_size = { SCREEN_WIDTH*2,SCREEN_HEIGHT*2 };
+    desc->window_min  = { SCREEN_WIDTH,SCREEN_HEIGHT };
 }
 
 GLOBAL void app_init(void)
 {
-    // Nothing...
+    g_app.screen_target = create_render_target(SCREEN_WIDTH,SCREEN_HEIGHT, SamplerFilter_Nearest, SamplerWrap_Clamp);
+    g_app.screen_shader = asset_manager_load<Shader>("copy.shader");
+    g_app.screen_buffer = create_vertex_buffer();
+
+    set_vertex_buffer_stride   (g_app.screen_buffer, sizeof(nkF32)*4);
+    enable_vertex_buffer_attrib(g_app.screen_buffer, 0, AttribType_Float, 4, 0);
 }
 
 GLOBAL void app_quit(void)
 {
-    // Nothing...
+    free_vertex_buffer(g_app.screen_buffer);
+    free_render_target(g_app.screen_target);
 }
 
 GLOBAL void app_tick(nkF32 dt)
@@ -72,7 +151,9 @@ GLOBAL void app_tick(nkF32 dt)
 
 GLOBAL void app_draw(void)
 {
-    // Nothing...
+    begin_frame_draw();
+    clear_screen(1.0f, 0.0f, 1.0f);
+    end_frame_draw();
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

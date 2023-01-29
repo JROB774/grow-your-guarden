@@ -124,13 +124,19 @@ GLOBAL void set_blend_mode(BlendMode blend_mode)
     }
 }
 
-GLOBAL void clear_screen_v(nkVec4 color)
+GLOBAL void clear_screen(nkVec4 color)
 {
     glClearColor(color.r,color.g,color.b,color.a);
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
-GLOBAL void clear_screen_f(nkF32 r, nkF32 g, nkF32 b, nkF32 a)
+GLOBAL void clear_screen(nkVec3 color)
+{
+    glClearColor(color.r,color.g,color.b,1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+
+GLOBAL void clear_screen(nkF32 r, nkF32 g, nkF32 b, nkF32 a)
 {
     glClearColor(r,g,b,a);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -258,7 +264,7 @@ GLOBAL RenderTarget create_render_target(nkS32 w, nkS32 h, SamplerFilter filter,
     return target;
 }
 
-GLOBAL void fre_render_target(RenderTarget target)
+GLOBAL void free_render_target(RenderTarget target)
 {
     if(!target) return;
     glDeleteFramebuffers(1, &target->handle);
