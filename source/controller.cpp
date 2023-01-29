@@ -1,9 +1,12 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
+INTERNAL constexpr nkS32 STARTING_MONEY = 800;
+
 struct Controller
 {
     PlantID hotbar[8];
     PlantID selected;
+    nkS32   money;
     nkVec2  camera_pos;
     nkVec2  cursor_pos;
     nkBool  panning;
@@ -57,6 +60,8 @@ GLOBAL void controller_init(void)
     // Center the camera on the map.
     g_controller.camera_pos.x = NK_CAST(nkF32, (g_world.width * TILE_WIDTH)) * 0.5f;
     g_controller.camera_pos.y = NK_CAST(nkF32, (g_world.height * TILE_HEIGHT)) * 0.5f;
+
+    g_controller.money = STARTING_MONEY;
 
     // @Incomplete: Just giving some plants for testing.
     g_controller.hotbar[0] = PlantID_Flower;
@@ -137,7 +142,12 @@ GLOBAL void controller_tick(nkF32 dt)
 
         if(g_controller.selected != PlantID_None)
         {
-            place_plant(g_controller.selected, tile.x, tile.y);
+            const PlantDesc& desc = get_plant_desc(g_controller.selected);
+            if(g_controller.money >= desc.cost)
+            {
+                place_plant(g_controller.selected, tile.x, tile.y);
+                g_controller.money -= desc.cost;
+            }
         }
         if(g_controller.watering)
         {
@@ -145,7 +155,12 @@ GLOBAL void controller_tick(nkF32 dt)
         }
         if(g_controller.removing)
         {
-            remove_plant(tile.x, tile.y);
+            PlantID removed = remove_plant(tile.x, tile.y);
+            if(removed != PlantID_None)
+            {
+                const PlantDesc& desc = get_plant_desc(removed);
+                g_controller.money += (desc.cost / 2);
+            }
         }
     }
 }
@@ -193,9 +208,17 @@ GLOBAL void controller_draw(void)
     {
         if(g_controller.hotbar[i] != PlantID_None)
         {
+            const PlantDesc& desc = get_plant_desc(g_controller.hotbar[i]);
+
             ImmClip clip = get_plant_id_icon_clip(g_controller.hotbar[i]);
 
-            imm_texture(icons, ix,iy, &clip);
+            nkVec4 color = NK_V4_WHITE;
+            if(g_controller.money < desc.cost)
+            {
+                color *= 0.5f;
+            }
+
+            imm_texture(icons, ix,iy, &clip, color);
 
             /*
             if(g_controller.selected == g_controller.hotbar[i])
@@ -213,6 +236,15 @@ GLOBAL void controller_draw(void)
     imm_texture(asset_manager_load<Texture>("watercan.png"), ix,iy);
     ix += 40.0f;
     imm_texture(asset_manager_load<Texture>("shovel.png"), ix,iy);
+
+    // Draw the money counter.
+    TrueTypeFont font = asset_manager_load<TrueTypeFont>("helsinki.ttf");
+    set_truetype_font_size(font, 20);
+    nkString string = format_string("$%d", g_controller.money);
+    nkF32 text_x = 4.0f;
+    nkF32 text_y = get_texture_height(hotbar) + get_truetype_line_height(font);
+    draw_truetype_text(font, text_x+2,text_y+2, string.cstr, NK_V4_BLACK);
+    draw_truetype_text(font, text_x,text_y, string.cstr, NK_V4_WHITE);
 
     // Draw the cursor.
     if(g_controller.watering)

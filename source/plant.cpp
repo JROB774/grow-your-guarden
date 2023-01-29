@@ -14,9 +14,9 @@ INTERNAL void plant_tick__bramble(Plant* p, nkF32 dt)
 
 GLOBAL constexpr PlantDesc PLANT_DESC_TABLE[] =
 {
-{ NULL,                NULL,          0, 0,0, { 0,0,0,0,0,0,0,0 } }, // None
-{ plant_tick__flower,  "flower.png",  3, 1,1, { 5,5,0,0,0,0,0,0 } }, // Flower
-{ plant_tick__bramble, "bramble.png", 3, 1,1, { 2,2,2,0,0,0,0,0 } }, // Bramble
+{ NULL,                NULL,            0, 0, 0,0, {  0, 0,0,0,0,0,0,0 } }, // None
+{ plant_tick__flower,  "flower.png",  100, 3, 1,1, { 10,10,0,0,0,0,0,0 } }, // Flower
+{ plant_tick__bramble, "bramble.png",  50, 3, 1,1, {  2, 2,2,0,0,0,0,0 } }, // Bramble
 };
 
 NK_STATIC_ASSERT(NK_ARRAY_SIZE(PLANT_DESC_TABLE) == PlantID_TOTAL, plant_desc_size_mismatch);
@@ -131,12 +131,12 @@ GLOBAL nkBool place_plant(PlantID id, nkS32 x, nkS32 y)
     return NK_TRUE;
 }
 
-GLOBAL nkBool remove_plant(nkS32 x, nkS32 y)
+GLOBAL PlantID remove_plant(nkS32 x, nkS32 y)
 {
     // Is the spot in bounds.
     if(x < 0 || x >= g_world.width || y < 0 || y >= g_world.height)
     {
-        return NK_FALSE;
+        return PlantID_None;
     }
 
     // Check for a plant and if so remove it.
@@ -145,14 +145,15 @@ GLOBAL nkBool remove_plant(nkS32 x, nkS32 y)
         Plant* p = &g_world.plants[i];
         if(p->x == x && p->y == y)
         {
+            PlantID id = p->id;
             Sound sound = asset_manager_load<Sound>("shovel_001.wav"); // @Incomplete: Randomize!
             play_sound(sound);
             nk_array_remove(&g_world.plants, i);
-            return NK_TRUE;
+            return id;
         }
     }
 
-    return NK_FALSE;
+    return PlantID_None;
 }
 
 GLOBAL nkBool water_plant(nkS32 x, nkS32 y)
@@ -203,6 +204,12 @@ GLOBAL ImmClip get_plant_clip(Plant* plant)
     clip.w = NK_CAST(nkF32, TILE_WIDTH);
     clip.h = NK_CAST(nkF32, TILE_HEIGHT);
     return clip;
+}
+
+GLOBAL const PlantDesc& get_plant_desc(PlantID id)
+{
+    NK_ASSERT(id < PlantID_TOTAL);
+    return PLANT_DESC_TABLE[id];
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/
