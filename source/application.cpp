@@ -75,6 +75,8 @@ INTERNAL void begin_frame_draw(void)
 
     clear_screen(0.2f,0.2f,0.2f);
 
+    set_blend_mode(BlendMode_Alpha);
+
     imm_set_viewport({ vx,vy,vw,vh });
     imm_set_projection(nk_orthographic(0,vw,vh,0,0,1));
     imm_set_view(nk_m4_identity());
