@@ -6,7 +6,7 @@
 
 #define DECLARE_PRIVATE_TYPE(name) struct name##__Type; typedef struct name##__Type* name;
 #define DEFINE_PRIVATE_TYPE(name) struct name##__Type
-#define ALLOCATE_PRIVATE_TYPE(name) NK_MALLOC_TYPES(name##__Type, 1)
+#define ALLOCATE_PRIVATE_TYPE(name) NK_CALLOC_TYPES(name##__Type, 1)
 
 template<typename T>
 struct Point
