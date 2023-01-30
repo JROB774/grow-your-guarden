@@ -17,6 +17,7 @@
 #include <nk_array.h>
 #include <nk_string.h>
 #include <nk_hashmap.h>
+#include <nk_hashset.h>
 #include <nk_defer.h>
 
 #include <stdlib.h>
@@ -41,7 +42,6 @@
 #include "controller.hpp"
 #include "bullets.hpp"
 #include "plants.hpp"
-#include "monsters.hpp"
 #include "entity.hpp"
 #include "world.hpp"
 
@@ -57,7 +57,6 @@
 #include "controller.cpp"
 #include "bullets.cpp"
 #include "plants.cpp"
-#include "monsters.cpp"
 #include "entity_ident.cpp"
 #include "entity_ticks.cpp"
 #include "entity_table.cpp"
@@ -157,12 +156,11 @@ GLOBAL void app_init(void)
     set_vertex_buffer_stride   (g_app.screen_buffer, sizeof(nkF32)*4);
     enable_vertex_buffer_attrib(g_app.screen_buffer, 0, AttribType_Float, 4, 0);
 
+    entity_init();
     world_init();
     controller_init();
     bullet_init();
     plant_init();
-    monster_init();
-    entity_init();
 
     show_cursor(NK_FALSE);
 
@@ -171,8 +169,8 @@ GLOBAL void app_init(void)
 
 GLOBAL void app_quit(void)
 {
-    entity_quit();
     world_quit();
+    entity_quit();
 
     free_vertex_buffer(g_app.screen_buffer);
     free_render_target(g_app.screen_target);

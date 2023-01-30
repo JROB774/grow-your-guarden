@@ -8,6 +8,8 @@ INTERNAL void ptick__flower(Plant* p, nkF32 dt)
     // If we are fully grown then try and shoot any enemies that are close enough.
     if(p->phase >= 2)
     {
+        // @Incomplete: ...
+        /*
         nkF32 px = NK_CAST(nkF32, p->x * TILE_WIDTH) + (NK_CAST(nkF32,TILE_WIDTH) * 0.5f);
         nkF32 py = NK_CAST(nkF32, p->y * TILE_HEIGHT) + (NK_CAST(nkF32,TILE_HEIGHT) * 0.5f);
 
@@ -23,6 +25,7 @@ INTERNAL void ptick__flower(Plant* p, nkF32 dt)
                 }
             }
         }
+        */
     }
 }
 

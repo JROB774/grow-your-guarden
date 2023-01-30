@@ -9,7 +9,6 @@ GLOBAL void world_init(void)
 
     nk_array_reserve(&g_world.bullets, 256);
     nk_array_reserve(&g_world.plants, 256);
-    nk_array_reserve(&g_world.monsters, 256);
     nk_array_reserve(&g_world.entities, 256);
 
     TileID id = TileID_GrassLight;
@@ -40,7 +39,7 @@ GLOBAL void world_init(void)
         */
     }
 
-    monster_spawn(MonsterID_Walker, 128.0f,128.0f);
+    entity_spawn(EntityID_Monster_Walker, 128.0f,128.0f);
 
     // Pre-load a bunch of assets.
     asset_manager_load<Texture>("grass_light.png");
@@ -50,7 +49,6 @@ GLOBAL void world_init(void)
 GLOBAL void world_quit(void)
 {
     nk_array_free(&g_world.entities);
-    nk_array_free(&g_world.monsters);
     nk_array_free(&g_world.plants);
     nk_array_free(&g_world.bullets);
 
@@ -61,7 +59,6 @@ GLOBAL void world_tick(nkF32 dt)
 {
     bullet_tick(dt);
     plant_tick(dt);
-    monster_tick(dt);
     entity_tick(dt);
 }
 
@@ -91,7 +88,6 @@ GLOBAL void world_draw(void)
 
     bullet_draw();
     plant_draw();
-    monster_draw();
     entity_draw();
 }
 

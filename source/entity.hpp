@@ -19,13 +19,18 @@ struct Entity
     nkVec2     position;
     nkVec2     velocity;
     nkS32      health;
+    fRect      bounds;
+    AnimState  anim_state;
+    nkBool     active;
 };
 
 typedef void(*EntityTick)(Entity&, nkF32);
 
 struct EntityDesc
 {
-    const nkChar* texture;
+    const nkChar* texture_file;
+    const nkChar* anim_file;
+    const nkChar* start_anim;
     EntityTick    tick;
     EntityType    type;
     nkS32         health;

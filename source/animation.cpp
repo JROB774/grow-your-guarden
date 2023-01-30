@@ -47,13 +47,13 @@ GLOBAL AnimGroup* create_animation_group(void* data, nkU64 size)
                     nk_hashmap_insert(&group->anims, anim_name, anim);
                     break;
                 }
-                if(strcmp(ident, "NAME"))
+                if(strcmp(ident, "NAME") == 0)
                 {
                     str_eat_space(&line);
                     nk_string_assign(&anim_name, line);
                     continue;
                 }
-                if(strcmp(ident, "LOOP"))
+                if(strcmp(ident, "LOOP") == 0)
                 {
                     anim.looped = NK_TRUE;
                     continue;
