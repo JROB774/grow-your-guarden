@@ -34,6 +34,7 @@ struct PlantDesc
     nkS32         phase_times[8]; // We should never have more phases than this but if we do then increase!
 };
 
+GLOBAL void             plant_init            (void);
 GLOBAL void             plant_tick            (nkF32 dt);
 GLOBAL void             plant_draw            (void);
 GLOBAL nkBool           place_plant           (PlantID id, nkS32 x, nkS32 y);

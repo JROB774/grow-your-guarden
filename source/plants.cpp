@@ -25,6 +25,17 @@ NK_STATIC_ASSERT(NK_ARRAY_SIZE(PLANT_TABLE) == PlantID_TOTAL, plant_table_size_m
 
 INTERNAL constexpr nkF32 PLANT_ANIM_SPEED = 0.3f;
 
+INTERNAL Sound g_shovel_sfx[5];
+
+GLOBAL void plant_init(void)
+{
+    g_shovel_sfx[0] = asset_manager_load<Sound>("shovel_000.wav");
+    g_shovel_sfx[1] = asset_manager_load<Sound>("shovel_001.wav");
+    g_shovel_sfx[2] = asset_manager_load<Sound>("shovel_002.wav");
+    g_shovel_sfx[3] = asset_manager_load<Sound>("shovel_003.wav");
+    g_shovel_sfx[4] = asset_manager_load<Sound>("shovel_004.wav");
+}
+
 GLOBAL void plant_tick(nkF32 dt)
 {
     for(nkU64 i=0; i<g_world.plants.length; ++i)
@@ -104,8 +115,8 @@ GLOBAL nkBool place_plant(PlantID id, nkS32 x, nkS32 y)
         }
     }
 
-    Sound sound = asset_manager_load<Sound>("shovel_000.wav"); // @Incomplete: Randomize!
-    play_sound(sound);
+    nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_shovel_sfx)-1);
+    play_sound(g_shovel_sfx[sound_index]);
 
     const PlantDesc& desc = PLANT_TABLE[id];
 
@@ -141,10 +152,12 @@ GLOBAL PlantID remove_plant(nkS32 x, nkS32 y)
         Plant* p = &g_world.plants[i];
         if(p->x == x && p->y == y)
         {
+            nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_shovel_sfx)-1);
+            play_sound(g_shovel_sfx[sound_index]);
+
             PlantID id = p->id;
-            Sound sound = asset_manager_load<Sound>("shovel_001.wav"); // @Incomplete: Randomize!
-            play_sound(sound);
             nk_array_remove(&g_world.plants, i);
+
             return id;
         }
     }

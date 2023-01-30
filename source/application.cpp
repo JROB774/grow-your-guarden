@@ -152,6 +152,7 @@ GLOBAL void app_init(void)
 
     world_init();
     controller_init();
+    plant_init();
 
     show_cursor(NK_FALSE);
 }
