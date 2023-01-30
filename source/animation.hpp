@@ -6,23 +6,30 @@ struct AnimFrame
     nkF32 duration;
 };
 
-struct Animation
+struct Anim
 {
     nkBool             looped;
     nkArray<AnimFrame> frames;
 };
 
+struct AnimGroup
+{
+    nkHashMap<nkString,Anim> anims;
+};
+
 struct AnimState
 {
-    Animation* anim;
+    AnimGroup* anims;
+    Anim*      current;
     nkU32      frame;
     nkF32      timer;
 };
 
-GLOBAL Animation* create_animation           (void* data, nkU64 size);
-GLOBAL void       free_animation             (Animation* anim);
-GLOBAL void       set_animation              (AnimState* state, Animation* anim);
-GLOBAL void       set_animation              (AnimState* state, const nkChar* anim_name); // Goes through the asset manager.
+GLOBAL AnimGroup* create_animation_group     (void* data, nkU64 size);
+GLOBAL void       free_animation_group       (AnimGroup* group);
+GLOBAL AnimState  create_animation_state     (AnimGroup* group);
+GLOBAL AnimState  create_animation_state     (const nkChar* group_name); // Goes through the asset manager directly.
+GLOBAL void       set_animation              (AnimState* state, const nkChar* anim_name, nkBool reset = NK_FALSE); // Does nothing if the animation is already playing (unless reset flag is true).
 GLOBAL void       update_animation           (AnimState* state, nkF32 dt);
 GLOBAL void       reset_animation            (AnimState* state);
 GLOBAL nkBool     is_animation_done          (AnimState* state);
@@ -31,17 +38,17 @@ GLOBAL AnimFrame  get_current_animation_frame(AnimState* state);
 /*////////////////////////////////////////////////////////////////////////////*/
 
 template<>
-Animation* asset_load<Animation*>(void* data, nkU64 size, nkBool from_npak, void* userdata)
+AnimGroup* asset_load<AnimGroup*>(void* data, nkU64 size, nkBool from_npak, void* userdata)
 {
-    return create_animation(data, size);
+    return create_animation_group(data, size);
 }
 template<>
-void asset_free<Animation*>(Asset<Animation*>& asset)
+void asset_free<AnimGroup*>(Asset<AnimGroup*>& asset)
 {
-    free_animation(asset.data);
+    free_animation_group(asset.data);
 }
 template<>
-const nkChar* asset_path<Animation*>(void)
+const nkChar* asset_path<AnimGroup*>(void)
 {
     return "anims/";
 }
