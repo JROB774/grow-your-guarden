@@ -80,7 +80,7 @@ GLOBAL void setup_renderer_platform(void)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     #endif // BUILD_NATIVE
     #if defined(BUILD_WEB)
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
     #endif // BUILD_WEB
@@ -311,8 +311,8 @@ INTERNAL GLuint compile_shader(const nkChar* source, nkU64 bytes, GLenum type)
     if(type == GL_FRAGMENT_SHADER) sources[0] = "#version 330\n#define FRAG_SHADER 1\n";
     #endif // BUILD_NATIVE
     #if defined(BUILD_WEB)
-    if(type == GL_VERTEX_SHADER) sources[0] = "#version 200 es\n#define VERT_SHADER 1\nprecision mediump float;\n";
-    if(type == GL_FRAGMENT_SHADER) sources[0] = "#version 200 es\n#define FRAG_SHADER 1\nprecision mediump float;\n";
+    if(type == GL_VERTEX_SHADER) sources[0] = "#version 300 es\n#define VERT_SHADER 1\nprecision mediump float;\n";
+    if(type == GL_FRAGMENT_SHADER) sources[0] = "#version 300 es\n#define FRAG_SHADER 1\nprecision mediump float;\n";
     #endif // BUILD_WEB
 
     GLuint shader = glCreateShader(type);
