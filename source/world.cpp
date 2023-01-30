@@ -2,8 +2,8 @@
 
 GLOBAL void world_init(void)
 {
-    g_world.width  = 24;
-    g_world.height = 18;
+    g_world.width  = 25;
+    g_world.height = 19;
 
     g_world.tilemap = NK_CALLOC_TYPES(Tile, g_world.width*g_world.height);
 
@@ -24,6 +24,7 @@ GLOBAL void world_init(void)
             }
         }
 
+        /*
         // Ensure the alternating grid patten on even width maps.
         if(g_world.width % 2 == 0)
         {
@@ -33,6 +34,7 @@ GLOBAL void world_init(void)
                 case TileID_GrassDark: id = TileID_GrassLight; break;
             }
         }
+        */
     }
 }
 
