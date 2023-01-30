@@ -26,14 +26,28 @@ NK_STATIC_ASSERT(NK_ARRAY_SIZE(PLANT_TABLE) == PlantID_TOTAL, plant_table_size_m
 INTERNAL constexpr nkF32 PLANT_ANIM_SPEED = 0.3f;
 
 INTERNAL Sound g_shovel_sfx[5];
+INTERNAL Sound g_water_sfx;
 
 GLOBAL void plant_init(void)
 {
+    // Pre-load a bunch of assets.
+
     g_shovel_sfx[0] = asset_manager_load<Sound>("shovel_000.wav");
     g_shovel_sfx[1] = asset_manager_load<Sound>("shovel_001.wav");
     g_shovel_sfx[2] = asset_manager_load<Sound>("shovel_002.wav");
     g_shovel_sfx[3] = asset_manager_load<Sound>("shovel_003.wav");
     g_shovel_sfx[4] = asset_manager_load<Sound>("shovel_004.wav");
+
+    g_water_sfx = asset_manager_load<Sound>("water_pour.wav");
+
+    for(nkU32 i=0; i<PlantID_TOTAL; ++i)
+    {
+        const PlantDesc& desc = PLANT_TABLE[i];
+        if(desc.texture)
+        {
+            asset_manager_load<Texture>(desc.texture);
+        }
+    }
 }
 
 GLOBAL void plant_tick(nkF32 dt)
@@ -154,10 +168,8 @@ GLOBAL PlantID remove_plant(nkS32 x, nkS32 y)
         {
             nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_shovel_sfx)-1);
             play_sound(g_shovel_sfx[sound_index]);
-
             PlantID id = p->id;
             nk_array_remove(&g_world.plants, i);
-
             return id;
         }
     }
@@ -179,8 +191,7 @@ GLOBAL nkBool water_plant(nkS32 x, nkS32 y)
         Plant* p = &g_world.plants[i];
         if(p->x == x && p->y == y)
         {
-            Sound sound = asset_manager_load<Sound>("water_pour.wav");
-            play_sound(sound);
+            play_sound(g_water_sfx);
             // @Incomplete: Do the watering logic...
             return NK_TRUE;
         }
