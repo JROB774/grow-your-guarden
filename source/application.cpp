@@ -39,6 +39,7 @@
 #include "animation.hpp"
 #include "renderer.hpp"
 #include "controller.hpp"
+#include "bullets.hpp"
 #include "plants.hpp"
 #include "monsters.hpp"
 #include "world.hpp"
@@ -53,6 +54,7 @@
 #include "animation.cpp"
 #include "renderer.cpp"
 #include "controller.cpp"
+#include "bullets.cpp"
 #include "plants.cpp"
 #include "monsters.cpp"
 #include "world.cpp"
@@ -152,6 +154,7 @@ GLOBAL void app_init(void)
 
     world_init();
     controller_init();
+    bullet_init();
     plant_init();
     monster_init();
 

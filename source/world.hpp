@@ -19,6 +19,7 @@ struct World
 {
     nkS32            width, height;
     Tile*            tilemap;
+    nkArray<Bullet>  bullets;
     nkArray<Plant>   plants;
     nkArray<Monster> monsters;
 };

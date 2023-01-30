@@ -77,4 +77,7 @@ GLOBAL nkVec2  str_get_vec2 (nkChar** str);
 GLOBAL nkVec3  str_get_vec3 (nkChar** str);
 GLOBAL nkVec4  str_get_vec4 (nkChar** str);
 
+// Miscellaneous
+INTERNAL NKFORCEINLINE nkF32 distance_between_points(const nkVec2& a, const nkVec2& b);
+
 /*////////////////////////////////////////////////////////////////////////////*/

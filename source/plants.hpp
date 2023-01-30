@@ -19,6 +19,7 @@ struct Plant
     nkS32   phase;
     nkF32   anim_timer;
     nkS32   anim_frame;
+    nkF32   shoot_cooldown;
 };
 
 typedef void(*PlantTick)(Plant*, nkF32);

@@ -313,4 +313,16 @@ GLOBAL nkVec4 str_get_vec4(nkChar** str)
     return v;
 }
 
+//
+// Miscellaneous.
+//
+
+INTERNAL NKFORCEINLINE nkF32 distance_between_points(const nkVec2& a, const nkVec2& b)
+{
+    nkF32 dx = a.x - b.x;
+    nkF32 dy = a.y - b.y;
+
+    return fabsf(sqrtf(dx * dx + dy * dy));
+}
+
 /*////////////////////////////////////////////////////////////////////////////*/

@@ -34,26 +34,25 @@ GLOBAL void monster_init(void)
 
 GLOBAL void monster_tick(nkF32 dt)
 {
-    for(nkU64 i=0; i<g_world.monsters.length; ++i)
+    for(auto& m: g_world.monsters)
     {
-        Monster* m = &g_world.monsters[i];
-        if(m->id != MonsterID_None)
+        if(m.id != MonsterID_None)
         {
             // Do the monster's custom update logic.
-            const MonsterDesc& desc = MONSTER_TABLE[m->id];
+            const MonsterDesc& desc = MONSTER_TABLE[m.id];
             if(desc.tick)
             {
-                desc.tick(m, dt);
+                desc.tick(&m, dt);
             }
 
             // Do animation logic.
-            m->anim_timer += dt;
-            if(m->anim_timer >= MONSTER_ANIM_SPEED)
+            m.anim_timer += dt;
+            if(m.anim_timer >= MONSTER_ANIM_SPEED)
             {
-                nkS32 max_frames = get_texture_width(get_monster_id_texture(m->id)) / TILE_WIDTH;
+                nkS32 max_frames = get_texture_width(get_monster_id_texture(m.id)) / TILE_WIDTH;
 
-                m->anim_timer -= MONSTER_ANIM_SPEED;
-                m->anim_frame = ((m->anim_frame + 1) % max_frames);
+                m.anim_timer -= MONSTER_ANIM_SPEED;
+                m.anim_frame = ((m.anim_frame + 1) % max_frames);
             }
         }
     }
@@ -61,16 +60,15 @@ GLOBAL void monster_tick(nkF32 dt)
 
 GLOBAL void monster_draw(void)
 {
-    for(nkU64 i=0; i<g_world.monsters.length; ++i)
+    for(auto& m: g_world.monsters)
     {
-        Monster* m = &g_world.monsters[i];
-        if(m->id != MonsterID_None)
+        if(m.id != MonsterID_None)
         {
-            Texture texture = get_monster_id_texture(m->id);
-            ImmClip clip = get_monster_clip(m);
+            Texture texture = get_monster_id_texture(m.id);
+            ImmClip clip = get_monster_clip(&m);
 
-            nkF32 mx = m->position.x;
-            nkF32 my = m->position.y;
+            nkF32 mx = m.position.x;
+            nkF32 my = m.position.y;
 
             imm_texture(texture, mx,my, &clip);
         }
