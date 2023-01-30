@@ -40,6 +40,7 @@
 #include "renderer.hpp"
 #include "controller.hpp"
 #include "plants.hpp"
+#include "monsters.hpp"
 #include "world.hpp"
 
 #include "utility.cpp"
@@ -53,6 +54,7 @@
 #include "renderer.cpp"
 #include "controller.cpp"
 #include "plants.cpp"
+#include "monsters.cpp"
 #include "world.cpp"
 
 struct AppContext

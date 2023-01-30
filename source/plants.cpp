@@ -1,41 +1,39 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
-INTERNAL void plant_tick__flower(Plant* p, nkF32 dt)
+INTERNAL void ptick__flower(Plant* p, nkF32 dt)
 {
     // @Incomplete: ...
 }
 
-INTERNAL void plant_tick__bramble(Plant* p, nkF32 dt)
+INTERNAL void ptick__bramble(Plant* p, nkF32 dt)
 {
     // @Incomplete: ...
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/
 
-GLOBAL constexpr PlantDesc PLANT_DESC_TABLE[] =
+INTERNAL constexpr PlantDesc PLANT_TABLE[] =
 {
-{ NULL,                NULL,            0, 0, 0,0, {  0, 0,0,0,0,0,0,0 } }, // None
-{ plant_tick__flower,  "flower.png",  100, 3, 1,1, { 10,10,0,0,0,0,0,0 } }, // Flower
-{ plant_tick__bramble, "bramble.png",  50, 3, 1,1, {  2, 2,2,0,0,0,0,0 } }, // Bramble
+{ NULL,           NULL,            0, 0, 0,0, {  0, 0, 0, 0, 0, 0, 0, 0 } }, // None
+{ ptick__flower,  "flower.png",  100, 3, 1,1, { 10,10, 0, 0, 0, 0, 0, 0 } }, // Flower
+{ ptick__bramble, "bramble.png",  50, 3, 1,1, {  2, 2, 2, 0, 0, 0, 0, 0 } }, // Bramble
 };
 
-NK_STATIC_ASSERT(NK_ARRAY_SIZE(PLANT_DESC_TABLE) == PlantID_TOTAL, plant_desc_size_mismatch);
+NK_STATIC_ASSERT(NK_ARRAY_SIZE(PLANT_TABLE) == PlantID_TOTAL, plant_table_size_mismatch);
 
 /*////////////////////////////////////////////////////////////////////////////*/
 
 INTERNAL constexpr nkF32 PLANT_ANIM_SPEED = 0.3f;
 
-GLOBAL void plant_tick(Plant* plants, nkU64 count, nkF32 dt)
+GLOBAL void plant_tick(nkF32 dt)
 {
-    NK_ASSERT(plants);
-
-    for(nkU64 i=0; i<count; ++i)
+    for(nkU64 i=0; i<g_world.plants.length; ++i)
     {
-        Plant* p = &plants[i];
+        Plant* p = &g_world.plants[i];
         if(p->id != PlantID_None)
         {
             // Do the plant's custom update logic.
-            const PlantDesc& desc = PLANT_DESC_TABLE[p->id];
+            const PlantDesc& desc = PLANT_TABLE[p->id];
             if(desc.tick)
             {
                 desc.tick(p, dt);
@@ -68,13 +66,11 @@ GLOBAL void plant_tick(Plant* plants, nkU64 count, nkF32 dt)
     }
 }
 
-GLOBAL void plant_draw(Plant* plants, nkU64 count)
+GLOBAL void plant_draw(void)
 {
-    NK_ASSERT(plants);
-
-    for(nkU64 i=0; i<count; ++i)
+    for(nkU64 i=0; i<g_world.plants.length; ++i)
     {
-        Plant* p = &plants[i];
+        Plant* p = &g_world.plants[i];
         if(p->id != PlantID_None)
         {
             Texture texture = get_plant_id_texture(p->id);
@@ -111,9 +107,9 @@ GLOBAL nkBool place_plant(PlantID id, nkS32 x, nkS32 y)
     Sound sound = asset_manager_load<Sound>("shovel_000.wav"); // @Incomplete: Randomize!
     play_sound(sound);
 
-    const PlantDesc& desc = PLANT_DESC_TABLE[id];
+    const PlantDesc& desc = PLANT_TABLE[id];
 
-    Plant plant;
+    Plant plant = NK_ZERO_MEM;
 
     plant.id          = id;
     plant.x           = x;
@@ -193,11 +189,12 @@ GLOBAL ImmClip get_plant_id_icon_clip(PlantID id)
 GLOBAL Texture get_plant_id_texture(PlantID id)
 {
     NK_ASSERT(id < PlantID_TOTAL);
-    return asset_manager_load<Texture>(PLANT_DESC_TABLE[id].texture);
+    return asset_manager_load<Texture>(PLANT_TABLE[id].texture);
 }
 
 GLOBAL ImmClip get_plant_clip(Plant* plant)
 {
+    NK_ASSERT(plant);
     ImmClip clip;
     clip.x = NK_CAST(nkF32, plant->anim_frame * TILE_WIDTH);
     clip.y = NK_CAST(nkF32, plant->phase * TILE_HEIGHT);
@@ -209,7 +206,7 @@ GLOBAL ImmClip get_plant_clip(Plant* plant)
 GLOBAL const PlantDesc& get_plant_desc(PlantID id)
 {
     NK_ASSERT(id < PlantID_TOTAL);
-    return PLANT_DESC_TABLE[id];
+    return PLANT_TABLE[id];
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

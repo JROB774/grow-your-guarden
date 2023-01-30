@@ -7,7 +7,8 @@ GLOBAL void world_init(void)
 
     g_world.tilemap = NK_CALLOC_TYPES(Tile, g_world.width*g_world.height);
 
-    nk_array_reserve(&g_world.plants, g_world.width * g_world.height);
+    nk_array_reserve(&g_world.plants, 256);
+    nk_array_reserve(&g_world.monsters, 256);
 
     TileID id = TileID_GrassLight;
 
@@ -36,23 +37,26 @@ GLOBAL void world_init(void)
         }
         */
     }
+
+    monster_spawn(MonsterID_Walker, 128.0f,128.0f);
 }
 
 GLOBAL void world_quit(void)
 {
+    nk_array_free(&g_world.monsters);
     nk_array_free(&g_world.plants);
+
     NK_FREE(g_world.tilemap);
 }
 
 GLOBAL void world_tick(nkF32 dt)
 {
-    // Update the plants.
-    plant_tick(g_world.plants.data, g_world.plants.length, dt);
+    plant_tick(dt);
+    monster_tick(dt);
 }
 
 GLOBAL void world_draw(void)
 {
-    // Draw the world tiles.
     for(nkS32 y=0; y<g_world.height; ++y)
     {
         for(nkS32 x=0; x<g_world.width; ++x)
@@ -75,8 +79,8 @@ GLOBAL void world_draw(void)
         }
     }
 
-    // Draw the plants.
-    plant_draw(g_world.plants.data, g_world.plants.length);
+    plant_draw();
+    monster_draw();
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

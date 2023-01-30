@@ -17,9 +17,10 @@ struct Tile
 
 struct World
 {
-    nkS32          width, height;
-    Tile*          tilemap;
-    nkArray<Plant> plants;
+    nkS32            width, height;
+    Tile*            tilemap;
+    nkArray<Plant>   plants;
+    nkArray<Monster> monsters;
 };
 
 GLOBAL World g_world;
