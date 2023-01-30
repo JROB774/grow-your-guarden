@@ -120,9 +120,13 @@ GLOBAL void controller_tick(nkF32 dt)
         {
             if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f,32.0f))
             {
-                g_controller.selected = g_controller.hotbar[i];
-                g_controller.watering = NK_FALSE;
-                g_controller.removing = NK_FALSE;
+                const PlantDesc& desc = get_plant_desc(g_controller.hotbar[i]);
+                if(g_controller.money >= desc.cost)
+                {
+                    g_controller.selected = g_controller.hotbar[i];
+                    g_controller.watering = NK_FALSE;
+                    g_controller.removing = NK_FALSE;
+                }
             }
 
             ix += 40.0f;
@@ -171,6 +175,12 @@ GLOBAL void controller_tick(nkF32 dt)
             {
                 place_plant(g_controller.selected, tile.x, tile.y);
                 g_controller.money -= desc.cost;
+
+                // If we no longer have enough money to purchase another, just de-select it.
+                if(g_controller.money < desc.cost)
+                {
+                    g_controller.selected = PlantID_None;
+                }
             }
         }
         if(g_controller.watering)
