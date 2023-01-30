@@ -31,7 +31,6 @@ INTERNAL Sound g_water_sfx;
 GLOBAL void plant_init(void)
 {
     // Pre-load a bunch of assets.
-
     g_shovel_sfx[0] = asset_manager_load<Sound>("shovel_000.wav");
     g_shovel_sfx[1] = asset_manager_load<Sound>("shovel_001.wav");
     g_shovel_sfx[2] = asset_manager_load<Sound>("shovel_002.wav");

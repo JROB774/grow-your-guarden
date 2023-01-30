@@ -27,6 +27,7 @@ struct MonsterDesc
     fRect         bounds;
 };
 
+GLOBAL void    monster_init          (void);
 GLOBAL void    monster_tick          (nkF32 dt);
 GLOBAL void    monster_draw          (void);
 GLOBAL void    monster_spawn         (MonsterID id, nkF32 x, nkF32 y);

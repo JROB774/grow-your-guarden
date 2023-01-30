@@ -153,8 +153,11 @@ GLOBAL void app_init(void)
     world_init();
     controller_init();
     plant_init();
+    monster_init();
 
     show_cursor(NK_FALSE);
+
+    printf("Init Complete!\n");
 }
 
 GLOBAL void app_quit(void)

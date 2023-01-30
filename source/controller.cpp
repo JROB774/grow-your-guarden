@@ -13,6 +13,16 @@ struct Controller
     nkBool  occluded;
     nkBool  watering;
     nkBool  removing;
+
+    // Assets
+    Texture hotbar_tex;
+    Texture highlight_tex;
+    Texture icons_tex;
+    Texture watercan_tex;
+    Texture shovel_tex;
+    Texture cursor_tex;
+
+    TrueTypeFont font;
 };
 
 INTERNAL Controller g_controller;
@@ -90,6 +100,19 @@ GLOBAL void controller_init(void)
     // @Incomplete: Just giving some plants for testing.
     g_controller.hotbar[0] = PlantID_Flower;
     g_controller.hotbar[1] = PlantID_Bramble;
+
+    // Pre-load a bunch of assets.
+    g_controller.hotbar_tex    = asset_manager_load<Texture>("hotbar.png");
+    g_controller.highlight_tex = asset_manager_load<Texture>("highlight.png");
+    g_controller.icons_tex     = asset_manager_load<Texture>("icon.png");
+    g_controller.watercan_tex  = asset_manager_load<Texture>("watercan.png");
+    g_controller.shovel_tex    = asset_manager_load<Texture>("shovel.png");
+    g_controller.cursor_tex    = asset_manager_load<Texture>("cursor.png");
+
+    TrueTypeFontDesc font_desc;
+    font_desc.px_sizes = { 10, 20 };
+
+    g_controller.font = asset_manager_load<TrueTypeFont>("helsinki.ttf", &font_desc);
 }
 
 GLOBAL void controller_tick(nkF32 dt)
@@ -105,9 +128,9 @@ GLOBAL void controller_tick(nkF32 dt)
     }
 
     // Check if the cursor is occluded from the world by the HUD.
-    Texture hotbar = asset_manager_load<Texture>("hotbar.png");
-    nkF32 hw = NK_CAST(nkF32, get_texture_width(hotbar));
-    nkF32 hh = NK_CAST(nkF32, get_texture_height(hotbar));
+    nkF32 hw = NK_CAST(nkF32, get_texture_width(g_controller.hotbar_tex));
+    nkF32 hh = NK_CAST(nkF32, get_texture_height(g_controller.hotbar_tex));
+
     g_controller.occluded = point_vs_rect(g_controller.cursor_pos, 0.0f,0.0f,hw,hh);
 
     // Select the hovered plant/tool.
@@ -204,8 +227,6 @@ GLOBAL void controller_draw(void)
     // Draw the highlighted tile if not panning.
     if(!g_controller.panning && !g_controller.occluded && (g_controller.selected != PlantID_None || g_controller.watering || g_controller.removing))
     {
-        Texture highlight = asset_manager_load<Texture>("highlight.png");
-
         nkF32 cx = g_controller.cursor_pos.x + (g_controller.camera_pos.x - (NK_CAST(nkF32, SCREEN_WIDTH) * 0.5f));
         nkF32 cy = g_controller.cursor_pos.y + (g_controller.camera_pos.y - (NK_CAST(nkF32, SCREEN_HEIGHT) * 0.5f));
 
@@ -220,7 +241,7 @@ GLOBAL void controller_draw(void)
             nkF32 tx = NK_CAST(nkF32, tile.x * TILE_WIDTH) + (NK_CAST(nkF32,TILE_WIDTH) * 0.5f);
             nkF32 ty = NK_CAST(nkF32, tile.y * TILE_HEIGHT) + (NK_CAST(nkF32,TILE_HEIGHT) * 0.5f);
 
-            imm_texture(highlight, tx,ty);
+            imm_texture(g_controller.highlight_tex, tx,ty);
         }
     }
 
@@ -228,12 +249,10 @@ GLOBAL void controller_draw(void)
     imm_set_view(nk_m4_identity());
 
     // Draw the hotbar.
-    Texture hotbar = asset_manager_load<Texture>("hotbar.png");
-    nkF32 hx = roundf(NK_CAST(nkF32, get_texture_width(hotbar)) * 0.5f);
-    nkF32 hy = roundf(NK_CAST(nkF32, get_texture_height(hotbar)) * 0.5f);
-    imm_texture(hotbar, hx,hy);
+    nkF32 hx = roundf(NK_CAST(nkF32, get_texture_width(g_controller.hotbar_tex)) * 0.5f);
+    nkF32 hy = roundf(NK_CAST(nkF32, get_texture_height(g_controller.hotbar_tex)) * 0.5f);
 
-    Texture icons = asset_manager_load<Texture>("icon.png");
+    imm_texture(g_controller.hotbar_tex, hx,hy);
 
     nkF32 ix = 24.0f;
     nkF32 iy = 24.0f;
@@ -252,17 +271,16 @@ GLOBAL void controller_draw(void)
                 color *= 0.5f;
             }
 
-            imm_texture(icons, ix,iy, &clip, color);
+            imm_texture(g_controller.icons_tex, ix,iy, &clip, color);
 
             // Draw the cost of the plant.
-            TrueTypeFont font = asset_manager_load<TrueTypeFont>("helsinki.ttf");
-            set_truetype_font_size(font, 10);
+            set_truetype_font_size(g_controller.font, 10);
             nkString string;
             number_to_string_with_commas(&string, desc.cost);
             nkF32 text_x = ix - 16.0f;
             nkF32 text_y = iy + 16.0f;
-            draw_truetype_text(font, text_x+2,text_y+2, string.cstr, NK_V4_BLACK * color);
-            draw_truetype_text(font, text_x,text_y, string.cstr, NK_V4_WHITE * color);
+            draw_truetype_text(g_controller.font, text_x+2,text_y+2, string.cstr, NK_V4_BLACK * color);
+            draw_truetype_text(g_controller.font, text_x,text_y, string.cstr, NK_V4_WHITE * color);
 
             /*
             if(g_controller.selected == g_controller.hotbar[i])
@@ -277,49 +295,44 @@ GLOBAL void controller_draw(void)
     }
 
     ix += 8.0f;
-    imm_texture(asset_manager_load<Texture>("watercan.png"), ix,iy);
+    imm_texture(g_controller.watercan_tex, ix,iy);
     ix += 40.0f;
-    imm_texture(asset_manager_load<Texture>("shovel.png"), ix,iy);
+    imm_texture(g_controller.shovel_tex, ix,iy);
 
     // Draw the money counter.
-    TrueTypeFont font = asset_manager_load<TrueTypeFont>("helsinki.ttf");
-    set_truetype_font_size(font, 20);
+    set_truetype_font_size(g_controller.font, 20);
     nkString string = "$";
     number_to_string_with_commas(&string, g_controller.money);
     nkF32 text_x = 4.0f;
-    nkF32 text_y = get_texture_height(hotbar) + get_truetype_line_height(font);
-    draw_truetype_text(font, text_x+2,text_y+2, string.cstr, NK_V4_BLACK);
-    draw_truetype_text(font, text_x,text_y, string.cstr, NK_V4_WHITE);
+    nkF32 text_y = get_texture_height(g_controller.hotbar_tex) + get_truetype_line_height(g_controller.font);
+    draw_truetype_text(g_controller.font, text_x+2,text_y+2, string.cstr, NK_V4_BLACK);
+    draw_truetype_text(g_controller.font, text_x,text_y, string.cstr, NK_V4_WHITE);
 
     // Draw the cursor.
     if(g_controller.watering)
     {
-        Texture cursor = asset_manager_load<Texture>("watercan.png");
         nkF32 cx = g_controller.cursor_pos.x;
         nkF32 cy = g_controller.cursor_pos.y;
-        imm_texture(cursor, cx,cy);
+        imm_texture(g_controller.watercan_tex, cx,cy);
     }
     else if(g_controller.removing)
     {
-        Texture cursor = asset_manager_load<Texture>("shovel.png");
         nkF32 cx = g_controller.cursor_pos.x;
         nkF32 cy = g_controller.cursor_pos.y;
-        imm_texture(cursor, cx,cy);
+        imm_texture(g_controller.shovel_tex, cx,cy);
     }
     else if(g_controller.selected != PlantID_None)
     {
-        Texture cursor = asset_manager_load<Texture>("icon.png");
         ImmClip clip = get_plant_id_icon_clip(g_controller.selected);
         nkF32 cx = g_controller.cursor_pos.x;
         nkF32 cy = g_controller.cursor_pos.y;
-        imm_texture(cursor, cx,cy, &clip);
+        imm_texture(g_controller.icons_tex, cx,cy, &clip);
     }
     else
     {
-        Texture cursor = asset_manager_load<Texture>("cursor.png");
-        nkF32 cx = g_controller.cursor_pos.x + (NK_CAST(nkF32, get_texture_width(cursor) * 0.5f)) - 4;
-        nkF32 cy = g_controller.cursor_pos.y + (NK_CAST(nkF32, get_texture_height(cursor) * 0.5f)) - 4;
-        imm_texture(cursor, cx,cy);
+        nkF32 cx = g_controller.cursor_pos.x + (NK_CAST(nkF32, get_texture_width(g_controller.cursor_tex) * 0.5f)) - 4;
+        nkF32 cy = g_controller.cursor_pos.y + (NK_CAST(nkF32, get_texture_height(g_controller.cursor_tex) * 0.5f)) - 4;
+        imm_texture(g_controller.cursor_tex, cx,cy);
     }
 }
 

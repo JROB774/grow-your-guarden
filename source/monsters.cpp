@@ -19,6 +19,19 @@ NK_STATIC_ASSERT(NK_ARRAY_SIZE(MONSTER_TABLE) == MonsterID_TOTAL, monster_table_
 
 INTERNAL constexpr nkF32 MONSTER_ANIM_SPEED = 0.3f;
 
+GLOBAL void monster_init(void)
+{
+    // Pre-load a bunch of assets.
+    for(nkU32 i=0; i<MonsterID_TOTAL; ++i)
+    {
+        const MonsterDesc& desc = MONSTER_TABLE[i];
+        if(desc.texture)
+        {
+            asset_manager_load<Texture>(desc.texture);
+        }
+    }
+}
+
 GLOBAL void monster_tick(nkF32 dt)
 {
     for(nkU64 i=0; i<g_world.monsters.length; ++i)
