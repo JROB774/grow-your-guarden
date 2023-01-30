@@ -22,6 +22,7 @@ struct World
     nkArray<Bullet>  bullets;
     nkArray<Plant>   plants;
     nkArray<Monster> monsters;
+    nkArray<Entity>  entities;
 };
 
 GLOBAL World g_world;

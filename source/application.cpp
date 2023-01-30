@@ -42,6 +42,7 @@
 #include "bullets.hpp"
 #include "plants.hpp"
 #include "monsters.hpp"
+#include "entity.hpp"
 #include "world.hpp"
 
 #include "utility.cpp"
@@ -57,6 +58,10 @@
 #include "bullets.cpp"
 #include "plants.cpp"
 #include "monsters.cpp"
+#include "entity_ident.cpp"
+#include "entity_ticks.cpp"
+#include "entity_table.cpp"
+#include "entity.cpp"
 #include "world.cpp"
 
 struct AppContext
@@ -157,6 +162,7 @@ GLOBAL void app_init(void)
     bullet_init();
     plant_init();
     monster_init();
+    entity_init();
 
     show_cursor(NK_FALSE);
 
@@ -165,6 +171,7 @@ GLOBAL void app_init(void)
 
 GLOBAL void app_quit(void)
 {
+    entity_quit();
     world_quit();
 
     free_vertex_buffer(g_app.screen_buffer);
