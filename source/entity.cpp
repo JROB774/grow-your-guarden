@@ -40,10 +40,9 @@ GLOBAL void entity_tick(nkF32 dt)
                 {
                     nkS32 max_phases = 0;
                     while(desc.phase_times[max_phases] > 0.0f)
-                    {
                         max_phases++;
-                    }
-                    if(e.current_phase < max_phases)
+                    max_phases++;
+                    if(e.current_phase < max_phases-1)
                     {
                         nkF32 phase_duration = desc.phase_times[e.current_phase];
                         e.phase_timer += dt;

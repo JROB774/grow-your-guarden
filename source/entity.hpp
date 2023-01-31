@@ -1,5 +1,8 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
+#define DEF_ETICK(name) INTERNAL void etick__##name(Entity& e, nkF32 dt)
+#define     ETICK(name) etick__##name
+
 typedef nkU32 EntityID;
 
 // These are implemented as flags so that some functions can take in multiple types

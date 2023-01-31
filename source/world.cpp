@@ -38,7 +38,7 @@ GLOBAL void world_init(void)
         */
     }
 
-    entity_spawn(EntityID_Monster_Walker, 128.0f,128.0f);
+    entity_spawn(EntityID_Walker, 128.0f,128.0f);
 
     // Pre-load a bunch of assets.
     asset_manager_load<Texture>("grass_light.png");

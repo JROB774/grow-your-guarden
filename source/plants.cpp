@@ -23,7 +23,7 @@ INTERNAL void ptick__flower(Plant* p, nkF32 dt)
                         nkF32 tx = e.position.x;
                         nkF32 ty = e.position.y;
 
-                        nkU64 index = entity_spawn(EntityID_Bullet_Flower, px,py);
+                        nkU64 index = entity_spawn(EntityID_Pollen, px,py);
                         Entity& b = g_world.entities[index];
 
                         nkVec2 src = { px,py };
