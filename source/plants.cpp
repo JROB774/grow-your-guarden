@@ -8,24 +8,36 @@ INTERNAL void ptick__flower(Plant* p, nkF32 dt)
     // If we are fully grown then try and shoot any enemies that are close enough.
     if(p->phase >= 2)
     {
-        // @Incomplete: ...
-        /*
         nkF32 px = NK_CAST(nkF32, p->x * TILE_WIDTH) + (NK_CAST(nkF32,TILE_WIDTH) * 0.5f);
         nkF32 py = NK_CAST(nkF32, p->y * TILE_HEIGHT) + (NK_CAST(nkF32,TILE_HEIGHT) * 0.5f);
 
-        for(auto& m: g_world.monsters)
+        for(auto& e: g_world.entities)
         {
-            nkF32 distance = distance_between_points({ px,py }, m.position);
-            if(distance <= RANGE)
+            if(e.type == EntityType_Monster)
             {
-                if(p->shoot_cooldown <= 0.0f)
+                nkF32 distance = distance_between_points({ px,py }, e.position);
+                if(distance <= RANGE)
                 {
-                    spawn_bullet(BulletID_Flower, px,py, m.position.x,m.position.y);
-                    p->shoot_cooldown = COOLDOWN;
+                    if(p->shoot_cooldown <= 0.0f)
+                    {
+                        nkF32 tx = e.position.x;
+                        nkF32 ty = e.position.y;
+
+                        nkU64 index = entity_spawn(EntityID_Bullet_Flower, px,py);
+                        Entity& b = g_world.entities[index];
+
+                        nkVec2 src = { px,py };
+                        nkVec2 dst = { tx,ty };
+
+                        nkVec2 dir = nk_normalize(dst - src);
+
+                        b.velocity = dir * NK_CAST(nkF32, b.speed);
+
+                        p->shoot_cooldown = COOLDOWN;
+                    }
                 }
             }
         }
-        */
     }
 }
 

@@ -40,7 +40,6 @@
 #include "animation.hpp"
 #include "renderer.hpp"
 #include "controller.hpp"
-#include "bullets.hpp"
 #include "plants.hpp"
 #include "entity.hpp"
 #include "world.hpp"
@@ -55,12 +54,11 @@
 #include "animation.cpp"
 #include "renderer.cpp"
 #include "controller.cpp"
-#include "bullets.cpp"
-#include "plants.cpp"
 #include "entity_ident.cpp"
 #include "entity_ticks.cpp"
 #include "entity_table.cpp"
 #include "entity.cpp"
+#include "plants.cpp"
 #include "world.cpp"
 
 struct AppContext
@@ -159,7 +157,6 @@ GLOBAL void app_init(void)
     entity_init();
     world_init();
     controller_init();
-    bullet_init();
     plant_init();
 
     show_cursor(NK_FALSE);
