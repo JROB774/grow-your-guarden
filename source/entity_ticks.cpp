@@ -10,7 +10,7 @@ INTERNAL nkBool plant_is_fully_grown(Entity& e)
         max_phases++;
     max_phases++;
 
-    return (e.current_phase >= max_phases);
+    return (e.current_phase >= max_phases-1);
 }
 
 DEF_ETICK(daisy)
@@ -18,6 +18,11 @@ DEF_ETICK(daisy)
     const nkF32 COOLDOWN = 1.5f;
 
     nkF32& shot_cooldown = e.timer0;
+
+    // @Incomplete: Don't want to do this for every plant...
+    if(e.current_phase == 0) set_animation(&e.anim_state, "phase0_idle");
+    if(e.current_phase == 1) set_animation(&e.anim_state, "phase1_idle");
+    if(e.current_phase == 2) set_animation(&e.anim_state, "phase2_idle");
 
     // If we are fully grown then try and shoot any enemies that are close enough.
     if(plant_is_fully_grown(e) && shot_cooldown <= 0.0f)

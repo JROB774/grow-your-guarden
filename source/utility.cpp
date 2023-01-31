@@ -127,6 +127,11 @@ GLOBAL NKFORCEINLINE nkBool point_vs_rect(const nkVec2& p, nkF32 rx, nkF32 ry, n
     return point_vs_rect(p.x, p.y, rx, ry, rw, rh);
 }
 
+GLOBAL NKFORCEINLINE nkBool rect_vs_rect(const fRect& r1, const fRect& r2)
+{
+    return ((r1.x < r2.x + r2.w) && (r1.x + r1.w > r2.x) && (r1.y < r2.y + r2.h) && (r1.y + r1.h > r2.y));
+}
+
 //
 // Random number generation.
 //

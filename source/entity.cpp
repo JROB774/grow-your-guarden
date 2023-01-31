@@ -152,4 +152,31 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
     }
 }
 
+GLOBAL nkU64 check_entity_collision(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityType collision_mask)
+{
+    nkU64 index = 0;
+
+    for(auto& e: g_world.entities)
+    {
+        if(e.id != EntityType_None && e.active && NK_CHECK_FLAGS(collision_mask, e.type))
+        {
+            const EntityDesc& desc = ENTITY_TABLE[e.id];
+
+            nkF32 ex = e.position.x - (desc.bounds.x * 0.5f);
+            nkF32 ey = e.position.y - (desc.bounds.y * 0.5f);
+            nkF32 ew = desc.bounds.x;
+            nkF32 eh = desc.bounds.y;
+
+            if(rect_vs_rect({ x,y,w,h }, { ex,ey,ew,eh }))
+            {
+                return index;
+            }
+        }
+
+        ++index;
+    }
+
+    return NK_U64_MAX;
+}
+
 /*////////////////////////////////////////////////////////////////////////////*/

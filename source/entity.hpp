@@ -29,7 +29,7 @@ struct Entity
     nkS32         damage;
     nkS32         speed;
     nkS32         range;
-    fRect         bounds;
+    nkVec2        bounds;
     AnimState     anim_state;
     EntityType    collision_mask;
     nkS32         current_phase; // Only used by plants for tracking growth stages.
@@ -55,7 +55,7 @@ struct EntityDesc
     nkS32         speed;
     nkS32         range;
     EntityType    collision_mask;
-    fRect         bounds;
+    nkVec2        bounds;
     nkF32         phase_times[8]; // Only used by plants, can be ignored by other entity types.
 };
 
@@ -67,5 +67,8 @@ GLOBAL void  entity_kill (nkU64 index);
 GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y); // Returns the index in the world entity array where the entity
                                                           // was inserted. Indicies should remain valid until an entity
                                                           // is marked dead, in which case other entities can claim it.
+
+// Return the index of the entity collided with or NK_U64_MAX if there was no collision.
+GLOBAL nkU64 check_entity_collision(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityType collision_mask = EntityType_All);
 
 /*////////////////////////////////////////////////////////////////////////////*/

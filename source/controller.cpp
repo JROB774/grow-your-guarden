@@ -24,6 +24,8 @@ struct Controller
     Texture shovel_tex;
     Texture cursor_tex;
 
+    Sound shovel_sfx[5];
+
     TrueTypeFont font;
 };
 
@@ -93,35 +95,72 @@ INTERNAL void number_to_string_with_commas(nkString* str, nkS32 number)
 
 INTERNAL void place_plant(nkS32 tile_x, nkS32 tile_y)
 {
-    // @Incomplete: ...
+    // If the tile position is out of the world bounds then the spawn isn't possible.
+    if(tile_x < 0 || tile_x >= g_world.width || tile_y < 0 || tile_y >= g_world.height) return;
+    // If nothing is selected then there's nothing to place.
+    if(g_controller.selected == NO_SELECTION) return;
 
-    /*
-    g_controller.money -= desc.cost;
+    EntityID id = g_controller.hotbar[g_controller.selected].id;
+
+    const EntityDesc& desc = ENTITY_TABLE[id];
+
+    // Determine the bounds of the plant and check if the spot is occupied.
+    nkF32 x = NK_CAST(nkF32, tile_x * TILE_WIDTH);
+    nkF32 y = NK_CAST(nkF32, tile_y * TILE_HEIGHT);
+    nkF32 w = desc.bounds.x;
+    nkF32 h = desc.bounds.y;
+
+    if(check_entity_collision(x,y,w,h, EntityType_Plant) != NK_U64_MAX)
+    {
+        return; // A plant is already at this position.
+    }
+
+    // If we get here we can place!
+
+    nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_controller.shovel_sfx)-1);
+    play_sound(g_controller.shovel_sfx[sound_index]);
+
+    x += (desc.bounds.x * 0.5f);
+    y += (desc.bounds.y * 0.5f);
+
+    entity_spawn(id, x,y);
 
     // If we no longer have enough money to purchase another, just de-select it.
-    if(g_controller.money < desc.cost)
+    nkS32 cost = g_controller.hotbar[g_controller.selected].cost;
+    g_controller.money -= cost;
+    if(g_controller.money < cost)
     {
-        g_controller.selected = PlantID_None;
+        g_controller.selected = NO_SELECTION;
     }
-    */
 }
 
 INTERNAL void remove_plant(nkF32 x, nkF32 y)
 {
-    // @Incomplete: ...
+    nkU64 entity_index = check_entity_collision(x,y,1,1, EntityType_Plant);
+    if(entity_index == NK_U64_MAX) return; // Nothing at the spot to remove.
 
-    /*
-    if(removed != PlantID_None)
+    EntityID entity_id = g_world.entities[entity_index].id;
+
+    nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_controller.shovel_sfx)-1);
+    play_sound(g_controller.shovel_sfx[sound_index]);
+
+    entity_kill(entity_index);
+
+    // Get back some of the money spent on the entity.
+    for(nkU64 i=0,n=NK_ARRAY_SIZE(g_controller.hotbar); i<n; ++i)
     {
-        const PlantDesc& desc = get_plant_desc(removed);
-        g_controller.money += (desc.cost / 2);
+        const PlantSpawn& spawn = g_controller.hotbar[i];
+        if(spawn.id == entity_id)
+        {
+            g_controller.money += (spawn.cost / 2);
+            break;
+        }
     }
-    */
 }
 
 INTERNAL void water_plant(nkF32 x, nkF32 y)
 {
-    // @Incomplete: ...
+    // @Incomplete: Does nothing currently...
 }
 
 GLOBAL void controller_init(void)
@@ -145,6 +184,12 @@ GLOBAL void controller_init(void)
     g_controller.watercan_tex  = asset_manager_load<Texture>("tool_water.png");
     g_controller.shovel_tex    = asset_manager_load<Texture>("tool_shovel.png");
     g_controller.cursor_tex    = asset_manager_load<Texture>("cursor.png");
+
+    g_controller.shovel_sfx[0] = asset_manager_load<Sound>("shovel_000.wav");
+    g_controller.shovel_sfx[1] = asset_manager_load<Sound>("shovel_001.wav");
+    g_controller.shovel_sfx[2] = asset_manager_load<Sound>("shovel_002.wav");
+    g_controller.shovel_sfx[3] = asset_manager_load<Sound>("shovel_003.wav");
+    g_controller.shovel_sfx[4] = asset_manager_load<Sound>("shovel_004.wav");
 
     TrueTypeFontDesc font_desc;
     font_desc.px_sizes = { 10, 20 };
