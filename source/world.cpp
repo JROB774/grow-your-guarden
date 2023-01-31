@@ -7,8 +7,7 @@ GLOBAL void world_init(void)
 
     g_world.tilemap = NK_CALLOC_TYPES(Tile, g_world.width*g_world.height);
 
-    nk_array_reserve(&g_world.plants, 256);
-    nk_array_reserve(&g_world.entities, 256);
+    nk_array_reserve(&g_world.entities, 512);
 
     TileID id = TileID_GrassLight;
 
@@ -48,14 +47,11 @@ GLOBAL void world_init(void)
 GLOBAL void world_quit(void)
 {
     nk_array_free(&g_world.entities);
-    nk_array_free(&g_world.plants);
-
     NK_FREE(g_world.tilemap);
 }
 
 GLOBAL void world_tick(nkF32 dt)
 {
-    plant_tick(dt);
     entity_tick(dt);
 }
 
@@ -83,7 +79,6 @@ GLOBAL void world_draw(void)
         }
     }
 
-    plant_draw();
     entity_draw();
 }
 

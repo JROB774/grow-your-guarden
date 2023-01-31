@@ -17,10 +17,9 @@ struct Tile
 
 struct World
 {
-    nkS32            width, height;
-    Tile*            tilemap;
-    nkArray<Plant>   plants; // @Incomplete: Remove!
-    nkArray<Entity>  entities;
+    nkS32           width, height;
+    Tile*           tilemap;
+    nkArray<Entity> entities;
 };
 
 GLOBAL World g_world;

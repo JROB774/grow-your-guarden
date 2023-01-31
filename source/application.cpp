@@ -39,9 +39,8 @@
 #include "truetype_font.hpp"
 #include "animation.hpp"
 #include "renderer.hpp"
-#include "controller.hpp"
-#include "plants.hpp"
 #include "entity.hpp"
+#include "controller.hpp"
 #include "world.hpp"
 
 #include "utility.cpp"
@@ -53,11 +52,10 @@
 #include "truetype_font.cpp"
 #include "animation.cpp"
 #include "renderer.cpp"
-#include "controller.cpp"
 #include "entity_table.cpp"
 #include "entity_ticks.cpp"
 #include "entity.cpp"
-#include "plants.cpp"
+#include "controller.cpp"
 #include "world.cpp"
 
 struct AppContext
@@ -153,10 +151,10 @@ GLOBAL void app_init(void)
     set_vertex_buffer_stride   (g_app.screen_buffer, sizeof(nkF32)*4);
     enable_vertex_buffer_attrib(g_app.screen_buffer, 0, AttribType_Float, 4, 0);
 
+    // NOTE: DO NOT TOUCH THE ORDER WITHOUT CONSIDERING WHAT IT MIGHT BREAK!
     entity_init();
     world_init();
     controller_init();
-    plant_init();
 
     show_cursor(NK_FALSE);
 

@@ -4,15 +4,17 @@ INTERNAL constexpr nkS32 STARTING_MONEY = 1200;
 
 struct Controller
 {
-    PlantID hotbar[8];
-    PlantID selected;
-    nkS32   money;
-    nkVec2  camera_pos;
-    nkVec2  cursor_pos;
-    nkBool  panning;
-    nkBool  occluded;
-    nkBool  watering;
-    nkBool  removing;
+    PlantSpawn hotbar[8];
+    nkU32      selected;
+
+    nkS32 money;
+
+    nkVec2 camera_pos;
+    nkVec2 cursor_pos;
+    nkBool panning;
+    nkBool occluded;
+    nkBool watering;
+    nkBool removing;
 
     // Assets
     Texture hotbar_tex;
@@ -89,6 +91,39 @@ INTERNAL void number_to_string_with_commas(nkString* str, nkS32 number)
     }
 }
 
+INTERNAL void place_plant(nkS32 tile_x, nkS32 tile_y)
+{
+    // @Incomplete: ...
+
+    /*
+    g_controller.money -= desc.cost;
+
+    // If we no longer have enough money to purchase another, just de-select it.
+    if(g_controller.money < desc.cost)
+    {
+        g_controller.selected = PlantID_None;
+    }
+    */
+}
+
+INTERNAL void remove_plant(nkF32 x, nkF32 y)
+{
+    // @Incomplete: ...
+
+    /*
+    if(removed != PlantID_None)
+    {
+        const PlantDesc& desc = get_plant_desc(removed);
+        g_controller.money += (desc.cost / 2);
+    }
+    */
+}
+
+INTERNAL void water_plant(nkF32 x, nkF32 y)
+{
+    // @Incomplete: ...
+}
+
 GLOBAL void controller_init(void)
 {
     // Center the camera on the map.
@@ -98,15 +133,17 @@ GLOBAL void controller_init(void)
     g_controller.money = STARTING_MONEY;
 
     // @Incomplete: Just giving some plants for testing.
-    g_controller.hotbar[0] = PlantID_Flower;
-    g_controller.hotbar[1] = PlantID_Bramble;
+    g_controller.hotbar[0] = { EntityID_Daisy,  100 };
+    g_controller.hotbar[1] = { EntityID_Bramble, 50 };
+
+    g_controller.selected = NO_SELECTION;
 
     // Pre-load a bunch of assets.
     g_controller.hotbar_tex    = asset_manager_load<Texture>("hotbar.png");
+    g_controller.icons_tex     = asset_manager_load<Texture>("hotbar_icons.png");
     g_controller.highlight_tex = asset_manager_load<Texture>("highlight.png");
-    g_controller.icons_tex     = asset_manager_load<Texture>("icon.png");
-    g_controller.watercan_tex  = asset_manager_load<Texture>("watercan.png");
-    g_controller.shovel_tex    = asset_manager_load<Texture>("shovel.png");
+    g_controller.watercan_tex  = asset_manager_load<Texture>("tool_water.png");
+    g_controller.shovel_tex    = asset_manager_load<Texture>("tool_shovel.png");
     g_controller.cursor_tex    = asset_manager_load<Texture>("cursor.png");
 
     TrueTypeFontDesc font_desc;
@@ -143,10 +180,10 @@ GLOBAL void controller_tick(nkF32 dt)
         {
             if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f,32.0f))
             {
-                const PlantDesc& desc = get_plant_desc(g_controller.hotbar[i]);
-                if(g_controller.money >= desc.cost)
+                const PlantSpawn& spawn = g_controller.hotbar[i];
+                if(g_controller.money >= spawn.cost)
                 {
-                    g_controller.selected = g_controller.hotbar[i];
+                    g_controller.selected = i;
                     g_controller.watering = NK_FALSE;
                     g_controller.removing = NK_FALSE;
                 }
@@ -158,7 +195,7 @@ GLOBAL void controller_tick(nkF32 dt)
         ix += 8.0f;
         if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f,32.0f))
         {
-            g_controller.selected = PlantID_None;
+            g_controller.selected = NO_SELECTION;
             g_controller.watering = !g_controller.watering;
             g_controller.removing = NK_FALSE;
         }
@@ -166,7 +203,7 @@ GLOBAL void controller_tick(nkF32 dt)
         ix += 40.0f;
         if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f,32.0f))
         {
-            g_controller.selected = PlantID_None;
+            g_controller.selected = NO_SELECTION;
             g_controller.watering = NK_FALSE;
             g_controller.removing = !g_controller.removing;
         }
@@ -175,7 +212,7 @@ GLOBAL void controller_tick(nkF32 dt)
     // De-select current plant/tool.
     if(is_mouse_button_pressed(MouseButton_Right))
     {
-        g_controller.selected = PlantID_None;
+        g_controller.selected = NO_SELECTION;
         g_controller.watering = NK_FALSE;
         g_controller.removing = NK_FALSE;
     }
@@ -186,38 +223,26 @@ GLOBAL void controller_tick(nkF32 dt)
         nkF32 cx = g_controller.cursor_pos.x + (g_controller.camera_pos.x - (NK_CAST(nkF32, SCREEN_WIDTH) * 0.5f));
         nkF32 cy = g_controller.cursor_pos.y + (g_controller.camera_pos.y - (NK_CAST(nkF32, SCREEN_HEIGHT) * 0.5f));
 
-        iPoint tile;
-
-        tile.x = NK_CAST(nkS32, cx / TILE_WIDTH);
-        tile.y = NK_CAST(nkS32, cy / TILE_HEIGHT);
-
-        if(g_controller.selected != PlantID_None)
+        if(g_controller.selected != NO_SELECTION)
         {
-            const PlantDesc& desc = get_plant_desc(g_controller.selected);
-            if(g_controller.money >= desc.cost)
+            const PlantSpawn& spawn = g_controller.hotbar[g_controller.selected];
+            if(g_controller.money >= spawn.cost)
             {
-                place_plant(g_controller.selected, tile.x, tile.y);
-                g_controller.money -= desc.cost;
+                iPoint tile;
 
-                // If we no longer have enough money to purchase another, just de-select it.
-                if(g_controller.money < desc.cost)
-                {
-                    g_controller.selected = PlantID_None;
-                }
+                tile.x = NK_CAST(nkS32, cx / TILE_WIDTH);
+                tile.y = NK_CAST(nkS32, cy / TILE_HEIGHT);
+
+                place_plant(tile.x, tile.y);
             }
         }
         if(g_controller.watering)
         {
-            water_plant(tile.x, tile.y);
+            water_plant(cx, cy);
         }
         if(g_controller.removing)
         {
-            PlantID removed = remove_plant(tile.x, tile.y);
-            if(removed != PlantID_None)
-            {
-                const PlantDesc& desc = get_plant_desc(removed);
-                g_controller.money += (desc.cost / 2);
-            }
+            remove_plant(cx, cy);
         }
     }
 }
@@ -225,7 +250,7 @@ GLOBAL void controller_tick(nkF32 dt)
 GLOBAL void controller_draw(void)
 {
     // Draw the highlighted tile if not panning.
-    if(!g_controller.panning && !g_controller.occluded && (g_controller.selected != PlantID_None || g_controller.watering || g_controller.removing))
+    if(!g_controller.panning && !g_controller.occluded && (g_controller.selected != NO_SELECTION || g_controller.watering || g_controller.removing))
     {
         nkF32 cx = g_controller.cursor_pos.x + (g_controller.camera_pos.x - (NK_CAST(nkF32, SCREEN_WIDTH) * 0.5f));
         nkF32 cy = g_controller.cursor_pos.y + (g_controller.camera_pos.y - (NK_CAST(nkF32, SCREEN_HEIGHT) * 0.5f));
@@ -259,36 +284,27 @@ GLOBAL void controller_draw(void)
 
     for(nkS32 i=0,n=NK_ARRAY_SIZE(g_controller.hotbar); i<n; ++i)
     {
-        if(g_controller.hotbar[i] != PlantID_None)
+        if(g_controller.hotbar[i].id != EntityID_None)
         {
-            const PlantDesc& desc = get_plant_desc(g_controller.hotbar[i]);
-
-            ImmClip clip = get_plant_id_icon_clip(g_controller.hotbar[i]);
+            const PlantSpawn& spawn = g_controller.hotbar[i];
 
             nkVec4 color = NK_V4_WHITE;
-            if(g_controller.money < desc.cost)
+            if(g_controller.money < spawn.cost)
             {
                 color *= 0.5f;
             }
 
+            ImmClip clip = { NK_CAST(nkF32, i * 32), 0.0f, 32.0f, 32.0f };
             imm_texture(g_controller.icons_tex, ix,iy, &clip, color);
 
             // Draw the cost of the plant.
             set_truetype_font_size(g_controller.font, 10);
             nkString string;
-            number_to_string_with_commas(&string, desc.cost);
+            number_to_string_with_commas(&string, spawn.cost);
             nkF32 text_x = ix - 16.0f;
             nkF32 text_y = iy + 16.0f;
             draw_truetype_text(g_controller.font, text_x+2,text_y+2, string.cstr, NK_V4_BLACK * color);
             draw_truetype_text(g_controller.font, text_x,text_y, string.cstr, NK_V4_WHITE * color);
-
-            /*
-            if(g_controller.selected == g_controller.hotbar[i])
-            {
-                Texture highlight = asset_manager_load<Texture>("highlight.png");
-                imm_texture(highlight, ix,iy);
-            }
-            */
         }
 
         ix += 40.0f;
@@ -321,9 +337,9 @@ GLOBAL void controller_draw(void)
         nkF32 cy = g_controller.cursor_pos.y;
         imm_texture(g_controller.shovel_tex, cx,cy);
     }
-    else if(g_controller.selected != PlantID_None)
+    else if(g_controller.selected != NO_SELECTION)
     {
-        ImmClip clip = get_plant_id_icon_clip(g_controller.selected);
+        ImmClip clip = { NK_CAST(nkF32, g_controller.selected * 32), 0.0f, 32.0f, 32.0f };
         nkF32 cx = g_controller.cursor_pos.x;
         nkF32 cy = g_controller.cursor_pos.y;
         imm_texture(g_controller.icons_tex, cx,cy, &clip);
