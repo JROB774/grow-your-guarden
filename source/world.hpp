@@ -18,6 +18,7 @@ struct Tile
 struct World
 {
     nkS32           width, height;
+    Texture         tileset;
     Tile*           tilemap;
     nkArray<Entity> entities;
 };
