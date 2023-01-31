@@ -2,6 +2,8 @@
 
 // Track entity slots that were in use but no longer are as they can be filled without growing the array.
 INTERNAL nkHashSet<nkU64> g_free_entity_slots;
+INTERNAL Sound            g_splat_sfx[3];
+INTERNAL Sound            g_monster_die_sfx;
 
 GLOBAL void entity_init(void)
 {
@@ -15,6 +17,14 @@ GLOBAL void entity_init(void)
         if(desc.anim_file)
             asset_manager_load<AnimGroup*>(desc.anim_file, NULL, "textures/");
     }
+
+    // @Incomplete: CREDIT: https://freesound.org/people/duckduckpony/sounds/204027/
+    g_splat_sfx[0] = asset_manager_load<Sound>("splat_000.wav");
+    g_splat_sfx[1] = asset_manager_load<Sound>("splat_001.wav");
+    g_splat_sfx[2] = asset_manager_load<Sound>("splat_002.wav");
+
+    // @IncompletE: CREDIT: https://freesound.org/people/Michel88/sounds/76962/
+    g_monster_die_sfx = asset_manager_load<Sound>("monster_die.wav");
 }
 
 GLOBAL void entity_quit(void)
@@ -63,6 +73,40 @@ GLOBAL void entity_tick(nkF32 dt)
                         entity_kill(index);
                     }
                 } break;
+
+                // Check if we have collided with any plant bullets.
+                case EntityType_Monster:
+                {
+                    nkU64 sub_index = 0;
+
+                    for(auto& b: g_world.entities)
+                    {
+                        if(b.type == EntityType_Bullet && b.active && NK_CHECK_FLAGS(b.collision_mask, EntityType_Monster))
+                        {
+                            nkF32 mw = e.bounds.x;
+                            nkF32 mh = e.bounds.y;
+                            nkF32 mx = e.position.x - (mw * 0.5f);
+                            nkF32 my = e.position.y - (mh * 0.5f);
+
+                            nkF32 bw = b.bounds.x;
+                            nkF32 bh = b.bounds.y;
+                            nkF32 bx = b.position.x - (bw * 0.5f);
+                            nkF32 by = b.position.y - (bh * 0.5f);
+
+                            if(rect_vs_rect({ mx,my,mw,my }, { bx,by,bw,bh }))
+                            {
+                                e.health -= b.damage;
+                                entity_kill(sub_index);
+
+                                // @Incomplete: Different sound effects!
+                                nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_splat_sfx)-1);
+                                play_sound(g_splat_sfx[sound_index]);
+                            }
+                        }
+
+                        ++sub_index;
+                    }
+                } break;
             }
 
             // Do the entity's custom update logic.
@@ -76,6 +120,14 @@ GLOBAL void entity_tick(nkF32 dt)
 
             // Update animation logic.
             update_animation(&e.anim_state, dt);
+
+            // Kill if dead.
+            if(e.health < 0)
+            {
+                if(e.type == EntityType_Monster)
+                    play_sound(g_monster_die_sfx);
+                entity_kill(index);
+            }
         }
 
         ++index;
@@ -176,6 +228,18 @@ GLOBAL nkU64 check_entity_collision(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityTy
         ++index;
     }
 
+    return NK_U64_MAX;
+}
+
+GLOBAL nkU64 get_first_entity_with_id(EntityID id)
+{
+    nkU64 index = 0;
+    for(auto& e: g_world.entities)
+    {
+        if(e.id == id && e.active)
+            return index;
+        ++index;
+    }
     return NK_U64_MAX;
 }
 

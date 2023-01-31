@@ -1,5 +1,9 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
+//
+// Plants
+//
+
 INTERNAL nkBool plant_is_fully_grown(Entity& e)
 {
     if(e.type != EntityType_Plant) return NK_FALSE;
@@ -11,6 +15,14 @@ INTERNAL nkBool plant_is_fully_grown(Entity& e)
     max_phases++;
 
     return (e.current_phase >= max_phases-1);
+}
+
+INTERNAL void spawn_bullet_at_target(EntityID id, nkF32 x, nkF32 y, const Entity& target)
+{
+    nkU64 index = entity_spawn(id, x,y);
+    Entity& b = g_world.entities[index];
+    nkVec2 dir = nk_normalize(target.position - b.position);
+    b.velocity = dir * NK_CAST(nkF32, b.speed);
 }
 
 DEF_ETICK(daisy)
@@ -29,19 +41,13 @@ DEF_ETICK(daisy)
     {
         for(auto& m: g_world.entities)
         {
-            if(m.type == EntityType_Monster)
+            if(m.type == EntityType_Monster && m.active)
             {
                 nkF32 distance = distance_between_points(e.position, m.position);
                 if(distance <= e.range)
                 {
-                    // Spawn a bullet and make it target the monster.
-                    nkU64 index = entity_spawn(EntityID_Pollen, e.position.x,e.position.y);
-                    Entity& b = g_world.entities[index];
-                    nkVec2 dir = nk_normalize(m.position - e.position);
-                    b.velocity = dir * NK_CAST(nkF32, b.speed);
-
                     shot_cooldown = COOLDOWN;
-
+                    spawn_bullet_at_target(EntityID_Pollen, e.position.x,e.position.y, m);
                     break; // Exit early we don't need to keep looping.
                 }
             }
@@ -61,6 +67,25 @@ DEF_ETICK(bramble)
     if(e.current_phase == 1) set_animation(&e.anim_state, "phase1_idle");
     if(e.current_phase == 2) set_animation(&e.anim_state, "phase2_idle");
     if(e.current_phase == 3) set_animation(&e.anim_state, "phase3_idle");
+}
+
+/*////////////////////////////////////////////////////////////////////////////*/
+
+//
+// Monsters
+//
+
+DEF_ETICK(walker)
+{
+    // @Incomplete + @Speed: Don't hunt for the house each time, just store the target...
+    nkU64 target_index = get_first_entity_with_id(EntityID_House);
+    if(target_index != NK_U64_MAX)
+    {
+        // Walk towards the house.
+        Entity& target = g_world.entities[target_index];
+        nkVec2 dir = nk_normalize(target.position - e.position);
+        e.velocity = dir * NK_CAST(nkF32, e.speed);
+    }
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

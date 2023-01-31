@@ -13,7 +13,7 @@ NK_ENUM(EntityType, nkU32)
     EntityType_None    = (   0),
     EntityType_Plant   = (1<<0),
     EntityType_Monster = (1<<1),
-    EntityType_Decor   = (1<<2),
+    EntityType_Object  = (1<<2),
     EntityType_Bullet  = (1<<3),
     EntityType_All     = (  -1)
 };
@@ -70,5 +70,7 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y); // Returns the index i
 
 // Return the index of the entity collided with or NK_U64_MAX if there was no collision.
 GLOBAL nkU64 check_entity_collision(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityType collision_mask = EntityType_All);
+
+GLOBAL nkU64 get_first_entity_with_id(EntityID id);
 
 /*////////////////////////////////////////////////////////////////////////////*/

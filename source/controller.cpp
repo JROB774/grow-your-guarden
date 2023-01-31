@@ -1,6 +1,6 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
-INTERNAL constexpr nkS32 STARTING_MONEY = 1200;
+INTERNAL constexpr nkS32 STARTING_MONEY = 20000;
 
 struct Controller
 {
@@ -93,12 +93,12 @@ INTERNAL void number_to_string_with_commas(nkString* str, nkS32 number)
     }
 }
 
-INTERNAL void place_plant(nkS32 tile_x, nkS32 tile_y)
+INTERNAL nkBool can_place_plant_at_position(nkS32 tile_x, nkS32 tile_y)
 {
     // If the tile position is out of the world bounds then the spawn isn't possible.
-    if(tile_x < 0 || tile_x >= g_world.width || tile_y < 0 || tile_y >= g_world.height) return;
+    if(tile_x < 0 || tile_x >= g_world.width || tile_y < 0 || tile_y >= g_world.height) return NK_FALSE;
     // If nothing is selected then there's nothing to place.
-    if(g_controller.selected == NO_SELECTION) return;
+    if(g_controller.selected == NO_SELECTION) return NK_FALSE;
 
     EntityID id = g_controller.hotbar[g_controller.selected].id;
 
@@ -110,18 +110,27 @@ INTERNAL void place_plant(nkS32 tile_x, nkS32 tile_y)
     nkF32 w = desc.bounds.x;
     nkF32 h = desc.bounds.y;
 
-    if(check_entity_collision(x,y,w,h, EntityType_Plant) != NK_U64_MAX)
+    if(check_entity_collision(x,y,w,h, EntityType_Plant|EntityType_Object) != NK_U64_MAX)
     {
-        return; // A plant is already at this position.
+        return NK_FALSE; // A plant or object is already at this position.
     }
 
-    // If we get here we can place!
+    return NK_TRUE;
+}
+
+INTERNAL void place_plant(nkS32 tile_x, nkS32 tile_y)
+{
+    if(!can_place_plant_at_position(tile_x, tile_y)) return;
+
+    EntityID id = g_controller.hotbar[g_controller.selected].id;
+
+    const EntityDesc& desc = ENTITY_TABLE[id];
 
     nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_controller.shovel_sfx)-1);
     play_sound(g_controller.shovel_sfx[sound_index]);
 
-    x += (desc.bounds.x * 0.5f);
-    y += (desc.bounds.y * 0.5f);
+    nkF32 x = NK_CAST(nkF32, tile_x * TILE_WIDTH) + (desc.bounds.x * 0.5f);
+    nkF32 y = NK_CAST(nkF32, tile_y * TILE_HEIGHT) + (desc.bounds.y * 0.5f);
 
     entity_spawn(id, x,y);
 
@@ -305,8 +314,8 @@ GLOBAL void controller_draw(void)
         tile.x = NK_CAST(nkS32, cx / TILE_WIDTH);
         tile.y = NK_CAST(nkS32, cy / TILE_HEIGHT);
 
-        // Make sure we're in bounds.
-        if(tile.x >= 0 && tile.x < g_world.width && tile.y >= 0 && tile.y < g_world.height)
+        // Make sure we can place at the spot.
+        if(can_place_plant_at_position(tile.x, tile.y))
         {
             nkF32 tx = NK_CAST(nkF32, tile.x * TILE_WIDTH) + (NK_CAST(nkF32,TILE_WIDTH) * 0.5f);
             nkF32 ty = NK_CAST(nkF32, tile.y * TILE_HEIGHT) + (NK_CAST(nkF32,TILE_HEIGHT) * 0.5f);

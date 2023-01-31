@@ -29,7 +29,10 @@ GLOBAL void world_init(void)
         }
     }
 
-    entity_spawn(EntityID_Walker, 128.0f,128.0f); // @Temporary!
+    nkF32 hx = NK_CAST(nkF32, g_world.width * TILE_WIDTH) * 0.5f;
+    nkF32 hy = NK_CAST(nkF32, g_world.height * TILE_HEIGHT) * 0.5f;
+
+    entity_spawn(EntityID_House, hx,hy);
 
     g_world.tileset = asset_manager_load<Texture>("tileset.png");
 }
@@ -42,6 +45,28 @@ GLOBAL void world_quit(void)
 
 GLOBAL void world_tick(nkF32 dt)
 {
+    // @Temporary: Spawn random monsters!
+    if(rng_s32(0,100) < 2)
+    {
+        nkS32 pos = rng_s32(0,100);
+        if(pos < 25)
+        {
+            entity_spawn(EntityID_Walker, 0, rng_s32(0, g_world.height * TILE_HEIGHT));
+        }
+        else if(pos < 50)
+        {
+            entity_spawn(EntityID_Walker, g_world.width * TILE_WIDTH, rng_s32(0, g_world.height * TILE_HEIGHT));
+        }
+        else if(pos < 75)
+        {
+            entity_spawn(EntityID_Walker, rng_s32(0, g_world.width * TILE_WIDTH), 0);
+        }
+        else
+        {
+            entity_spawn(EntityID_Walker, rng_s32(0, g_world.width * TILE_WIDTH), g_world.height * TILE_HEIGHT);
+        }
+    }
+
     entity_tick(dt);
 }
 
