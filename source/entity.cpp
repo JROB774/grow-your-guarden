@@ -95,12 +95,8 @@ GLOBAL void entity_tick(nkF32 dt)
 
                             if(rect_vs_rect({ mx,my,mw,my }, { bx,by,bw,bh }))
                             {
-                                e.health -= b.damage;
+                                entity_damage(index, b.damage);
                                 entity_kill(sub_index);
-
-                                // @Incomplete: Different sound effects!
-                                nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_splat_sfx)-1);
-                                play_sound(g_splat_sfx[sound_index]);
                             }
                         }
 
@@ -120,6 +116,12 @@ GLOBAL void entity_tick(nkF32 dt)
 
             // Update animation logic.
             update_animation(&e.anim_state, dt);
+
+            // Update damage timer.
+            if(e.damage_timer > 0.0f)
+            {
+                e.damage_timer -= dt;
+            }
 
             // Kill if dead.
             if(e.health < 0)
@@ -148,9 +150,23 @@ GLOBAL void entity_draw(void)
             nkF32 ex = e.position.x;
             nkF32 ey = e.position.y;
 
-            imm_texture(texture, ex,ey, &clip);
+            nkVec4 color = (e.damage_timer > 0.0f) ? NK_V4_RED : NK_V4_WHITE;
+
+            imm_texture(texture, ex,ey, &clip, color);
         }
     }
+}
+
+GLOBAL void entity_damage(nkU64 index, nkS32 damage)
+{
+    if(index >= g_world.entities.length) return;
+
+    // @Incomplete: Different sound effects!
+    nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_splat_sfx)-1);
+    play_sound(g_splat_sfx[sound_index]);
+
+    g_world.entities[index].health -= damage;
+    g_world.entities[index].damage_timer = 0.1f;
 }
 
 GLOBAL void entity_kill(nkU64 index)

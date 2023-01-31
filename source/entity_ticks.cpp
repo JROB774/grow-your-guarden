@@ -32,7 +32,7 @@ DEF_ETICK(daisy)
     if(e.current_phase == 1) set_animation(&e.anim_state, "phase1_idle");
     if(e.current_phase == 2) set_animation(&e.anim_state, "phase2_idle");
 
-    const nkF32 COOLDOWN = 1.5f;
+    const nkF32 COOLDOWN = 3.0f;
 
     nkF32& shot_cooldown = e.timer0;
 
@@ -67,6 +67,38 @@ DEF_ETICK(bramble)
     if(e.current_phase == 1) set_animation(&e.anim_state, "phase1_idle");
     if(e.current_phase == 2) set_animation(&e.anim_state, "phase2_idle");
     if(e.current_phase == 3) set_animation(&e.anim_state, "phase3_idle");
+
+    const nkF32 COOLDOWN = 3.0f;
+
+    nkF32& attack_cooldown = e.timer0;
+
+    if(attack_cooldown <= 0.0f)
+    {
+        nkF32 x = e.position.x - (e.bounds.x * 0.5f);
+        nkF32 y = e.position.y - (e.bounds.y * 0.5f);
+        nkF32 w = e.bounds.x;
+        nkF32 h = e.bounds.y;
+
+        nkU64 hit_entity = check_entity_collision(x,y,w,h, EntityType_Monster);
+        if(hit_entity != NK_U64_MAX)
+        {
+            attack_cooldown = COOLDOWN;
+
+            // The amount of damage dealth depends on the growth stage of the bramble.
+            switch(e.current_phase)
+            {
+                case 0: entity_damage(hit_entity, 1); break;
+                case 1: entity_damage(hit_entity, 1); break;
+                case 2: entity_damage(hit_entity, 2); break;
+                case 3: entity_damage(hit_entity, 3); break;
+            }
+        }
+    }
+
+    if(attack_cooldown > 0.0f)
+    {
+        attack_cooldown -= dt;
+    }
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

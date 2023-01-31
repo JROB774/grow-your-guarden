@@ -32,6 +32,7 @@ struct Entity
     nkVec2        bounds;
     AnimState     anim_state;
     EntityType    collision_mask;
+    nkF32         damage_timer;  // How long to flash red for when damaged.
     nkS32         current_phase; // Only used by plants for tracking growth stages.
     nkF32         phase_timer;   // Only used by plants for tracking growth stages.
     nkF32         timer0;
@@ -59,12 +60,13 @@ struct EntityDesc
     nkF32         phase_times[8]; // Only used by plants, can be ignored by other entity types.
 };
 
-GLOBAL void  entity_init (void);
-GLOBAL void  entity_quit (void);
-GLOBAL void  entity_tick (nkF32 dt);
-GLOBAL void  entity_draw (void);
-GLOBAL void  entity_kill (nkU64 index);
-GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y); // Returns the index in the world entity array where the entity
+GLOBAL void  entity_init  (void);
+GLOBAL void  entity_quit  (void);
+GLOBAL void  entity_tick  (nkF32 dt);
+GLOBAL void  entity_draw  (void);
+GLOBAL void  entity_damage(nkU64 index, nkS32 damage);
+GLOBAL void  entity_kill  (nkU64 index);
+GLOBAL nkU64 entity_spawn (EntityID id, nkF32 x, nkF32 y); // Returns the index in the world entity array where the entity
                                                           // was inserted. Indicies should remain valid until an entity
                                                           // is marked dead, in which case other entities can claim it.
 
