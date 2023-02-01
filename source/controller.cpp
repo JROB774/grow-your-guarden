@@ -102,8 +102,8 @@ INTERNAL nkBool can_place_plant_at_position(nkS32 tile_x, nkS32 tile_y)
     // Determine the bounds of the plant and check if the spot is occupied.
     nkF32 x = NK_CAST(nkF32, tile_x * TILE_WIDTH);
     nkF32 y = NK_CAST(nkF32, tile_y * TILE_HEIGHT);
-    nkF32 w = desc.bounds.x;
-    nkF32 h = desc.bounds.y;
+    nkF32 w = desc.bounds.x * TILE_WIDTH;
+    nkF32 h = desc.bounds.y * TILE_HEIGHT;
 
     if(check_entity_collision(x,y,w,h, EntityType_Plant|EntityType_Object) != NK_U64_MAX)
     {
@@ -124,8 +124,8 @@ INTERNAL void place_plant(nkS32 tile_x, nkS32 tile_y)
     nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_controller.shovel_sfx)-1);
     play_sound(g_controller.shovel_sfx[sound_index]);
 
-    nkF32 x = NK_CAST(nkF32, tile_x * TILE_WIDTH) + (desc.bounds.x * 0.5f);
-    nkF32 y = NK_CAST(nkF32, tile_y * TILE_HEIGHT) + (desc.bounds.y * 0.5f);
+    nkF32 x = NK_CAST(nkF32, tile_x * TILE_WIDTH) + ((desc.bounds.x * TILE_WIDTH) * 0.5f);
+    nkF32 y = NK_CAST(nkF32, tile_y * TILE_HEIGHT) + ((desc.bounds.y * TILE_HEIGHT) * 0.5f);
 
     entity_spawn(id, x,y);
 

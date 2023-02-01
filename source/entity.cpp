@@ -229,12 +229,10 @@ GLOBAL nkU64 check_entity_collision(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityTy
     {
         if(e.id != EntityType_None && e.active && NK_CHECK_FLAGS(collision_mask, e.type))
         {
-            const EntityDesc& desc = ENTITY_TABLE[e.id];
-
-            nkF32 ex = e.position.x - (desc.bounds.x * 0.5f);
-            nkF32 ey = e.position.y - (desc.bounds.y * 0.5f);
-            nkF32 ew = desc.bounds.x;
-            nkF32 eh = desc.bounds.y;
+            nkF32 ex = e.position.x - (e.bounds.x * 0.5f);
+            nkF32 ey = e.position.y - (e.bounds.y * 0.5f);
+            nkF32 ew = e.bounds.x;
+            nkF32 eh = e.bounds.y;
 
             if(rect_vs_rect({ x,y,w,h }, { ex,ey,ew,eh }))
             {
