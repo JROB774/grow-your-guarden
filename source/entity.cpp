@@ -157,7 +157,7 @@ GLOBAL void entity_draw(void)
     }
 }
 
-GLOBAL void entity_damage(nkU64 index, nkS32 damage)
+GLOBAL void entity_damage(nkU64 index, nkF32 damage)
 {
     if(index >= g_world.entities.length) return;
 
@@ -190,9 +190,10 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
     entity.velocity       = { 0,0 };
     entity.health         = desc.health;
     entity.damage         = desc.damage;
-    entity.speed          = desc.speed;
-    entity.range          = desc.range;
-    entity.bounds         = desc.bounds;
+    entity.speed          = desc.speed    * TILE_WIDTH;
+    entity.range          = desc.range    * TILE_HEIGHT;
+    entity.bounds.x       = desc.bounds.x * TILE_WIDTH;
+    entity.bounds.y       = desc.bounds.y * TILE_HEIGHT;
     entity.anim_state     = create_animation_state(desc.anim_file);
     entity.collision_mask = desc.collision_mask;
     entity.current_phase  = 0;

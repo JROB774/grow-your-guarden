@@ -25,10 +25,10 @@ struct Entity
     nkVec2        position;
     nkVec2        spawn;
     nkVec2        velocity;
-    nkS32         health;
-    nkS32         damage;
-    nkS32         speed;
-    nkS32         range;
+    nkF32         health;
+    nkF32         damage;
+    nkF32         speed;
+    nkF32         range;
     nkVec2        bounds;
     AnimState     anim_state;
     EntityType    collision_mask;
@@ -51,10 +51,10 @@ struct EntityDesc
     const nkChar* start_anim;
     EntityTick    tick;
     EntityType    type;
-    nkS32         health;
-    nkS32         damage;
-    nkS32         speed;
-    nkS32         range;
+    nkF32         health;
+    nkF32         damage;
+    nkF32         speed;
+    nkF32         range;
     EntityType    collision_mask;
     nkVec2        bounds;
     nkF32         phase_times[8]; // Only used by plants, can be ignored by other entity types.
@@ -64,7 +64,7 @@ GLOBAL void  entity_init  (void);
 GLOBAL void  entity_quit  (void);
 GLOBAL void  entity_tick  (nkF32 dt);
 GLOBAL void  entity_draw  (void);
-GLOBAL void  entity_damage(nkU64 index, nkS32 damage);
+GLOBAL void  entity_damage(nkU64 index, nkF32 damage);
 GLOBAL void  entity_kill  (nkU64 index);
 GLOBAL nkU64 entity_spawn (EntityID id, nkF32 x, nkF32 y); // Returns the index in the world entity array where the entity
                                                            // was inserted. Indicies should remain valid until an entity
