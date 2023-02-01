@@ -329,11 +329,7 @@ GLOBAL void controller_draw(void)
     }
 
     // Unset the camera so that we render in screen-space for the HUD.
-    nkF32 ww = NK_CAST(nkF32, get_window_width());
-    nkF32 wh = NK_CAST(nkF32, get_window_height());
-
-    imm_set_projection(nk_orthographic(0.0f,ww,wh,0.0f));
-    imm_set_view(nk_m4_identity());
+    unset_controller_camera();
 
     // Draw the hotbar.
     nkF32 hx = roundf(NK_CAST(nkF32, get_texture_width(g_controller.hotbar_tex)) * 0.5f);
@@ -435,6 +431,15 @@ GLOBAL void set_controller_camera(void)
 
     imm_set_projection(g_controller.camera_proj);
     imm_set_view(g_controller.camera_view);
+}
+
+GLOBAL void unset_controller_camera(void)
+{
+    nkF32 ww = NK_CAST(nkF32, get_window_width());
+    nkF32 wh = NK_CAST(nkF32, get_window_height());
+
+    imm_set_projection(nk_orthographic(0.0f,ww,wh,0.0f));
+    imm_set_view(nk_m4_identity());
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

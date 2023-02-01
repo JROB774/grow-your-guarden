@@ -1,5 +1,11 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
+NK_ENUM(AppState, nkS32)
+{
+    AppState_Menu,
+    AppState_Game
+};
+
 struct AppDesc
 {
     const nkChar* title       = "Template Game"; // Display name of the game (shown in the title bar).
@@ -14,5 +20,8 @@ GLOBAL void app_init(void);
 GLOBAL void app_quit(void);
 GLOBAL void app_tick(nkF32 dt);
 GLOBAL void app_draw(void);
+
+GLOBAL void     set_app_state(AppState state);
+GLOBAL AppState get_app_state(void);
 
 /*////////////////////////////////////////////////////////////////////////////*/

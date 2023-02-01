@@ -42,6 +42,8 @@
 #include "entity.hpp"
 #include "controller.hpp"
 #include "world.hpp"
+#include "menu.hpp"
+#include "game.hpp"
 
 #include "utility.cpp"
 #include "platform.cpp"
@@ -57,12 +59,15 @@
 #include "entity.cpp"
 #include "controller.cpp"
 #include "world.cpp"
+#include "menu.cpp"
+#include "game.cpp"
 
 struct AppContext
 {
     RenderTarget screen_target;
     VertexBuffer screen_buffer;
     Shader       screen_shader;
+    AppState     state;
 };
 
 INTERNAL AppContext g_app;
@@ -82,11 +87,15 @@ INTERNAL void begin_frame_draw(void)
 
     set_blend_mode(BlendMode_Alpha);
 
-    imm_set_viewport({ 0.0f, 0.0f, NK_CAST(nkF32, ww), NK_CAST(nkF32, wh) });
+    nkF32 vw = NK_CAST(nkF32, ww);
+    nkF32 vh = NK_CAST(nkF32, wh);
 
-    imm_set_projection(nk_m4_identity());
+    imm_set_viewport({ 0,0,vw,vh });
+
+    nkMat4 projection = nk_orthographic(0,vw,vh,0);
+
+    imm_set_projection(projection);
     imm_set_view(nk_m4_identity());
-    imm_set_model(nk_m4_identity());
 }
 
 INTERNAL void end_frame_draw(void)
@@ -150,6 +159,8 @@ GLOBAL void app_init(void)
 
     show_cursor(NK_FALSE);
 
+    g_app.state = AppState_Menu;
+
     printf("Init Complete!\n");
 }
 
@@ -164,20 +175,34 @@ GLOBAL void app_quit(void)
 
 GLOBAL void app_tick(nkF32 dt)
 {
-    controller_tick(dt);
-    world_tick(dt);
+    switch(g_app.state)
+    {
+        case AppState_Menu: menu_tick(dt); break;
+        case AppState_Game: game_tick(dt); break;
+    }
 }
 
 GLOBAL void app_draw(void)
 {
     begin_frame_draw();
 
-    set_controller_camera();
-
-    world_draw();
-    controller_draw();
+    switch(g_app.state)
+    {
+        case AppState_Menu: menu_draw(); break;
+        case AppState_Game: game_draw(); break;
+    }
 
     end_frame_draw();
+}
+
+GLOBAL void set_app_state(AppState state)
+{
+    g_app.state = state;
+}
+
+GLOBAL AppState get_app_state(void)
+{
+    return g_app.state;
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/
