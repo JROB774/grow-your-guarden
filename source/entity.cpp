@@ -5,6 +5,15 @@ INTERNAL nkHashSet<nkU64> g_free_entity_slots;
 INTERNAL Sound            g_splat_sfx[3];
 INTERNAL Sound            g_monster_die_sfx;
 
+INTERNAL nkS32 entity_sort_op(const void* a, const void* b)
+{
+    Entity* aa = *NK_CAST(Entity**, a);
+    Entity* bb = *NK_CAST(Entity**, b);
+    if((aa->position.y + (aa->bounds.y * 0.5f)) < (bb->position.y + (bb->bounds.y * 0.5f))) return -1;
+    if((aa->position.y + (aa->bounds.y * 0.5f)) > (bb->position.y + (bb->bounds.y * 0.5f))) return +1;
+    return 0;
+}
+
 GLOBAL void entity_init(void)
 {
     // Pre-load all of the entity sprite textures and animation.
@@ -138,22 +147,34 @@ GLOBAL void entity_tick(nkF32 dt)
 
 GLOBAL void entity_draw(void)
 {
+    // Sort the entities based on their Y position so that they draw in the correct order.
+    nkArray<Entity*> entity_draw_list;
+    nk_array_reserve(&entity_draw_list, g_world.entities.length);
+
     for(auto& e: g_world.entities)
     {
         if(e.id != EntityID_None && e.active)
         {
-            Texture texture = asset_manager_load<Texture>(ENTITY_TABLE[e.id].texture_file);
-
-            AnimFrame frame = get_current_animation_frame(&e.anim_state);
-            ImmClip clip = { frame.x,frame.y,frame.w,frame.h };
-
-            nkF32 ex = e.position.x;
-            nkF32 ey = e.position.y;
-
-            nkVec4 color = (e.damage_timer > 0.0f) ? NK_V4_RED : NK_V4_WHITE;
-
-            imm_texture(texture, ex,ey, &clip, color);
+            nk_array_append(&entity_draw_list, &e);
         }
+    }
+
+    qsort(entity_draw_list.data, entity_draw_list.length, sizeof(Entity*), entity_sort_op);
+
+    // Draw the sorted entities.
+    for(Entity* e: entity_draw_list)
+    {
+        Texture texture = asset_manager_load<Texture>(ENTITY_TABLE[e->id].texture_file);
+
+        AnimFrame frame = get_current_animation_frame(&e->anim_state);
+        ImmClip clip = { frame.x,frame.y,frame.w,frame.h };
+
+        nkF32 ex = e->position.x;
+        nkF32 ey = e->position.y;
+
+        nkVec4 color = (e->damage_timer > 0.0f) ? NK_V4_RED : NK_V4_WHITE;
+
+        imm_texture(texture, ex,ey, &clip, color);
     }
 }
 
