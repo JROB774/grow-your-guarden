@@ -2,6 +2,7 @@
 
 INTERNAL constexpr nkS32 STARTING_MONEY = 20000;
 
+INTERNAL constexpr nkF32 CAMERA_START_ZOOM       = 0.50f;
 INTERNAL constexpr nkF32 CAMERA_MIN_ZOOM         = 0.25f;
 INTERNAL constexpr nkF32 CAMERA_MAX_ZOOM         = 1.00f;
 INTERNAL constexpr nkF32 CAMERA_ZOOM_SENSITIVITY = 0.10f;
@@ -60,7 +61,7 @@ INTERNAL nkVec2 screen_to_world(nkVec2 screen)
 
     world /= world.w;
 
-    return world;
+    return { world.x, world.y };
 }
 
 // https://stackoverflow.com/a/1449859
@@ -172,7 +173,7 @@ GLOBAL void controller_init(void)
     g_controller.camera_pos.x = NK_CAST(nkF32, (g_world.width * TILE_WIDTH)) * 0.5f;
     g_controller.camera_pos.y = NK_CAST(nkF32, (g_world.height * TILE_HEIGHT)) * 0.5f;
 
-    g_controller.camera_zoom = CAMERA_MIN_ZOOM;
+    g_controller.camera_zoom = CAMERA_START_ZOOM;
 
     g_controller.money = STARTING_MONEY;
 
@@ -219,7 +220,7 @@ GLOBAL void controller_tick(nkF32 dt)
     if(mouse_wheel.y != 0.0f)
     {
         // @Incomplete: Lerp the zoom for smoothness.
-        g_controller.camera_zoom += (mouse_wheel.y * CAMERA_ZOOM_SENSITIVTIY) * g_controller.camera_zoom; // Multiply by the current zoom for more even increments.
+        g_controller.camera_zoom += (mouse_wheel.y * CAMERA_ZOOM_SENSITIVITY) * g_controller.camera_zoom; // Multiply by the current zoom for more even increments.
         g_controller.camera_zoom = nk_clamp(g_controller.camera_zoom, CAMERA_MIN_ZOOM, CAMERA_MAX_ZOOM);
     }
 
