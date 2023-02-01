@@ -108,7 +108,7 @@ GLOBAL void entity_tick(nkF32 dt)
                             nkF32 bx = b.position.x - (bw * 0.5f);
                             nkF32 by = b.position.y - (bh * 0.5f);
 
-                            if(rect_vs_rect({ mx,my,mw,my }, { bx,by,bw,bh }))
+                            if(rect_vs_rect({ mx,my,mw,mh }, { bx,by,bw,bh }))
                             {
                                 entity_damage(index, b.damage);
                                 entity_kill(sub_index);
