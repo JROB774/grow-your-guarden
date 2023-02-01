@@ -5,7 +5,9 @@ INTERNAL constexpr nkS32 STARTING_MONEY = 20000;
 INTERNAL constexpr nkF32 CAMERA_START_ZOOM       = 0.50f;
 INTERNAL constexpr nkF32 CAMERA_MIN_ZOOM         = 0.25f;
 INTERNAL constexpr nkF32 CAMERA_MAX_ZOOM         = 1.00f;
-INTERNAL constexpr nkF32 CAMERA_ZOOM_SENSITIVITY = 0.10f;
+INTERNAL constexpr nkF32 CAMERA_ZOOM_SENSITIVITY = 0.15f;
+INTERNAL constexpr nkF32 CAMERA_ZOOM_SPEED       = 12.0f;
+INTERNAL constexpr nkF32 CAMERA_PAN_SPEED        = 12.0f;
 
 struct Controller
 {
@@ -14,8 +16,10 @@ struct Controller
 
     nkS32 money;
 
-    nkVec2 camera_pos;
-    nkF32  camera_zoom;
+    nkVec2 camera_current_pos;
+    nkVec2 camera_target_pos;
+    nkF32  camera_current_zoom;
+    nkF32  camera_target_zoom;
     nkMat4 camera_proj;
     nkMat4 camera_view;
 
@@ -170,10 +174,14 @@ INTERNAL void water_plant(nkF32 x, nkF32 y)
 GLOBAL void controller_init(void)
 {
     // Center the camera on the map.
-    g_controller.camera_pos.x = NK_CAST(nkF32, (get_world_width() * TILE_WIDTH)) * 0.5f;
-    g_controller.camera_pos.y = NK_CAST(nkF32, (get_world_height() * TILE_HEIGHT)) * 0.5f;
+    nkF32 center_x = NK_CAST(nkF32, (get_world_width() * TILE_WIDTH)) * 0.5f;
+    nkF32 center_y = NK_CAST(nkF32, (get_world_height() * TILE_HEIGHT)) * 0.5f;
 
-    g_controller.camera_zoom = CAMERA_START_ZOOM;
+    g_controller.camera_current_pos = { center_x, center_y };
+    g_controller.camera_target_pos  = { center_x, center_y };
+
+    g_controller.camera_current_zoom = CAMERA_START_ZOOM;
+    g_controller.camera_target_zoom  = CAMERA_START_ZOOM;
 
     g_controller.money = STARTING_MONEY;
 
@@ -209,17 +217,21 @@ GLOBAL void controller_tick(nkF32 dt)
     g_controller.panning = is_mouse_button_down(MouseButton_Middle);
     if(g_controller.panning)
     {
-        g_controller.camera_pos -= (get_relative_mouse_pos() / g_controller.camera_zoom);
+        g_controller.camera_target_pos -= (get_relative_mouse_pos() / g_controller.camera_current_zoom);
     }
+
+    g_controller.camera_current_pos = nk_lerp(g_controller.camera_current_pos, g_controller.camera_target_pos, CAMERA_PAN_SPEED * dt);
 
     // Zoom the camera in and out.
     nkVec2 mouse_wheel = get_mouse_wheel();
     if(mouse_wheel.y != 0.0f)
     {
         // @Incomplete: Lerp the zoom for smoothness.
-        g_controller.camera_zoom += (mouse_wheel.y * CAMERA_ZOOM_SENSITIVITY) * g_controller.camera_zoom; // Multiply by the current zoom for more even increments.
-        g_controller.camera_zoom = nk_clamp(g_controller.camera_zoom, CAMERA_MIN_ZOOM, CAMERA_MAX_ZOOM);
+        g_controller.camera_target_zoom += (mouse_wheel.y * CAMERA_ZOOM_SENSITIVITY) * g_controller.camera_target_zoom; // Multiply by the current zoom for more even increments.
+        g_controller.camera_target_zoom = nk_clamp(g_controller.camera_target_zoom, CAMERA_MIN_ZOOM, CAMERA_MAX_ZOOM);
     }
+
+    g_controller.camera_current_zoom = nk_lerp(g_controller.camera_current_zoom, g_controller.camera_target_zoom, CAMERA_ZOOM_SPEED * dt);
 
     // Check if the cursor is occluded from the world by the HUD.
     nkF32 hw = NK_CAST(nkF32, get_texture_width(g_controller.hotbar_tex));
@@ -415,10 +427,10 @@ GLOBAL void set_controller_camera(void)
     nkF32 b =  (NK_CAST(nkF32, get_window_height()) * 0.5f);
     nkF32 t = -(NK_CAST(nkF32, get_window_height()) * 0.5f);
 
-    nkF32 cx = g_controller.camera_pos.x;
-    nkF32 cy = g_controller.camera_pos.y;
+    nkF32 cx = g_controller.camera_current_pos.x;
+    nkF32 cy = g_controller.camera_current_pos.y;
 
-    nkF32 cs = g_controller.camera_zoom;
+    nkF32 cs = g_controller.camera_current_zoom;
 
     g_controller.camera_proj = nk_orthographic(l,r,b,t);
     g_controller.camera_view = nk_m4_identity();
