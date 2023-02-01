@@ -2,6 +2,8 @@
 
 GLOBAL void world_init(void)
 {
+    rng_seed(NK_CAST(nkU32, time(NULL)));
+
     g_world.width  = 25;
     g_world.height = 19;
 
@@ -13,19 +15,11 @@ GLOBAL void world_init(void)
 
     nk_array_reserve(&g_world.entities, 512);
 
-    TileID id = TileID_GrassLight;
-
     for(nkS32 y=0; y<g_world.height; ++y)
     {
         for(nkS32 x=0; x<g_world.width; ++x)
         {
-            g_world.tilemap[y*g_world.width+x].id = id;
-
-            switch(id)
-            {
-                case TileID_GrassLight: id = TileID_GrassDark; break;
-                case TileID_GrassDark: id = TileID_GrassLight; break;
-            }
+            g_world.tilemap[y*g_world.width+x].id = rng_s32(0, TileID_TOTAL-1);
         }
     }
 
@@ -34,7 +28,7 @@ GLOBAL void world_init(void)
 
     entity_spawn(EntityID_House, hx,hy);
 
-    g_world.tileset = asset_manager_load<Texture>("tileset.png");
+    g_world.tileset = asset_manager_load<Texture>("tileset0.png");
 }
 
 GLOBAL void world_quit(void)
@@ -82,12 +76,7 @@ GLOBAL void world_draw(void)
         {
             TileID id = g_world.tilemap[y*g_world.width+x].id;
 
-            ImmClip clip = { 0.0f, 0.0f, TILE_WIDTH, TILE_HEIGHT };
-            switch(id)
-            {
-                case TileID_GrassLight: clip.x =       0.0f; break;
-                case TileID_GrassDark:  clip.x = TILE_WIDTH; break;
-            }
+            ImmClip clip = { NK_CAST(nkF32, id) * TILE_WIDTH, 0.0f, TILE_WIDTH, TILE_HEIGHT };
 
             nkF32 tx = NK_CAST(nkF32, x * TILE_WIDTH) + (NK_CAST(nkF32,TILE_WIDTH) * 0.5f);
             nkF32 ty = NK_CAST(nkF32, y * TILE_HEIGHT) + (NK_CAST(nkF32,TILE_HEIGHT) * 0.5f);

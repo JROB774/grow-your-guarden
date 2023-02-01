@@ -5,8 +5,14 @@ GLOBAL nkF32 TILE_HEIGHT = 256.0f;
 
 NK_ENUM(TileID, nkU32)
 {
-    TileID_GrassLight,
-    TileID_GrassDark,
+    TileID_Grass0,
+    TileID_Grass1,
+    TileID_Grass2,
+    TileID_Grass3,
+    TileID_Grass4,
+    TileID_Grass5,
+    TileID_Grass6,
+    TileID_Grass7,
     TileID_TOTAL
 };
 
