@@ -152,6 +152,12 @@ GLOBAL void app_init(void)
     set_vertex_buffer_stride   (g_app.screen_buffer, sizeof(nkF32)*4);
     enable_vertex_buffer_attrib(g_app.screen_buffer, 0, AttribType_Float, 4, 0);
 
+    // Bake font sizes.
+    TrueTypeFontDesc font_desc;
+    font_desc.px_sizes = { 10, 20, 80 };
+    asset_manager_load<TrueTypeFont>("helsinki.ttf", &font_desc);
+
+    // Hide the cursor (we have a custom one).
     show_cursor(NK_FALSE);
 
     g_app.state = AppState_Menu;

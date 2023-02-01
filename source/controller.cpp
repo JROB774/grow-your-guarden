@@ -197,10 +197,7 @@ GLOBAL void controller_init(void)
     g_controller.shovel_sfx[3] = asset_manager_load<Sound>("shovel_003.wav");
     g_controller.shovel_sfx[4] = asset_manager_load<Sound>("shovel_004.wav");
 
-    TrueTypeFontDesc font_desc;
-    font_desc.px_sizes = { 10, 20 };
-
-    g_controller.font = asset_manager_load<TrueTypeFont>("helsinki.ttf", &font_desc);
+    g_controller.font = asset_manager_load<TrueTypeFont>("helsinki.ttf");
 }
 
 GLOBAL void controller_tick(nkF32 dt)
