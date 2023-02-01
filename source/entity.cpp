@@ -4,6 +4,7 @@
 INTERNAL nkHashSet<nkU64> g_free_entity_slots;
 INTERNAL Sound            g_splat_sfx[3];
 INTERNAL Sound            g_monster_die_sfx;
+INTERNAL nkBool           g_draw_colliders;
 
 INTERNAL nkS32 entity_sort_op(const void* a, const void* b)
 {
@@ -43,6 +44,11 @@ GLOBAL void entity_quit(void)
 
 GLOBAL void entity_tick(nkF32 dt)
 {
+    #if defined(BUILD_DEBUG)
+    if(is_key_pressed(KeyCode_F1))
+        g_draw_colliders = !g_draw_colliders;
+    #endif // BUILD_DEBUG
+
     nkU64 index = 0;
 
     for(auto& e: g_world.entities)
@@ -175,6 +181,28 @@ GLOBAL void entity_draw(void)
         nkVec4 color = (e->damage_timer > 0.0f) ? NK_V4_RED : NK_V4_WHITE;
 
         imm_texture(texture, ex,ey, &clip, color);
+
+        #if defined(BUILD_DEBUG)
+        if(g_draw_colliders)
+        {
+            nkF32 cx = ex - (e->bounds.x * 0.5f);
+            nkF32 cy = ey - (e->bounds.y * 0.5f);
+            nkF32 cw = e->bounds.x;
+            nkF32 ch = e->bounds.y;
+
+            nkVec4 collider_color = { 1.0f,1.0f,1.0f,0.5f };
+            switch(e->type)
+            {
+                case EntityType_Plant:   collider_color = { 0.0f,1.0f,0.0f,0.5f }; break;
+                case EntityType_Monster: collider_color = { 1.0f,0.0f,0.0f,0.5f }; break;
+                case EntityType_Base:    collider_color = { 0.0f,0.0f,1.0f,0.5f }; break;
+                case EntityType_Bullet:  collider_color = { 1.0f,1.0f,0.0f,0.5f }; break;
+                case EntityType_Object:  collider_color = { 0.0f,1.0f,1.0f,0.5f }; break;
+            }
+
+            imm_rect_filled(cx,cy,cw,ch, collider_color);
+        }
+        #endif // BUILD_DEBUG
     }
 }
 
