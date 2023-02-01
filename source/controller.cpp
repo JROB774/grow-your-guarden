@@ -105,7 +105,7 @@ INTERNAL nkBool can_place_plant_at_position(nkS32 tile_x, nkS32 tile_y)
     nkF32 w = desc.bounds.x * TILE_WIDTH;
     nkF32 h = desc.bounds.y * TILE_HEIGHT;
 
-    if(check_entity_collision(x,y,w,h, EntityType_Plant|EntityType_Object) != NK_U64_MAX)
+    if(check_entity_collision(x,y,w,h, EntityType_Plant|EntityType_Base|EntityType_Object) != NK_U64_MAX)
     {
         return NK_FALSE; // A plant or object is already at this position.
     }

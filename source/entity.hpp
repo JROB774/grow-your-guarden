@@ -13,8 +13,9 @@ NK_ENUM(EntityType, nkU32)
     EntityType_None    = (   0),
     EntityType_Plant   = (1<<0),
     EntityType_Monster = (1<<1),
-    EntityType_Object  = (1<<2),
+    EntityType_Base    = (1<<2),
     EntityType_Bullet  = (1<<3),
+    EntityType_Object  = (1<<4),
     EntityType_All     = (  -1)
 };
 

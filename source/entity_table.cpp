@@ -23,7 +23,7 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 {  "ent_p/bramble.png", "ent_p/bramble.anm", "phase0_idle", ETICK(bramble), EntityType_Plant,     3.0f,     0.0f,    0.0f,    0.0f,  EntityType_None,    { 1.0f,1.0f }, { 30,40,50, 0, 0, 0, 0, 0 } }, // EntityID_Bramble
 {  "ent_m/walker.png",  "ent_m/walker.anm",  "walk",        ETICK(walker),  EntityType_Monster,  10.0f,     1.0f,    0.5f,    0.0f,  EntityType_None,    { 1.0f,1.0f }, {  0, 0, 0, 0, 0, 0, 0, 0 } }, // EntityID_Walker
 {  "ent_b/pollen.png",  "ent_b/pollen.anm",  "idle",        NULL,           EntityType_Bullet,    0.0f,     2.0f,    3.1f,    5.0f,  EntityType_Monster, { 0.5f,0.5f }, {  0, 0, 0, 0, 0, 0, 0, 0 } }, // EntityID_Pollen
-{  "ent_o/house.png",   "ent_o/house.anm",   "idle",        NULL,           EntityType_Object,  100.0f,     0.0f,    0.0f,    0.0f,  EntityType_None,    { 3.0f,3.0f }, {  0, 0, 0, 0, 0, 0, 0, 0 } }, // EntityID_House
+{  "ent_o/house.png",   "ent_o/house.anm",   "idle",        NULL,           EntityType_Base,    100.0f,     0.0f,    0.0f,    0.0f,  EntityType_None,    { 3.0f,3.0f }, {  0, 0, 0, 0, 0, 0, 0, 0 } }, // EntityID_House
 };
 
 NK_STATIC_ASSERT(NK_ARRAY_SIZE(ENTITY_TABLE) == EntityID_TOTAL, entity_table_size_mismatch);

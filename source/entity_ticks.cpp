@@ -104,14 +104,38 @@ DEF_ETICK(bramble)
 
 DEF_ETICK(walker)
 {
-    // @Incomplete + @Speed: Don't hunt for the house each time, just store the target...
-    nkU64 target_index = get_first_entity_with_id(EntityID_House);
-    if(target_index != NK_U64_MAX)
+    const nkF32 COOLDOWN = 3.0f;
+
+    nkF32& attack_cooldown = e.timer0;
+
+    // If we collide with a plant or the base then stop to eat it, otherwise continue walking to the house.
+    nkU64 hit_index = check_entity_collision(e, EntityType_Plant|EntityType_Base);
+    if(hit_index != NK_U64_MAX)
     {
-        // Walk towards the house.
-        Entity& target = g_world.entities[target_index];
-        nkVec2 dir = nk_normalize(target.position - e.position);
-        e.velocity = dir * NK_CAST(nkF32, e.speed);
+        e.velocity = NK_V2_ZERO;
+
+        if(attack_cooldown <= 0.0f)
+        {
+            attack_cooldown = COOLDOWN;
+            entity_damage(hit_index, e.damage);
+        }
+    }
+    else
+    {
+        // @Incomplete + @Speed: Don't hunt for the house each time, just store the target...
+        nkU64 target_index = get_first_entity_with_id(EntityID_House);
+        if(target_index != NK_U64_MAX)
+        {
+            // Walk towards the house.
+            Entity& target = g_world.entities[target_index];
+            nkVec2 dir = nk_normalize(target.position - e.position);
+            e.velocity = dir * NK_CAST(nkF32, e.speed);
+        }
+    }
+
+    if(attack_cooldown > 0.0f)
+    {
+        attack_cooldown -= dt;
     }
 }
 
