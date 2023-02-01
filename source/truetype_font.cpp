@@ -6,7 +6,7 @@
 // Converts from FreeType's fixed-point to floating-point.
 #define FT_CEIL(x) ((nkF32)(((x + 63) & -64) / 64))
 
-INTERNAL constexpr nkS32 FONT_ATLAS_SIZE    = 512;
+INTERNAL constexpr nkS32 FONT_ATLAS_SIZE    = 1024;
 INTERNAL constexpr nkS32 FONT_ATLAS_PADDING = 4;
 
 // Glyphs are indexed into a hashmap using this structure because just the codepoint is not enough information. We
@@ -293,7 +293,11 @@ GLOBAL Glyph get_glyph(TrueTypeFont font, wchar_t codepoint)
 {
     NK_ASSERT(font);
 
-    GlyphID glyph_id = { font->current_size, codepoint };
+    GlyphID glyph_id = NK_ZERO_MEM; // NOTE: The zeroing of the memory is important here or else bytes used in hashing could be random!!!
+                                    //       We should probably just implement a custom hashing function for the GlyphID function instead...
+    glyph_id.px_size = font->current_size;
+    glyph_id.codepoint = codepoint;
+
     if(nk_hashmap_contains(&font->glyphs, glyph_id))
     {
         return nk_hashmap_getref(&font->glyphs, glyph_id);
