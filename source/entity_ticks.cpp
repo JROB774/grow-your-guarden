@@ -20,9 +20,9 @@ INTERNAL nkBool plant_is_fully_grown(Entity& e)
 INTERNAL void spawn_bullet_at_target(EntityID id, nkF32 x, nkF32 y, const Entity& target)
 {
     nkU64 index = entity_spawn(id, x,y);
-    Entity& b = g_world.entities[index];
-    nkVec2 dir = nk_normalize(target.position - b.position);
-    b.velocity = dir * NK_CAST(nkF32, b.speed);
+    Entity* b = get_entity(index);
+    nkVec2 dir = nk_normalize(target.position - b->position);
+    b->velocity = dir * NK_CAST(nkF32, b->speed);
 }
 
 DEF_ETICK(daisy)
@@ -39,7 +39,7 @@ DEF_ETICK(daisy)
     // If we are fully grown then try and shoot any enemies that are close enough.
     if(plant_is_fully_grown(e) && shot_cooldown <= 0.0f)
     {
-        for(auto& m: g_world.entities)
+        for(auto& m: g_entity_manager.entities)
         {
             if(m.type == EntityType_Monster && m.active)
             {
@@ -123,12 +123,11 @@ DEF_ETICK(walker)
     else
     {
         // @Incomplete + @Speed: Don't hunt for the house each time, just store the target...
-        nkU64 target_index = get_first_entity_with_id(EntityID_House);
-        if(target_index != NK_U64_MAX)
+        Entity* target = get_first_entity_with_id(EntityID_House);
+        if(target)
         {
             // Walk towards the house.
-            Entity& target = g_world.entities[target_index];
-            nkVec2 dir = nk_normalize(target.position - e.position);
+            nkVec2 dir = nk_normalize(target->position - e.position);
             e.velocity = dir * NK_CAST(nkF32, e.speed);
         }
     }

@@ -1,10 +1,15 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
-// Track entity slots that were in use but no longer are as they can be filled without growing the array.
-INTERNAL nkHashSet<nkU64> g_free_entity_slots;
-INTERNAL Sound            g_splat_sfx[3];
-INTERNAL Sound            g_monster_die_sfx;
-INTERNAL nkBool           g_draw_colliders;
+struct EntityManager
+{
+    nkArray<Entity>  entities;
+    nkHashSet<nkU64> free_entity_slots; // Track entity slots that were in use but no longer are as they can be filled without growing the array.
+    Sound            splat_sfx[3];
+    Sound            monster_die_sfx;
+    nkBool           draw_colliders;
+};
+
+INTERNAL EntityManager g_entity_manager;
 
 INTERNAL nkS32 entity_sort_op(const void* a, const void* b)
 {
@@ -29,29 +34,30 @@ GLOBAL void entity_init(void)
     }
 
     // @Incomplete: CREDIT: https://freesound.org/people/duckduckpony/sounds/204027/
-    g_splat_sfx[0] = asset_manager_load<Sound>("splat_000.wav");
-    g_splat_sfx[1] = asset_manager_load<Sound>("splat_001.wav");
-    g_splat_sfx[2] = asset_manager_load<Sound>("splat_002.wav");
+    g_entity_manager.splat_sfx[0] = asset_manager_load<Sound>("splat_000.wav");
+    g_entity_manager.splat_sfx[1] = asset_manager_load<Sound>("splat_001.wav");
+    g_entity_manager.splat_sfx[2] = asset_manager_load<Sound>("splat_002.wav");
 
     // @IncompletE: CREDIT: https://freesound.org/people/Michel88/sounds/76962/
-    g_monster_die_sfx = asset_manager_load<Sound>("monster_die.wav");
+    g_entity_manager.monster_die_sfx = asset_manager_load<Sound>("monster_die.wav");
 }
 
 GLOBAL void entity_quit(void)
 {
-    // Does nothing...
+    nk_array_free(&g_entity_manager.entities);
+    nk_hashset_free(&g_entity_manager.free_entity_slots);
 }
 
 GLOBAL void entity_tick(nkF32 dt)
 {
     #if defined(BUILD_DEBUG)
     if(is_key_pressed(KeyCode_F1))
-        g_draw_colliders = !g_draw_colliders;
+        g_entity_manager.draw_colliders = !g_entity_manager.draw_colliders;
     #endif // BUILD_DEBUG
 
     nkU64 index = 0;
 
-    for(auto& e: g_world.entities)
+    for(auto& e: g_entity_manager.entities)
     {
         if(e.id != EntityID_None && e.active)
         {
@@ -94,7 +100,7 @@ GLOBAL void entity_tick(nkF32 dt)
                 {
                     nkU64 sub_index = 0;
 
-                    for(auto& b: g_world.entities)
+                    for(auto& b: g_entity_manager.entities)
                     {
                         if(b.type == EntityType_Bullet && b.active && NK_CHECK_FLAGS(b.collision_mask, EntityType_Monster))
                         {
@@ -132,7 +138,7 @@ GLOBAL void entity_tick(nkF32 dt)
             if(e.health < 0)
             {
                 if(e.type == EntityType_Monster)
-                    play_sound(g_monster_die_sfx);
+                    play_sound(g_entity_manager.monster_die_sfx);
                 entity_kill(index);
             }
         }
@@ -145,9 +151,9 @@ GLOBAL void entity_draw(void)
 {
     // Sort the entities based on their Y position so that they draw in the correct order.
     nkArray<Entity*> entity_draw_list;
-    nk_array_reserve(&entity_draw_list, g_world.entities.length);
+    nk_array_reserve(&entity_draw_list, g_entity_manager.entities.length);
 
-    for(auto& e: g_world.entities)
+    for(auto& e: g_entity_manager.entities)
     {
         if(e.id != EntityID_None && e.active)
         {
@@ -173,7 +179,7 @@ GLOBAL void entity_draw(void)
         imm_texture(texture, ex,ey, &clip, color);
 
         #if defined(BUILD_DEBUG)
-        if(g_draw_colliders)
+        if(g_entity_manager.draw_colliders)
         {
             nkF32 cx = ex - (e->bounds.x * 0.5f);
             nkF32 cy = ey - (e->bounds.y * 0.5f);
@@ -198,21 +204,21 @@ GLOBAL void entity_draw(void)
 
 GLOBAL void entity_damage(nkU64 index, nkF32 damage)
 {
-    if(index >= g_world.entities.length) return;
+    if(index >= g_entity_manager.entities.length) return;
 
     // @Incomplete: Different sound effects!
-    nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_splat_sfx)-1);
-    play_sound(g_splat_sfx[sound_index]);
+    nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_entity_manager.splat_sfx)-1);
+    play_sound(g_entity_manager.splat_sfx[sound_index]);
 
-    g_world.entities[index].health -= damage;
-    g_world.entities[index].damage_timer = 0.1f;
+    g_entity_manager.entities[index].health -= damage;
+    g_entity_manager.entities[index].damage_timer = 0.1f;
 }
 
 GLOBAL void entity_kill(nkU64 index)
 {
-    if(index >= g_world.entities.length) return;
-    g_world.entities[index].active = NK_FALSE;
-    nk_hashset_insert(&g_free_entity_slots, index);
+    if(index >= g_entity_manager.entities.length) return;
+    g_entity_manager.entities[index].active = NK_FALSE;
+    nk_hashset_insert(&g_entity_manager.free_entity_slots, index);
 }
 
 GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
@@ -246,17 +252,17 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
     set_animation(&entity.anim_state, desc.start_anim, NK_TRUE);
 
     // If there are free slots available then use them, otherwise append on the end (potentially grow memory).
-    if(!nk_hashset_empty(&g_free_entity_slots))
+    if(!nk_hashset_empty(&g_entity_manager.free_entity_slots))
     {
-        nkU64 index = g_free_entity_slots.begin()->key;
-        g_world.entities[index] = entity;
-        nk_hashset_remove(&g_free_entity_slots, index);
+        nkU64 index = g_entity_manager.free_entity_slots.begin()->key;
+        g_entity_manager.entities[index] = entity;
+        nk_hashset_remove(&g_entity_manager.free_entity_slots, index);
         return index;
     }
     else
     {
-        nk_array_append(&g_world.entities, entity);
-        return (g_world.entities.length - 1);
+        nk_array_append(&g_entity_manager.entities, entity);
+        return (g_entity_manager.entities.length - 1);
     }
 }
 
@@ -264,7 +270,7 @@ GLOBAL nkU64 check_entity_collision(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityTy
 {
     nkU64 index = 0;
 
-    for(auto& e: g_world.entities)
+    for(auto& e: g_entity_manager.entities)
     {
         if(e.id != EntityType_None && e.active && NK_CHECK_FLAGS(collision_mask, e.type))
         {
@@ -310,10 +316,27 @@ GLOBAL nkBool check_entity_collision(const Entity& a, const Entity& b)
     return rect_vs_rect({ ax,ay,aw,ah }, { bx,by,bw,bh });
 }
 
-GLOBAL nkU64 get_first_entity_with_id(EntityID id)
+GLOBAL nkU64 get_entity_count(void)
+{
+    return g_entity_manager.entities.length;
+}
+
+GLOBAL Entity* get_entity(nkU64 index)
+{
+    if(index >= g_entity_manager.entities.length) return NULL;
+    Entity* e = &g_entity_manager.entities[index];
+    return (e->active) ? e : NULL;
+}
+
+GLOBAL Entity* get_first_entity_with_id(EntityID id)
+{
+    return get_entity(get_first_entity_index_with_id(id));
+}
+
+GLOBAL nkU64 get_first_entity_index_with_id(EntityID id)
 {
     nkU64 index = 0;
-    for(auto& e: g_world.entities)
+    for(auto& e: g_entity_manager.entities)
     {
         if(e.id == id && e.active)
             return index;

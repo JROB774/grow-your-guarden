@@ -55,8 +55,8 @@
 #include "animation.cpp"
 #include "renderer.cpp"
 #include "entity_table.cpp"
-#include "entity_ticks.cpp"
 #include "entity.cpp"
+#include "entity_ticks.cpp"
 #include "controller.cpp"
 #include "world.cpp"
 #include "menu.cpp"
@@ -152,11 +152,6 @@ GLOBAL void app_init(void)
     set_vertex_buffer_stride   (g_app.screen_buffer, sizeof(nkF32)*4);
     enable_vertex_buffer_attrib(g_app.screen_buffer, 0, AttribType_Float, 4, 0);
 
-    // NOTE: DO NOT TOUCH THE ORDER WITHOUT CONSIDERING WHAT IT MIGHT BREAK!
-    entity_init();
-    world_init();
-    controller_init();
-
     show_cursor(NK_FALSE);
 
     g_app.state = AppState_Menu;
@@ -166,8 +161,7 @@ GLOBAL void app_init(void)
 
 GLOBAL void app_quit(void)
 {
-    world_quit();
-    entity_quit();
+    game_quit();
 
     free_vertex_buffer(g_app.screen_buffer);
     free_render_target(g_app.screen_target);

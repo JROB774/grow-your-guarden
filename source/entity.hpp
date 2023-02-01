@@ -76,6 +76,9 @@ GLOBAL nkU64  check_entity_collision(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityT
 GLOBAL nkU64  check_entity_collision(const Entity& e,                    EntityType collision_mask = EntityType_All);
 GLOBAL nkBool check_entity_collision(const Entity& a, const Entity& b);
 
-GLOBAL nkU64 get_first_entity_with_id(EntityID id);
+GLOBAL nkU64   get_entity_count              (void);
+GLOBAL Entity* get_entity                    (nkU64 index);
+GLOBAL Entity* get_first_entity_with_id      (EntityID id);
+GLOBAL nkU64   get_first_entity_index_with_id(EntityID id);
 
 /*////////////////////////////////////////////////////////////////////////////*/

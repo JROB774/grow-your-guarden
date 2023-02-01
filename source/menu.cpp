@@ -4,7 +4,7 @@ GLOBAL void menu_tick(nkF32 dt)
 {
     if(is_mouse_button_pressed(MouseButton_Left))
     {
-        set_app_state(AppState_Game);
+        game_start();
     }
 }
 

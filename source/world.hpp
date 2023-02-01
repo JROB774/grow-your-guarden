@@ -23,17 +23,17 @@ struct Tile
 
 struct World
 {
-    nkS32           width, height;
-    Texture         tileset;
-    Tile*           tilemap;
-    nkArray<Entity> entities;
+    nkS32   width, height;
+    Texture tileset;
+    Tile*   tilemap;
 };
 
-GLOBAL World g_world;
-
-GLOBAL void world_init(void);
+GLOBAL void world_init(nkS32 width, nkS32 height, nkU32 seed = 0);
 GLOBAL void world_quit(void);
 GLOBAL void world_tick(nkF32 dt);
 GLOBAL void world_draw(void);
+
+GLOBAL nkS32 get_world_width (void);
+GLOBAL nkS32 get_world_height(void);
 
 /*////////////////////////////////////////////////////////////////////////////*/

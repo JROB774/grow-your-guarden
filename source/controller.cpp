@@ -91,7 +91,7 @@ INTERNAL void number_to_string_with_commas(nkString* str, nkS32 number)
 INTERNAL nkBool can_place_plant_at_position(nkS32 tile_x, nkS32 tile_y)
 {
     // If the tile position is out of the world bounds then the spawn isn't possible.
-    if(tile_x < 0 || tile_x >= g_world.width || tile_y < 0 || tile_y >= g_world.height) return NK_FALSE;
+    if(tile_x < 0 || tile_x >= get_world_width() || tile_y < 0 || tile_y >= get_world_height()) return NK_FALSE;
     // If nothing is selected then there's nothing to place.
     if(g_controller.selected == NO_SELECTION) return NK_FALSE;
 
@@ -143,7 +143,7 @@ INTERNAL void remove_plant(nkF32 x, nkF32 y)
     nkU64 entity_index = check_entity_collision(x,y,1,1, EntityType_Plant);
     if(entity_index == NK_U64_MAX) return; // Nothing at the spot to remove.
 
-    EntityID entity_id = g_world.entities[entity_index].id;
+    EntityID entity_id = get_entity(entity_index)->id;
 
     nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_controller.shovel_sfx)-1);
     play_sound(g_controller.shovel_sfx[sound_index]);
@@ -170,8 +170,8 @@ INTERNAL void water_plant(nkF32 x, nkF32 y)
 GLOBAL void controller_init(void)
 {
     // Center the camera on the map.
-    g_controller.camera_pos.x = NK_CAST(nkF32, (g_world.width * TILE_WIDTH)) * 0.5f;
-    g_controller.camera_pos.y = NK_CAST(nkF32, (g_world.height * TILE_HEIGHT)) * 0.5f;
+    g_controller.camera_pos.x = NK_CAST(nkF32, (get_world_width() * TILE_WIDTH)) * 0.5f;
+    g_controller.camera_pos.y = NK_CAST(nkF32, (get_world_height() * TILE_HEIGHT)) * 0.5f;
 
     g_controller.camera_zoom = CAMERA_START_ZOOM;
 
