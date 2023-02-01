@@ -108,12 +108,12 @@ DEF_ETICK(walker)
 
     nkF32& attack_cooldown = e.timer0;
 
+    e.velocity = NK_V2_ZERO;
+
     // If we collide with a plant or the base then stop to eat it, otherwise continue walking to the house.
     nkU64 hit_index = check_entity_collision(e, EntityType_Plant|EntityType_Base);
     if(hit_index != NK_U64_MAX)
     {
-        e.velocity = NK_V2_ZERO;
-
         if(attack_cooldown <= 0.0f)
         {
             attack_cooldown = COOLDOWN;
