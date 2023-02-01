@@ -74,12 +74,7 @@ DEF_ETICK(bramble)
 
     if(attack_cooldown <= 0.0f)
     {
-        nkF32 x = e.position.x - (e.bounds.x * 0.5f);
-        nkF32 y = e.position.y - (e.bounds.y * 0.5f);
-        nkF32 w = e.bounds.x;
-        nkF32 h = e.bounds.y;
-
-        nkU64 hit_entity = check_entity_collision(x,y,w,h, EntityType_Monster);
+        nkU64 hit_entity = check_entity_collision(e, EntityType_Monster);
         if(hit_entity != NK_U64_MAX)
         {
             attack_cooldown = COOLDOWN;

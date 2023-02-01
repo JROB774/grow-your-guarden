@@ -2,6 +2,10 @@
 
 INTERNAL constexpr nkS32 STARTING_MONEY = 20000;
 
+INTERNAL constexpr nkF32 CAMERA_MIN_ZOOM         = 0.25f;
+INTERNAL constexpr nkF32 CAMERA_MAX_ZOOM         = 1.00f;
+INTERNAL constexpr nkF32 CAMERA_ZOOM_SENSITIVITY = 0.10f;
+
 struct Controller
 {
     PlantSpawn hotbar[8];
@@ -10,6 +14,10 @@ struct Controller
     nkS32 money;
 
     nkVec2 camera_pos;
+    nkF32  camera_zoom;
+    nkMat4 camera_proj;
+    nkMat4 camera_view;
+
     nkVec2 cursor_pos;
     nkBool panning;
     nkBool occluded;
@@ -31,42 +39,28 @@ struct Controller
 
 INTERNAL Controller g_controller;
 
-INTERNAL nkVec2 mouse_pos_to_screen(nkVec2 pos, nkBool apply_offset)
+INTERNAL nkVec2 screen_to_world(nkVec2 screen)
 {
     nkF32 ww = NK_CAST(nkF32, get_window_width());
     nkF32 wh = NK_CAST(nkF32, get_window_height());
 
-    nkVec2 screen_mouse = pos;
+    nkMat4 proj = g_controller.camera_proj;
+    nkMat4 view = g_controller.camera_view;
 
-    nkF32 scaledw = NK_CAST(nkF32, SCREEN_WIDTH);
-    nkF32 scaledh = NK_CAST(nkF32, SCREEN_HEIGHT);
+    nkVec4 coord = { screen.x, fabsf(screen.y - wh), 0.0f, 1.0f }; // We use inverted y-axis.
 
-    while((scaledw+SCREEN_WIDTH <= ww) && (scaledh+SCREEN_HEIGHT <= wh))
-    {
-        scaledw += SCREEN_WIDTH;
-        scaledh += SCREEN_HEIGHT;
-    }
+    nkMat4 inverse = nk_inverse(proj * view);
 
-    nkF32 scaledx = (ww-scaledw)*0.5f;
-    nkF32 scaledy = (wh-scaledh)*0.5f;
+    coord.x = coord.x / ww;
+    coord.y = coord.y / wh;
+    coord.x = coord.x * 2.0f - 1.0f;
+    coord.y = coord.y * 2.0f - 1.0f;
 
-    nkF32 sx = ww / SCREEN_WIDTH;
-    nkF32 sy = wh / SCREEN_HEIGHT;
+    nkVec4 world = inverse * coord;
 
-    nkF32 s = nk_min(sx,sy);
+    world /= world.w;
 
-    if(s < 1.0f) s = 1.0f; // Avoid scale of zero.
-
-    if(apply_offset)
-    {
-        screen_mouse.x -= scaledx;
-        screen_mouse.y -= scaledy;
-    }
-
-    screen_mouse.x /= floorf(s);
-    screen_mouse.y /= floorf(s);
-
-    return screen_mouse;
+    return world;
 }
 
 // https://stackoverflow.com/a/1449859
@@ -178,6 +172,8 @@ GLOBAL void controller_init(void)
     g_controller.camera_pos.x = NK_CAST(nkF32, (g_world.width * TILE_WIDTH)) * 0.5f;
     g_controller.camera_pos.y = NK_CAST(nkF32, (g_world.height * TILE_HEIGHT)) * 0.5f;
 
+    g_controller.camera_zoom = CAMERA_MIN_ZOOM;
+
     g_controller.money = STARTING_MONEY;
 
     // @Incomplete: Just giving some plants for testing.
@@ -209,13 +205,22 @@ GLOBAL void controller_init(void)
 GLOBAL void controller_tick(nkF32 dt)
 {
     // Convert the raw mouse position into screen position for the cursor.
-    g_controller.cursor_pos = mouse_pos_to_screen(get_window_mouse_pos(), NK_TRUE);
+    g_controller.cursor_pos = get_window_mouse_pos();
 
     // Pan the camera around the world.
     g_controller.panning = is_mouse_button_down(MouseButton_Middle);
     if(g_controller.panning)
     {
-        g_controller.camera_pos -= mouse_pos_to_screen(get_relative_mouse_pos(), NK_FALSE);
+        g_controller.camera_pos -= (get_relative_mouse_pos() / g_controller.camera_zoom);
+    }
+
+    // Zoom the camera in and out.
+    nkVec2 mouse_wheel = get_mouse_wheel();
+    if(mouse_wheel.y != 0.0f)
+    {
+        // @Incomplete: Lerp the zoom for smoothness.
+        g_controller.camera_zoom += (mouse_wheel.y * CAMERA_ZOOM_SENSITIVTIY) * g_controller.camera_zoom; // Multiply by the current zoom for more even increments.
+        g_controller.camera_zoom = nk_clamp(g_controller.camera_zoom, CAMERA_MIN_ZOOM, CAMERA_MAX_ZOOM);
     }
 
     // Check if the cursor is occluded from the world by the HUD.
@@ -274,8 +279,7 @@ GLOBAL void controller_tick(nkF32 dt)
     // Place current plant / perform the current tool action.
     if(!g_controller.occluded && !g_controller.panning && is_mouse_button_pressed(MouseButton_Left))
     {
-        nkF32 cx = g_controller.cursor_pos.x + (g_controller.camera_pos.x - (NK_CAST(nkF32, SCREEN_WIDTH) * 0.5f));
-        nkF32 cy = g_controller.cursor_pos.y + (g_controller.camera_pos.y - (NK_CAST(nkF32, SCREEN_HEIGHT) * 0.5f));
+        nkVec2 pos = screen_to_world(g_controller.cursor_pos);
 
         if(g_controller.selected != NO_SELECTION)
         {
@@ -284,19 +288,19 @@ GLOBAL void controller_tick(nkF32 dt)
             {
                 iPoint tile;
 
-                tile.x = NK_CAST(nkS32, cx / TILE_WIDTH);
-                tile.y = NK_CAST(nkS32, cy / TILE_HEIGHT);
+                tile.x = NK_CAST(nkS32, floorf(pos.x / NK_CAST(nkF32, TILE_WIDTH)));
+                tile.y = NK_CAST(nkS32, floorf(pos.y / NK_CAST(nkF32, TILE_HEIGHT)));
 
                 place_plant(tile.x, tile.y);
             }
         }
         if(g_controller.watering)
         {
-            water_plant(cx, cy);
+            water_plant(pos.x, pos.y);
         }
         if(g_controller.removing)
         {
-            remove_plant(cx, cy);
+            remove_plant(pos.x, pos.y);
         }
     }
 }
@@ -306,13 +310,12 @@ GLOBAL void controller_draw(void)
     // Draw the highlighted tile if not panning.
     if(!g_controller.panning && !g_controller.occluded && (g_controller.selected != NO_SELECTION || g_controller.watering || g_controller.removing))
     {
-        nkF32 cx = g_controller.cursor_pos.x + (g_controller.camera_pos.x - (NK_CAST(nkF32, SCREEN_WIDTH) * 0.5f));
-        nkF32 cy = g_controller.cursor_pos.y + (g_controller.camera_pos.y - (NK_CAST(nkF32, SCREEN_HEIGHT) * 0.5f));
+        nkVec2 pos = screen_to_world(g_controller.cursor_pos);
 
         iPoint tile;
 
-        tile.x = NK_CAST(nkS32, cx / TILE_WIDTH);
-        tile.y = NK_CAST(nkS32, cy / TILE_HEIGHT);
+        tile.x = NK_CAST(nkS32, floorf(pos.x / (NK_CAST(nkF32, TILE_WIDTH))));
+        tile.y = NK_CAST(nkS32, floorf(pos.y / (NK_CAST(nkF32, TILE_HEIGHT))));
 
         // Make sure we can place at the spot.
         if(can_place_plant_at_position(tile.x, tile.y))
@@ -325,6 +328,10 @@ GLOBAL void controller_draw(void)
     }
 
     // Unset the camera so that we render in screen-space for the HUD.
+    nkF32 ww = NK_CAST(nkF32, get_window_width());
+    nkF32 wh = NK_CAST(nkF32, get_window_height());
+
+    imm_set_projection(nk_orthographic(0.0f,ww,wh,0.0f));
     imm_set_view(nk_m4_identity());
 
     // Draw the hotbar.
@@ -408,12 +415,25 @@ GLOBAL void controller_draw(void)
 
 GLOBAL void set_controller_camera(void)
 {
-    // Setup the view matrix using the controller camera.
-    nkF32 cx = g_controller.camera_pos.x - (NK_CAST(nkF32, SCREEN_WIDTH) * 0.5f);
-    nkF32 cy = g_controller.camera_pos.y - (NK_CAST(nkF32, SCREEN_HEIGHT) * 0.5f);
+    // Setup the camera matrices using the controller camera.
+    nkF32 l = -(NK_CAST(nkF32, get_window_width ()) * 0.5f);
+    nkF32 r =  (NK_CAST(nkF32, get_window_width ()) * 0.5f);
+    nkF32 b =  (NK_CAST(nkF32, get_window_height()) * 0.5f);
+    nkF32 t = -(NK_CAST(nkF32, get_window_height()) * 0.5f);
 
-    nkMat4 camera_matrix = nk_translate(nk_m4_identity(), { -cx,-cy,0.0f });
-    imm_set_view(camera_matrix);
+    nkF32 cx = g_controller.camera_pos.x;
+    nkF32 cy = g_controller.camera_pos.y;
+
+    nkF32 cs = g_controller.camera_zoom;
+
+    g_controller.camera_proj = nk_orthographic(l,r,b,t);
+    g_controller.camera_view = nk_m4_identity();
+
+    g_controller.camera_view = nk_scale    (g_controller.camera_view, {  cs, cs, 1.0f });
+    g_controller.camera_view = nk_translate(g_controller.camera_view, { -cx,-cy, 0.0f });
+
+    imm_set_projection(g_controller.camera_proj);
+    imm_set_view(g_controller.camera_view);
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

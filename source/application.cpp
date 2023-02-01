@@ -69,19 +69,22 @@ INTERNAL AppContext g_app;
 
 INTERNAL void begin_frame_draw(void)
 {
-    nkF32 vx = 0.0f;
-    nkF32 vy = 0.0f;
-    nkF32 vw = NK_CAST(nkF32, get_texture_width(g_app.screen_target->color_target));
-    nkF32 vh = NK_CAST(nkF32, get_texture_height(g_app.screen_target->color_target));
+    nkS32 ww = get_window_width();
+    nkS32 wh = get_window_height();
+    nkS32 sw = get_texture_width(g_app.screen_target->color_target);
+    nkS32 sh = get_texture_height(g_app.screen_target->color_target);
 
+    if(ww != sw || wh != sh)
+        resize_render_target(g_app.screen_target, ww,wh); // The screen target should always fit the window.
     bind_render_target(g_app.screen_target);
 
     clear_screen(0.2f,0.2f,0.2f);
 
     set_blend_mode(BlendMode_Alpha);
 
-    imm_set_viewport({ vx,vy,vw,vh });
-    imm_set_projection(nk_orthographic(0,vw,vh,0,0,1));
+    imm_set_viewport({ 0.0f, 0.0f, NK_CAST(nkF32, ww), NK_CAST(nkF32, wh) });
+
+    imm_set_projection(nk_m4_identity());
     imm_set_view(nk_m4_identity());
     imm_set_model(nk_m4_identity());
 }
@@ -99,28 +102,14 @@ INTERNAL void end_frame_draw(void)
 
     clear_screen(0,0,0);
 
-    nkF32 dstw = SCREEN_WIDTH;
-    nkF32 dsth = SCREEN_HEIGHT;
-
-    while((dstw+SCREEN_WIDTH <= ww) && (dsth+SCREEN_HEIGHT <= wh))
-    {
-        dstw += SCREEN_WIDTH;
-        dsth += SCREEN_HEIGHT;
-    }
-
-    nkF32 dstx0 = (ww-dstw)*0.5f;
-    nkF32 dsty0 = (wh-dsth)*0.5f;
-    nkF32 dstx1 = dstx0+dstw;
-    nkF32 dsty1 = dsty0+dsth;
-
     nkVec4 vertices[4];
 
-    vertices[0] = { dstx0,dsty1, 0.0f,0.0f };
-    vertices[1] = { dstx0,dsty0, 0.0f,1.0f };
-    vertices[2] = { dstx1,dsty1, 1.0f,0.0f };
-    vertices[3] = { dstx1,dsty0, 1.0f,1.0f };
+    vertices[0] = { 0.0f,  wh, 0.0f,0.0f };
+    vertices[1] = { 0.0f,0.0f, 0.0f,1.0f };
+    vertices[2] = {   ww,  wh, 1.0f,0.0f };
+    vertices[3] = {   ww,0.0f, 1.0f,1.0f };
 
-    nkMat4 projection = nk_orthographic(0,ww,wh,0,0,1);
+    nkMat4 projection = nk_orthographic(0,ww,wh,0);
 
     set_blend_mode(BlendMode_PremultipliedAlpha);
 
@@ -137,14 +126,17 @@ GLOBAL void app_main(AppDesc* desc)
 {
     desc->title       = "PLANT";
     desc->name        = "PLANT";
-    desc->window_size = { SCREEN_WIDTH*2,SCREEN_HEIGHT*2 };
-    desc->window_min  = { SCREEN_WIDTH,SCREEN_HEIGHT };
+    desc->window_size = { 1280,720 };
+    desc->window_min  = {  640,360 };
 }
 
 GLOBAL void app_init(void)
 {
     // Setup the necessary resources for rendering the off-screen target.
-    g_app.screen_target = create_render_target(SCREEN_WIDTH,SCREEN_HEIGHT, SamplerFilter_Nearest, SamplerWrap_Clamp);
+    nkS32 ww = get_window_width();
+    nkS32 wh = get_window_height();
+
+    g_app.screen_target = create_render_target(ww,wh, SamplerFilter_Nearest, SamplerWrap_Clamp);
     g_app.screen_shader = asset_manager_load<Shader>("copy.shader");
     g_app.screen_buffer = create_vertex_buffer();
 

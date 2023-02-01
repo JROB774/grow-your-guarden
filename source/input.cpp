@@ -72,6 +72,7 @@ struct InputState
     nkS16  curr_axis_state[GamepadAxis_TOTAL];
     nkVec2 mouse_pos;
     nkVec2 mouse_pos_relative;
+    nkVec2 mouse_wheel;
     nkChar text_input[256];
 };
 
@@ -129,6 +130,12 @@ GLOBAL void process_input_events(void* event)
                 strcat(g_input.text_input, sdl_event->text.text);
             }
         } break;
+
+        case SDL_MOUSEWHEEL:
+        {
+            g_input.mouse_wheel.x = NK_CAST(nkF32, sdl_event->wheel.x);
+            g_input.mouse_wheel.y = NK_CAST(nkF32, sdl_event->wheel.y);
+        } break;
     }
 }
 
@@ -184,6 +191,9 @@ GLOBAL void update_input_state()
 GLOBAL void reset_input_state(void)
 {
     memset(g_input.text_input, 0, sizeof(g_input.text_input));
+
+    g_input.mouse_wheel.x = 0.0f;
+    g_input.mouse_wheel.y = 0.0f;
 }
 
 //
@@ -336,6 +346,11 @@ GLOBAL nkVec2 get_window_mouse_pos(void)
 GLOBAL nkVec2 get_relative_mouse_pos(void)
 {
     return g_input.mouse_pos_relative;
+}
+
+GLOBAL nkVec2 get_mouse_wheel(void)
+{
+    return g_input.mouse_wheel;
 }
 
 //

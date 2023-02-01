@@ -247,6 +247,16 @@ GLOBAL nkU64 check_entity_collision(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityTy
     return NK_U64_MAX;
 }
 
+GLOBAL nkU64 check_entity_collision(const Entity& e, EntityType collision_mask)
+{
+    nkF32 x = e.position.x - (e.bounds.x * 0.5f);
+    nkF32 y = e.position.y - (e.bounds.y * 0.5f);
+    nkF32 w = e.bounds.x;
+    nkF32 h = e.bounds.y;
+
+    return check_entity_collision(x,y,w,h, collision_mask);
+}
+
 GLOBAL nkU64 get_first_entity_with_id(EntityID id)
 {
     nkU64 index = 0;

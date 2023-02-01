@@ -1,7 +1,7 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
-GLOBAL nkS32 TILE_WIDTH  = 32;
-GLOBAL nkS32 TILE_HEIGHT = 32;
+GLOBAL nkF32 TILE_WIDTH  = 256.0f;
+GLOBAL nkF32 TILE_HEIGHT = 256.0f;
 
 NK_ENUM(TileID, nkU32)
 {

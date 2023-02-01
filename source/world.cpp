@@ -78,11 +78,12 @@ GLOBAL void world_draw(void)
         for(nkS32 x=0; x<g_world.width; ++x)
         {
             TileID id = g_world.tilemap[y*g_world.width+x].id;
-            ImmClip clip = { 0.0f, 0.0f, NK_CAST(nkF32, TILE_WIDTH), NK_CAST(nkF32, TILE_HEIGHT) };
+
+            ImmClip clip = { 0.0f, 0.0f, TILE_WIDTH, TILE_HEIGHT };
             switch(id)
             {
-                case TileID_GrassLight: clip.x = 0.0f; break;
-                case TileID_GrassDark: clip.x = 32.0f; break;
+                case TileID_GrassLight: clip.x =       0.0f; break;
+                case TileID_GrassDark:  clip.x = TILE_WIDTH; break;
             }
 
             nkF32 tx = NK_CAST(nkF32, x * TILE_WIDTH) + (NK_CAST(nkF32,TILE_WIDTH) * 0.5f);

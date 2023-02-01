@@ -91,6 +91,7 @@ GLOBAL void   set_mouse_to_relative       (nkBool enable);
 GLOBAL nkBool is_mouse_relative           (void);
 GLOBAL nkVec2 get_window_mouse_pos        (void);
 GLOBAL nkVec2 get_relative_mouse_pos      (void);
+GLOBAL nkVec2 get_mouse_wheel             (void);
 
 // Gamepad
 GLOBAL nkBool is_gamepad_button_down         (GamepadButton button);
