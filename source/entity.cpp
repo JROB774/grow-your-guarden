@@ -98,17 +98,7 @@ GLOBAL void entity_tick(nkF32 dt)
                     {
                         if(b.type == EntityType_Bullet && b.active && NK_CHECK_FLAGS(b.collision_mask, EntityType_Monster))
                         {
-                            nkF32 mw = e.bounds.x;
-                            nkF32 mh = e.bounds.y;
-                            nkF32 mx = e.position.x - (mw * 0.5f);
-                            nkF32 my = e.position.y - (mh * 0.5f);
-
-                            nkF32 bw = b.bounds.x;
-                            nkF32 bh = b.bounds.y;
-                            nkF32 bx = b.position.x - (bw * 0.5f);
-                            nkF32 by = b.position.y - (bh * 0.5f);
-
-                            if(rect_vs_rect({ mx,my,mw,mh }, { bx,by,bw,bh }))
+                            if(check_entity_collision(e, b))
                             {
                                 entity_damage(index, b.damage);
                                 entity_kill(sub_index);
@@ -303,6 +293,21 @@ GLOBAL nkU64 check_entity_collision(const Entity& e, EntityType collision_mask)
     nkF32 h = e.bounds.y;
 
     return check_entity_collision(x,y,w,h, collision_mask);
+}
+
+GLOBAL nkBool check_entity_collision(const Entity& a, const Entity& b)
+{
+    nkF32 aw = a.bounds.x;
+    nkF32 ah = a.bounds.y;
+    nkF32 ax = a.position.x - (aw * 0.5f);
+    nkF32 ay = a.position.y - (ah * 0.5f);
+
+    nkF32 bw = b.bounds.x;
+    nkF32 bh = b.bounds.y;
+    nkF32 bx = b.position.x - (bw * 0.5f);
+    nkF32 by = b.position.y - (bh * 0.5f);
+
+    return rect_vs_rect({ ax,ay,aw,ah }, { bx,by,bw,bh });
 }
 
 GLOBAL nkU64 get_first_entity_with_id(EntityID id)

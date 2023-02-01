@@ -72,8 +72,9 @@ GLOBAL nkU64 entity_spawn (EntityID id, nkF32 x, nkF32 y); // Returns the index 
                                                            // is marked dead, in which case other entities can claim it.
 
 // Return the index of the entity collided with or NK_U64_MAX if there was no collision.
-GLOBAL nkU64 check_entity_collision(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityType collision_mask = EntityType_All);
-GLOBAL nkU64 check_entity_collision(const Entity& e,                    EntityType collision_mask = EntityType_All);
+GLOBAL nkU64  check_entity_collision(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityType collision_mask = EntityType_All);
+GLOBAL nkU64  check_entity_collision(const Entity& e,                    EntityType collision_mask = EntityType_All);
+GLOBAL nkBool check_entity_collision(const Entity& a, const Entity& b);
 
 GLOBAL nkU64 get_first_entity_with_id(EntityID id);
 
