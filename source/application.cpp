@@ -127,7 +127,7 @@ GLOBAL void app_main(AppDesc* desc)
     desc->title       = "PLANT";
     desc->name        = "PLANT";
     desc->window_size = { 1280,720 };
-    desc->window_min  = {  640,360 };
+    desc->window_min  = { 1280,720 };
 }
 
 GLOBAL void app_init(void)
