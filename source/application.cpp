@@ -8,8 +8,6 @@
 #define GLEW_STATIC
 #define NK_STATIC
 
-#define USE_RENDERER_SIMPLE
-
 #include <nk_define.h>
 #include <nk_math.h>
 #include <nk_filesys.h>
