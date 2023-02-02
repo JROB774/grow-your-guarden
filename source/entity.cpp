@@ -163,6 +163,8 @@ GLOBAL void entity_draw(void)
 
     qsort(entity_draw_list.data, entity_draw_list.length, sizeof(Entity*), entity_sort_op);
 
+    Texture shadow = asset_manager_load<Texture>("shadow.png");
+
     // Draw the sorted entities.
     for(Entity* e: entity_draw_list)
     {
@@ -175,6 +177,18 @@ GLOBAL void entity_draw(void)
         nkF32 ey = e->position.y;
 
         nkVec4 color = (e->damage_timer > 0.0f) ? NK_V4_RED : NK_V4_WHITE;
+
+        // Bullets and monsters have shadows.
+        if(e->type == EntityType_Monster || e->type == EntityType_Bullet)
+        {
+            nkVec4 shadow_color = { 1.0f,1.0f,1.0f,0.25f };
+
+            nkF32 pos_x = ex;
+            nkF32 pos_y = ey + (e->bounds.y * 0.4f);
+            nkF32 scale = e->bounds.x / NK_CAST(nkF32, get_texture_width(shadow));
+
+            imm_texture_ex(shadow, pos_x,pos_y, scale,scale*0.75f, 0.0f, NULL, NULL, shadow_color);
+        }
 
         imm_texture_ex(texture, ex,ey, e->flip, 1.0f, 0.0f, NULL, &clip, color);
 
