@@ -23,10 +23,10 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 // EntityID_None
 {
 /* Texture         */ NULL,
-/* Animation Group */ NULL,
-/* Start Animation */ NULL,
-/* Tick            */ NULL,
+/* Animation       */ NULL,
 /* Type            */ EntityType_None,
+/* Default State   */ EntityState_Idle,
+/* Tick            */ NULL,
 /* Health          */ 0.0f,
 /* Damage          */ 0.0f,
 /* Speed           */ 0.0f,
@@ -42,10 +42,10 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 // EntityID_Daisy
 {
 /* Texture         */ "ent_p/daisy.png",
-/* Animation Group */ "ent_p/daisy.anm",
-/* Start Animation */ "phase0_idle",
-/* Tick            */ ETICK(daisy),
+/* Animation       */ "ent_p/daisy.anm",
 /* Type            */ EntityType_Plant,
+/* Default State   */ EntityState_Idle,
+/* Tick            */ ETICK(daisy),
 /* Health          */ 5.0f,
 /* Damage          */ 0.0f,
 /* Speed           */ 0.0f,
@@ -61,10 +61,10 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 // EntityID_Bramble
 {
 /* Texture         */ "ent_p/bramble.png",
-/* Animation Group */ "ent_p/bramble.anm",
-/* Start Animation */ "phase0_idle",
-/* Tick            */ ETICK(bramble),
+/* Animation       */ "ent_p/bramble.anm",
 /* Type            */ EntityType_Plant,
+/* Default State   */ EntityState_Idle,
+/* Tick            */ ETICK(bramble),
 /* Health          */ 5.0f,
 /* Damage          */ 0.0f,
 /* Speed           */ 0.0f,
@@ -80,10 +80,10 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 // EntityID_Walker
 {
 /* Texture         */ "ent_m/walker.png",
-/* Animation Group */ "ent_m/walker.anm",
-/* Start Animation */ "walk",
-/* Tick            */ ETICK(walker),
+/* Animation       */ "ent_m/walker.anm",
 /* Type            */ EntityType_Monster,
+/* Default State   */ EntityState_Move,
+/* Tick            */ ETICK(walker),
 /* Health          */ 10.0f,
 /* Damage          */ 1.0f,
 /* Speed           */ 0.5f,
@@ -99,10 +99,10 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 // EntityID_Pollen
 {
 /* Texture         */ "ent_b/pollen.png",
-/* Animation Group */ "ent_b/pollen.anm",
-/* Start Animation */ "idle",
-/* Tick            */ NULL,
+/* Animation       */ "ent_b/pollen.anm",
 /* Type            */ EntityType_Bullet,
+/* Default State   */ EntityState_Idle,
+/* Tick            */ NULL,
 /* Health          */ 1.0f,
 /* Damage          */ 2.0f,
 /* Speed           */ 3.1f,
@@ -118,10 +118,10 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 // EntityID_House
 {
 /* Texture         */ "ent_o/house.png",
-/* Animation Group */ "ent_o/house.anm",
-/* Start Animation */ "idle",
-/* Tick            */ NULL,
+/* Animation       */ "ent_o/house.anm",
 /* Type            */ EntityType_Base,
+/* Default State   */ EntityState_Idle,
+/* Tick            */ NULL,
 /* Health          */ 100.0f,
 /* Damage          */ 0.0f,
 /* Speed           */ 0.0f,

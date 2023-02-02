@@ -19,10 +19,31 @@ NK_ENUM(EntityType, nkU32)
     EntityType_All     = (  -1)
 };
 
+// Set entity state to trigger specific animations. The names of these animations
+// are listed next to the states below. For plants they are also prefixed with
+// "phaseX_" where X is the value stored in current_phase. This allows for plants
+// to have multiple variants of animations depending on their current growth.
+//
+// States are driven by their animations so once an animation is complete the state
+// will reset to whatever has been assigned as the default state in the entity's
+// descriptor. If a state's animation has been set to lop then the state will only
+// be able to change if it is explictially changed via the change state function.
+NK_ENUM(EntityState, nkU32)
+{
+    EntityState_None,   // (NULL)
+    EntityState_Idle,   // "idle"
+    EntityState_Move,   // "move"
+    EntityState_Hurt,   // "hurt"
+    EntityState_Attack, // "attack"
+    EntityState_Dead,   // "dead"
+    EntityState_TOTAL
+};
+
 struct Entity
 {
     EntityType    type;
     EntityID      id;
+    EntityState   state;         // Do not set this manually! Go through change_entity_state.
     nkVec2        position;
     nkVec2        spawn;
     nkVec2        velocity;
@@ -53,9 +74,9 @@ struct EntityDesc
 {
     const nkChar* texture_file;
     const nkChar* anim_file;
-    const nkChar* start_anim;
-    EntityTick    tick;
     EntityType    type;
+    EntityState   default_state;
+    EntityTick    tick;
     nkF32         health;
     nkF32         damage;
     nkF32         speed;
@@ -77,6 +98,9 @@ GLOBAL void  entity_kill  (nkU64 index);
 GLOBAL nkU64 entity_spawn (EntityID id, nkF32 x, nkF32 y); // Returns the index in the world entity array where the entity
                                                            // was inserted. Indicies should remain valid until an entity
                                                            // is marked dead, in which case other entities can claim it.
+
+GLOBAL void change_entity_state(nkU64 index, EntityState state);
+GLOBAL void change_entity_state(Entity& e, EntityState state);
 
 // Return the index of the entity collided with or NK_U64_MAX if there was no collision.
 GLOBAL nkU64  check_entity_bounds   (nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityType collision_mask = EntityType_All);

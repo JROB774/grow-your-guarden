@@ -1,5 +1,8 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
+INTERNAL constexpr const nkChar* ENTITY_ANIM_NAMES[] = { NULL, "idle", "move", "hurt", "attack", "dead" };
+NK_STATIC_ASSERT(NK_ARRAY_SIZE(ENTITY_ANIM_NAMES) == EntityState_TOTAL, entity_anim_size_mismatch);
+
 struct EntityManager
 {
     nkArray<Entity>  entities;
@@ -18,6 +21,15 @@ INTERNAL nkS32 entity_sort_op(const void* a, const void* b)
     if((aa->position.y + (aa->bounds.y * 0.5f)) < (bb->position.y + (bb->bounds.y * 0.5f))) return -1;
     if((aa->position.y + (aa->bounds.y * 0.5f)) > (bb->position.y + (bb->bounds.y * 0.5f))) return +1;
     return 0;
+}
+
+INTERNAL nkString get_current_entity_anim_name(Entity& e)
+{
+    nkString name;
+    if(e.type == EntityType_Plant)
+        name = format_string("phase%d_", e.current_phase);
+    nk_string_append(&name, ENTITY_ANIM_NAMES[e.state]);
+    return name;
 }
 
 GLOBAL void entity_init(void)
@@ -81,6 +93,9 @@ GLOBAL void entity_tick(nkF32 dt)
                         {
                             e.phase_timer -= phase_duration;
                             e.current_phase++;
+
+                            // Update the animation for the new phase.
+                            set_animation(&e.anim_state, get_current_entity_anim_name(e).cstr);
                         }
                     }
                 } break;
@@ -103,20 +118,21 @@ GLOBAL void entity_tick(nkF32 dt)
                 // Check if we have collided with any plant bullets.
                 case EntityType_Monster:
                 {
-                    nkU64 sub_index = 0;
-
-                    for(auto& b: g_entity_manager.entities)
+                    if(e.state != EntityState_Dead)
                     {
-                        if(b.type == EntityType_Bullet && b.active && NK_CHECK_FLAGS(b.collision_mask, EntityType_Monster))
+                        nkU64 sub_index = 0;
+                        for(auto& b: g_entity_manager.entities)
                         {
-                            if(check_entity_collision(e, b))
+                            if(b.type == EntityType_Bullet && b.state != EntityState_Dead && b.active && NK_CHECK_FLAGS(b.collision_mask, EntityType_Monster))
                             {
-                                entity_damage(index, b.damage);
-                                entity_kill(sub_index);
+                                if(check_entity_collision(e, b))
+                                {
+                                    entity_damage(index, b.damage);
+                                    entity_kill(sub_index);
+                                }
                             }
+                            ++sub_index;
                         }
-
-                        ++sub_index;
                     }
                 } break;
             }
@@ -130,8 +146,19 @@ GLOBAL void entity_tick(nkF32 dt)
             // Apply velocity.
             e.position += e.velocity * dt;
 
-            // Update animation logic.
+            // Update state and animation logic.
             update_animation(&e.anim_state, dt);
+            if(is_animation_done(&e.anim_state) && e.state != desc.default_state)
+            {
+                // Special case for death.
+                if(e.state != EntityState_Dead)
+                    change_entity_state(e, desc.default_state);
+                else
+                {
+                    e.active = NK_FALSE;
+                    nk_hashset_insert(&g_entity_manager.free_entity_slots, index);
+                }
+            }
 
             // Update damage timer.
             if(e.damage_timer > 0.0f)
@@ -224,19 +251,31 @@ GLOBAL void entity_damage(nkU64 index, nkF32 damage)
 {
     if(index >= g_entity_manager.entities.length) return;
 
+    Entity* e = get_entity(index);
+    if(!e || e->state == EntityState_Dead) return;
+
     // @Incomplete: Different sound effects!
     nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_entity_manager.splat_sfx)-1);
     play_sound(g_entity_manager.splat_sfx[sound_index]);
 
-    g_entity_manager.entities[index].health -= damage;
-    g_entity_manager.entities[index].damage_timer = 0.1f;
+    e->health -= damage;
+    e->damage_timer = 0.1f;
+
+    change_entity_state(index, EntityState_Hurt);
 }
 
 GLOBAL void entity_kill(nkU64 index)
 {
     if(index >= g_entity_manager.entities.length) return;
-    g_entity_manager.entities[index].active = NK_FALSE;
-    nk_hashset_insert(&g_entity_manager.free_entity_slots, index);
+    change_entity_state(index, EntityState_Dead);
+
+    // If the entity doesn't have a death animation then just handle the death logic straight away!
+    Entity* e = get_entity(index);
+    if(e && !has_animation(&e->anim_state, get_current_entity_anim_name(*e).cstr))
+    {
+        e->active = NK_FALSE;
+        nk_hashset_insert(&g_entity_manager.free_entity_slots, index);
+    }
 }
 
 GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
@@ -248,6 +287,7 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
     Entity entity         = NK_ZERO_MEM;
     entity.type           = desc.type;
     entity.id             = id;
+    entity.state          = EntityState_None; // Properly set further down!
     entity.position       = { x,y };
     entity.spawn          = { x,y };
     entity.velocity       = { 0,0 };
@@ -272,7 +312,7 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
     entity.timer3         = 0.0f;
     entity.active         = NK_TRUE;
 
-    set_animation(&entity.anim_state, desc.start_anim, NK_TRUE);
+    change_entity_state(entity, desc.default_state);
 
     // Plants can be flipped for more visual variance.
     if(entity.type == EntityType_Plant && rng_s32(0,100) < 50)
@@ -295,6 +335,18 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
     }
 }
 
+GLOBAL void change_entity_state(nkU64 index, EntityState state)
+{
+    NK_ASSERT(index < g_entity_manager.entities.length);
+    change_entity_state(*get_entity(index), state);
+}
+
+GLOBAL void change_entity_state(Entity& e, EntityState state)
+{
+    if(e.state == state) return;
+    e.state = state;
+    set_animation(&e.anim_state, get_current_entity_anim_name(e).cstr);
+}
 
 GLOBAL nkU64 check_entity_bounds(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityType collision_mask)
 {
@@ -323,13 +375,13 @@ GLOBAL nkU64 check_entity_bounds(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityType 
 
 GLOBAL nkU64 check_entity_collision(const Entity& e, EntityType collision_mask)
 {
-    if(e.active)
+    if(e.active && e.state != EntityState_Dead)
     {
         nkU64 index = 0;
 
         for(auto& o: g_entity_manager.entities)
         {
-            if(o.id != EntityType_None && o.active && NK_CHECK_FLAGS(collision_mask, o.type))
+            if(o.id != EntityType_None && o.active && o.state != EntityState_Dead && NK_CHECK_FLAGS(collision_mask, o.type))
             {
                 nkF32 ax = e.position.x;
                 nkF32 ay = e.position.y;
@@ -355,6 +407,9 @@ GLOBAL nkU64 check_entity_collision(const Entity& e, EntityType collision_mask)
 GLOBAL nkBool check_entity_collision(const Entity& a, const Entity& b)
 {
     if(!a.active || !b.active) return NK_FALSE;
+
+    if(a.state == EntityState_Dead) return NK_FALSE;
+    if(b.state == EntityState_Dead) return NK_FALSE;
 
     nkF32 ax = a.position.x;
     nkF32 ay = a.position.y;

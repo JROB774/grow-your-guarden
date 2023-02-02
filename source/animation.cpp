@@ -175,6 +175,14 @@ GLOBAL void reset_animation(AnimState* state)
     state->timer = 0.0f;
 }
 
+GLOBAL nkBool has_animation(AnimState* state, const nkChar* anim_name)
+{
+    NK_ASSERT(state);
+    NK_ASSERT(state->anims);
+
+    return nk_hashmap_contains(&state->anims->anims, nkString(anim_name));
+}
+
 GLOBAL nkBool is_animation_done(AnimState* state)
 {
     NK_ASSERT(state);

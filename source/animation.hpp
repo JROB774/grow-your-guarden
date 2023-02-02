@@ -32,6 +32,7 @@ GLOBAL AnimState  create_animation_state     (const nkChar* group_name); // Goes
 GLOBAL void       set_animation              (AnimState* state, const nkChar* anim_name, nkBool reset = NK_FALSE); // Does nothing if the animation is already playing (unless reset flag is true).
 GLOBAL void       update_animation           (AnimState* state, nkF32 dt);
 GLOBAL void       reset_animation            (AnimState* state);
+GLOBAL nkBool     has_animation              (AnimState* state, const nkChar* anim_name);
 GLOBAL nkBool     is_animation_done          (AnimState* state);
 GLOBAL AnimFrame  get_current_animation_frame(AnimState* state);
 

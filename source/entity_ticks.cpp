@@ -27,11 +27,6 @@ INTERNAL void spawn_bullet_at_target(EntityID id, nkF32 x, nkF32 y, const Entity
 
 DEF_ETICK(daisy)
 {
-    // @Incomplete: Don't want to do this for every plant...
-    if(e.current_phase == 0) set_animation(&e.anim_state, "phase0_idle");
-    if(e.current_phase == 1) set_animation(&e.anim_state, "phase1_idle");
-    if(e.current_phase == 2) set_animation(&e.anim_state, "phase2_idle");
-
     const nkF32 COOLDOWN = 3.0f;
 
     nkF32& shot_cooldown = e.timer0;
@@ -46,6 +41,7 @@ DEF_ETICK(daisy)
                 nkF32 distance = distance_between_points(e.position, m.position);
                 if(distance <= e.range)
                 {
+                    change_entity_state(e, EntityState_Attack);
                     shot_cooldown = COOLDOWN;
                     spawn_bullet_at_target(EntityID_Pollen, e.position.x,e.position.y, m);
                     break; // Exit early we don't need to keep looping.
@@ -62,12 +58,6 @@ DEF_ETICK(daisy)
 
 DEF_ETICK(bramble)
 {
-    // @Incomplete: Don't want to do this for every plant...
-    if(e.current_phase == 0) set_animation(&e.anim_state, "phase0_idle");
-    if(e.current_phase == 1) set_animation(&e.anim_state, "phase1_idle");
-    if(e.current_phase == 2) set_animation(&e.anim_state, "phase2_idle");
-    if(e.current_phase == 3) set_animation(&e.anim_state, "phase3_idle");
-
     const nkF32 COOLDOWN = 3.0f;
 
     nkF32& attack_cooldown = e.timer0;
