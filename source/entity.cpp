@@ -161,7 +161,10 @@ GLOBAL void entity_tick(nkF32 dt)
                 else
                 {
                     e.active = NK_FALSE;
-                    nk_hashset_insert(&g_entity_manager.free_entity_slots, index);
+                    if(!nk_hashset_contains(&g_entity_manager.free_entity_slots, index)) // Just do a check here as we were running into issues with attempting to store the same value twice.
+                    {
+                        nk_hashset_insert(&g_entity_manager.free_entity_slots, index);
+                    }
                 }
             }
 
