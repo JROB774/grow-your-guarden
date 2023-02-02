@@ -56,7 +56,7 @@ GLOBAL NKFORCEINLINE void stack_clear(Stack<T,N>* stack)
 GLOBAL wchar_t* convert_string_to_wide(const nkChar* str)
 {
     nkU64 length = strlen(str);
-    wchar_t* wstr = NK_MALLOC_TYPES(wchar_t, (length*2)+1);
+    wchar_t* wstr = NK_MALLOC_TYPES(wchar_t, ((length+1)*4));
     if(!wstr) return NULL;
     mbstowcs(wstr, str, length);
     wstr[length] = L'\0';
