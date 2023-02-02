@@ -218,6 +218,9 @@ GLOBAL void controller_tick(nkF32 dt)
     if(g_controller.panning)
     {
         g_controller.camera_target_pos -= (get_relative_mouse_pos() / g_controller.camera_current_zoom);
+        g_controller.camera_target_pos.x = nk_clamp(g_controller.camera_target_pos.x, 0.0f, get_world_width() * TILE_WIDTH);
+        g_controller.camera_target_pos.y = nk_clamp(g_controller.camera_target_pos.y, 0.0f, get_world_height() * TILE_HEIGHT);
+
     }
 
     g_controller.camera_current_pos = nk_lerp(g_controller.camera_current_pos, g_controller.camera_target_pos, CAMERA_PAN_SPEED * dt);
