@@ -50,7 +50,7 @@ GLOBAL void entity_init(void)
     g_entity_manager.splat_sfx[1] = asset_manager_load<Sound>("splat_001.wav");
     g_entity_manager.splat_sfx[2] = asset_manager_load<Sound>("splat_002.wav");
 
-    // @IncompletE: CREDIT: https://freesound.org/people/Michel88/sounds/76962/
+    // @Incomplete: CREDIT: https://freesound.org/people/Michel88/sounds/76962/
     g_entity_manager.monster_die_sfx = asset_manager_load<Sound>("monster_die.wav");
 }
 

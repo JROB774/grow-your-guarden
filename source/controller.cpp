@@ -229,7 +229,6 @@ GLOBAL void controller_tick(nkF32 dt)
     nkVec2 mouse_wheel = get_mouse_wheel();
     if(mouse_wheel.y != 0.0f)
     {
-        // @Incomplete: Lerp the zoom for smoothness.
         g_controller.camera_target_zoom += (mouse_wheel.y * CAMERA_ZOOM_SENSITIVITY) * g_controller.camera_target_zoom; // Multiply by the current zoom for more even increments.
         g_controller.camera_target_zoom = nk_clamp(g_controller.camera_target_zoom, CAMERA_MIN_ZOOM, CAMERA_MAX_ZOOM);
     }
