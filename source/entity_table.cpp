@@ -31,6 +31,7 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Damage          */ 0.0f,
 /* Speed           */ 0.0f,
 /* Range           */ 0.0f,
+/* Z-Depth         */ 0.0f,
 /* Collision Mask  */ EntityType_None,
 /* Bounds          */ { 0.0f,0.0f },
 /* Growth Phases   */ { 0,0,0,0,0,0,0,0 }
@@ -47,6 +48,7 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Damage          */ 0.0f,
 /* Speed           */ 0.0f,
 /* Range           */ 4.5f,
+/* Z-Depth         */ 0.0f,
 /* Collision Mask  */ EntityType_None,
 /* Bounds          */ { 1.0f,1.0f },
 /* Growth Phases   */ { 2,2,0,0,0,0,0,0 }
@@ -63,6 +65,7 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Damage          */ 0.0f,
 /* Speed           */ 0.0f,
 /* Range           */ 0.0f,
+/* Z-Depth         */ 0.0f,
 /* Collision Mask  */ EntityType_None,
 /* Bounds          */ { 1.0f,1.0f },
 /* Growth Phases   */ { 30,40,50,0,0,0,0,0 }
@@ -79,6 +82,7 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Damage          */ 1.0f,
 /* Speed           */ 0.5f,
 /* Range           */ 0.0f,
+/* Z-Depth         */ 0.0f,
 /* Collision Mask  */ EntityType_None,
 /* Bounds          */ { 1.0f,1.0f },
 /* Growth Phases   */ { 0,0,0,0,0,0,0,0 }
@@ -95,6 +99,7 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Damage          */ 2.0f,
 /* Speed           */ 3.1f,
 /* Range           */ 5.0f,
+/* Z-Depth         */ 0.5f,
 /* Collision Mask  */ EntityType_Monster,
 /* Bounds          */ { 0.5f,0.5f },
 /* Growth Phases   */ { 0,0,0,0,0,0,0,0 }
@@ -111,6 +116,7 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Damage          */ 0.0f,
 /* Speed           */ 0.0f,
 /* Range           */ 0.0f,
+/* Z-Depth         */ 0.0f,
 /* Collision Mask  */ EntityType_None,
 /* Bounds          */ { 3.0f,3.0f },
 /* Growth Phases   */ { 0,0,0,0,0,0,0,0 }

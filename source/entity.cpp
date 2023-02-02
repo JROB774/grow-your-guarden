@@ -85,13 +85,18 @@ GLOBAL void entity_tick(nkF32 dt)
                     }
                 } break;
 
-                // Check if we have reached our max range and if so die.
+                // Check if we have reached our max range and if so drop off, once we hit the floor die.
                 case EntityType_Bullet:
                 {
+                    const nkF32 BULLET_DROPOFF_SPEED = 300.0f;
                     nkF32 distance = distance_between_points(e.position, e.spawn);
                     if(distance >= e.range)
                     {
-                        entity_kill(index);
+                        e.z_depth -= BULLET_DROPOFF_SPEED * dt;
+                        if(e.z_depth <= 0.0f)
+                        {
+                            entity_kill(index);
+                        }
                     }
                 } break;
 
@@ -190,7 +195,7 @@ GLOBAL void entity_draw(void)
             imm_texture_ex(shadow, pos_x,pos_y, scale,scale*0.75f, 0.0f, NULL, NULL, shadow_color);
         }
 
-        imm_texture_ex(texture, ex,ey, e->flip, 1.0f, 0.0f, NULL, &clip, color);
+        imm_texture_ex(texture, ex,ey - e->z_depth, e->flip, 1.0f, 0.0f, NULL, &clip, color);
 
         #if defined(BUILD_DEBUG)
         if(g_entity_manager.draw_colliders)
@@ -253,6 +258,7 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
     entity.range          = desc.range    * TILE_HEIGHT;
     entity.bounds.x       = desc.bounds.x * TILE_WIDTH;
     entity.bounds.y       = desc.bounds.y * TILE_HEIGHT;
+    entity.z_depth        = desc.z_depth  * TILE_HEIGHT;
     entity.flip           = 1.0f;
     entity.anim_state     = create_animation_state(desc.anim_file);
     entity.collision_mask = desc.collision_mask;

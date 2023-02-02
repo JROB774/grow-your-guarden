@@ -31,6 +31,7 @@ struct Entity
     nkF32         speed;
     nkF32         range;
     nkVec2        bounds;
+    nkF32         z_depth;       // Controls how "high" the visual of the entity is compared to its shadow.
     nkF32         flip;          // Plants get this randomly set on spawn to add some visual variance.
     AnimState     anim_state;
     EntityType    collision_mask;
@@ -57,6 +58,7 @@ struct EntityDesc
     nkF32         damage;
     nkF32         speed;
     nkF32         range;
+    nkF32         z_depth;
     EntityType    collision_mask;
     nkVec2        bounds;
     nkF32         phase_times[8]; // Only used by plants, can be ignored by other entity types.
