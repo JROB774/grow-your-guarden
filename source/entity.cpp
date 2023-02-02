@@ -103,14 +103,18 @@ GLOBAL void entity_tick(nkF32 dt)
                 // Check if we have reached our max range and if so drop off, once we hit the floor die.
                 case EntityType_Bullet:
                 {
-                    const nkF32 BULLET_DROPOFF_SPEED = 300.0f;
-                    nkF32 distance = distance_between_points(e.position, e.spawn);
-                    if(distance >= e.range)
+                    if(e.state != EntityState_Dead)
                     {
-                        e.z_depth -= BULLET_DROPOFF_SPEED * dt;
-                        if(e.z_depth <= 0.0f)
+                        const nkF32 BULLET_DROPOFF_SPEED = 300.0f;
+                        nkF32 distance = distance_between_points(e.position, e.spawn);
+                        if(distance >= e.range)
                         {
-                            entity_kill(index);
+                            e.z_depth -= BULLET_DROPOFF_SPEED * dt;
+                            if(e.z_depth <= 0.0f)
+                            {
+                                entity_kill(index);
+                                e.velocity = NK_V2_ZERO;
+                            }
                         }
                     }
                 } break;
@@ -129,6 +133,7 @@ GLOBAL void entity_tick(nkF32 dt)
                                 {
                                     entity_damage(index, b.damage);
                                     entity_kill(sub_index);
+                                    b.velocity = NK_V2_ZERO;
                                 }
                             }
                             ++sub_index;
