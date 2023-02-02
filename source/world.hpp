@@ -5,10 +5,11 @@ GLOBAL nkF32 TILE_HEIGHT = 256.0f;
 
 NK_ENUM(TileID, nkU32)
 {
-    //                  AABBGGRR
-    TileID_Dirt     = 0xFF347571,
-    TileID_DirtDark = 0xFF38605E,
-    TileID_Grass    = 0xFF3AC431,
+    TileID_None,
+    TileID_Dirt,
+    TileID_DirtDark,
+    TileID_Grass,
+    TileID_TOTAL
 };
 
 NK_ENUM(TileEdge, nkU32)

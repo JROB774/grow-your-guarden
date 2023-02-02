@@ -2,12 +2,33 @@
 
 #define CHECK_TILE_EDGE(edge, flags) (((edge) & (flags)) == (flags))
 
+INTERNAL nkU32 TILE_COLORS[] =
+{
+//    AABBGGRR
+    0xFFFFFFFF, // TileID_None
+    0xFF347571, // TileID_Dirt
+    0xFF38605E, // TileID_DirtDark
+    0xFF3AC431, // TileID_Grass
+};
+
+NK_STATIC_ASSERT(NK_ARRAY_SIZE(TILE_COLORS) == TileID_TOTAL, tile_color_size_mismatch);
+
 INTERNAL World g_world;
+
+INTERNAL TileID tile_id_from_tile_color(nkU32 color)
+{
+    for(nkU32 i=0; i<TileID_TOTAL; ++i)
+        if(TILE_COLORS[i] == color)
+            return i;
+    NK_ASSERT(NK_FALSE);
+    return TileID_None;
+}
 
 INTERNAL Texture get_tile_texture_from_id(TileID id)
 {
     switch(id)
     {
+        case TileID_None:     return NULL;
         case TileID_Dirt:     return asset_manager_load<Texture>("tiles/dirt.png");
         case TileID_DirtDark: return asset_manager_load<Texture>("tiles/dirt_dark.png");
         case TileID_Grass:    return asset_manager_load<Texture>("tiles/grass.png");
@@ -115,21 +136,21 @@ GLOBAL void world_load(const nkChar* level_name, nkU32 seed)
             nkS32 index = y * g_world.width + x;
 
             Tile& tile = g_world.tilemap[index];
-            tile.id = lvlbmp.pixels[index];
+            tile.id = tile_id_from_tile_color(lvlbmp.pixels[index]);
             tile.edges = TileEdge_None;
 
             // If the tile is dynamic then calculate the edges of the current tile.
             Texture texture = get_tile_texture_from_id(tile.id);
             if(is_tile_texture_dynamic(texture))
             {
-                if((x == (               0)                           ) || (lvlbmp.pixels[(y  )*g_world.width+(x-1)] == tile.id)) NK_SET_FLAGS(tile.edges, TileEdge_West     );
-                if((y == (g_world.height-1)                           ) || (lvlbmp.pixels[(y+1)*g_world.width+(x  )] == tile.id)) NK_SET_FLAGS(tile.edges, TileEdge_South    );
-                if((x == (g_world.width -1)                           ) || (lvlbmp.pixels[(y  )*g_world.width+(x+1)] == tile.id)) NK_SET_FLAGS(tile.edges, TileEdge_East     );
-                if((y == (               0)                           ) || (lvlbmp.pixels[(y-1)*g_world.width+(x  )] == tile.id)) NK_SET_FLAGS(tile.edges, TileEdge_North    );
-                if((x == (               0) || y == (               0)) || (lvlbmp.pixels[(y-1)*g_world.width+(x-1)] == tile.id)) NK_SET_FLAGS(tile.edges, TileEdge_NorthWest);
-                if((y == (g_world.height-1) || x == (               0)) || (lvlbmp.pixels[(y+1)*g_world.width+(x-1)] == tile.id)) NK_SET_FLAGS(tile.edges, TileEdge_SouthWest);
-                if((x == (g_world.width -1) || y == (g_world.height-1)) || (lvlbmp.pixels[(y+1)*g_world.width+(x+1)] == tile.id)) NK_SET_FLAGS(tile.edges, TileEdge_SouthEast);
-                if((y == (               0) || x == (g_world.width -1)) || (lvlbmp.pixels[(y-1)*g_world.width+(x+1)] == tile.id)) NK_SET_FLAGS(tile.edges, TileEdge_NorthEast);
+                if((x == (               0)                           ) || (lvlbmp.pixels[(y  )*g_world.width+(x-1)] == TILE_COLORS[tile.id])) NK_SET_FLAGS(tile.edges, TileEdge_West     );
+                if((y == (g_world.height-1)                           ) || (lvlbmp.pixels[(y+1)*g_world.width+(x  )] == TILE_COLORS[tile.id])) NK_SET_FLAGS(tile.edges, TileEdge_South    );
+                if((x == (g_world.width -1)                           ) || (lvlbmp.pixels[(y  )*g_world.width+(x+1)] == TILE_COLORS[tile.id])) NK_SET_FLAGS(tile.edges, TileEdge_East     );
+                if((y == (               0)                           ) || (lvlbmp.pixels[(y-1)*g_world.width+(x  )] == TILE_COLORS[tile.id])) NK_SET_FLAGS(tile.edges, TileEdge_North    );
+                if((x == (               0) || y == (               0)) || (lvlbmp.pixels[(y-1)*g_world.width+(x-1)] == TILE_COLORS[tile.id])) NK_SET_FLAGS(tile.edges, TileEdge_NorthWest);
+                if((y == (g_world.height-1) || x == (               0)) || (lvlbmp.pixels[(y+1)*g_world.width+(x-1)] == TILE_COLORS[tile.id])) NK_SET_FLAGS(tile.edges, TileEdge_SouthWest);
+                if((x == (g_world.width -1) || y == (g_world.height-1)) || (lvlbmp.pixels[(y+1)*g_world.width+(x+1)] == TILE_COLORS[tile.id])) NK_SET_FLAGS(tile.edges, TileEdge_SouthEast);
+                if((y == (               0) || x == (g_world.width -1)) || (lvlbmp.pixels[(y-1)*g_world.width+(x+1)] == TILE_COLORS[tile.id])) NK_SET_FLAGS(tile.edges, TileEdge_NorthEast);
 
                 tile.clip = get_tile_clip_from_edges(tile.edges);
             }
@@ -158,19 +179,27 @@ GLOBAL void world_draw_below(void)
 {
     clear_screen(g_world.border_color);
 
-    // @Incomplete: Batch tiles...
-    for(nkS32 y=0; y<g_world.height; ++y)
+    for(TileID id=0; id<TileID_TOTAL; ++id)
     {
-        for(nkS32 x=0; x<g_world.width; ++x)
+        Texture texture = get_tile_texture_from_id(id);
+        if(texture)
         {
-            nkF32 tx = NK_CAST(nkF32, x * TILE_WIDTH) + (NK_CAST(nkF32,TILE_WIDTH) * 0.5f);
-            nkF32 ty = NK_CAST(nkF32, y * TILE_HEIGHT) + (NK_CAST(nkF32,TILE_HEIGHT) * 0.5f);
+            imm_begin_texture_batch(texture);
+            for(nkS32 y=0; y<g_world.height; ++y)
+            {
+                for(nkS32 x=0; x<g_world.width; ++x)
+                {
+                    Tile tile = g_world.tilemap[y*g_world.width+x];
+                    if(tile.id == id)
+                    {
+                        nkF32 tx = NK_CAST(nkF32, x * TILE_WIDTH) + (NK_CAST(nkF32,TILE_WIDTH) * 0.5f);
+                        nkF32 ty = NK_CAST(nkF32, y * TILE_HEIGHT) + (NK_CAST(nkF32,TILE_HEIGHT) * 0.5f);
 
-            Tile tile = g_world.tilemap[y*g_world.width+x];
-
-            Texture texture = get_tile_texture_from_id(tile.id);
-
-            imm_texture(texture, tx,ty, &tile.clip);
+                        imm_texture_batched(tx,ty, &tile.clip);
+                    }
+                }
+            }
+            imm_end_texture_batch();
         }
     }
 }

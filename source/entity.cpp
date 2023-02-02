@@ -197,6 +197,25 @@ GLOBAL void entity_draw(void)
 
     Texture shadow = asset_manager_load<Texture>("shadow.png");
 
+    // Draw all the entity shadows first.
+    imm_begin_texture_batch(shadow);
+    for(Entity* e: entity_draw_list)
+    {
+        // Only bullets and monsters have shadows.
+        if(e->type == EntityType_Monster || e->type == EntityType_Bullet)
+        {
+            nkVec4 shadow_color = { 1.0f,1.0f,1.0f,0.25f };
+
+            nkF32 pos_x = e->position.x + e->draw_offset.x;
+            nkF32 pos_y = e->position.y + e->draw_offset.y + (e->bounds.y * 0.4f);
+
+            nkF32 scale = e->bounds.x / NK_CAST(nkF32, get_texture_width(shadow));
+
+            imm_texture_batched_ex(pos_x,pos_y, scale,scale*0.75f, 0.0f, NULL, NULL, shadow_color);
+        }
+    }
+    imm_end_texture_batch();
+
     // Draw the sorted entities.
     for(Entity* e: entity_draw_list)
     {
@@ -210,23 +229,14 @@ GLOBAL void entity_draw(void)
 
         nkVec4 color = (e->damage_timer > 0.0f) ? NK_V4_RED : NK_V4_WHITE;
 
-        // Bullets and monsters have shadows.
-        if(e->type == EntityType_Monster || e->type == EntityType_Bullet)
-        {
-            nkVec4 shadow_color = { 1.0f,1.0f,1.0f,0.25f };
-
-            nkF32 pos_x = e->position.x + e->draw_offset.x;
-            nkF32 pos_y = e->position.y + e->draw_offset.y + (e->bounds.y * 0.4f);
-
-            nkF32 scale = e->bounds.x / NK_CAST(nkF32, get_texture_width(shadow));
-
-            imm_texture_ex(shadow, pos_x,pos_y, scale,scale*0.75f, 0.0f, NULL, NULL, shadow_color);
-        }
-
         imm_texture_ex(texture, ex,ey - e->z_depth, e->flip, 1.0f, 0.0f, NULL, &clip, color);
+    }
 
-        #if defined(BUILD_DEBUG)
-        if(g_entity_manager.draw_colliders)
+    // Draw debug colliders on top.
+    #if defined(BUILD_DEBUG)
+    if(g_entity_manager.draw_colliders)
+    {
+        for(Entity* e: entity_draw_list)
         {
             nkVec4 collider_color = { 1.0f,1.0f,1.0f,0.5f };
             switch(e->type)
@@ -243,8 +253,8 @@ GLOBAL void entity_draw(void)
 
             imm_circle_filled(pos_x,pos_y, e->radius, 48, collider_color);
         }
-        #endif // BUILD_DEBUG
     }
+    #endif // BUILD_DEBUG
 }
 
 GLOBAL void entity_damage(nkU64 index, nkF32 damage)
