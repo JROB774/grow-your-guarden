@@ -3,7 +3,7 @@
 GLOBAL void game_start(void)
 {
     // NOTE: DO NOT TOUCH THE ORDER WITHOUT CONSIDERING WHAT IT MIGHT BREAK!
-    world_init(25, 19);
+    world_load("level00.png");
     entity_init();
     controller_init();
 
@@ -18,7 +18,7 @@ GLOBAL void game_start(void)
 GLOBAL void game_quit(void)
 {
     entity_quit();
-    world_quit();
+    world_free();
 }
 
 GLOBAL void game_tick(nkF32 dt)

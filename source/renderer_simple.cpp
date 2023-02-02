@@ -794,16 +794,21 @@ GLOBAL void imm_texture(Texture tex, nkF32 x, nkF32 y, const ImmClip* clip, nkVe
 
     if(clip)
     {
-        s1 = clip->x;
-        t1 = clip->y;
-        s2 = s1+clip->w;
-        t2 = t1+clip->h;
+        s1 = (clip->x   );
+        t1 = (clip->y   );
+        s2 = (s1+clip->w);
+        t2 = (t1+clip->h);
     }
 
     nkF32 x1 = x-((s2-s1)*0.5f);
     nkF32 y1 = y-((t2-t1)*0.5f);
     nkF32 x2 = x1+(s2-s1);
     nkF32 y2 = y1+(t2-t1);
+
+    s1 += 0.5f;
+    t1 += 0.5f;
+    s2 -= 0.5f;
+    t2 -= 0.5f;
 
     s1 /= w;
     t1 /= h;
