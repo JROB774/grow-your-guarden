@@ -325,25 +325,11 @@ int main(int argc, char** argv)
 #endif // BUILD_NATIVE
 
 #if defined(BUILD_WEB)
-extern "C" void main_callback(void)
-{
-    main_init();
-    emscripten_set_main_loop(main_loop, -1, 1);
-}
 int main(int argc, char** argv)
 {
     app_main(&g_ctx.app_desc);
-
-    EM_ASM
-    (
-        FS.mkdir("/PLANT");
-        FS.mount(IDBFS, {}, "/PLANT");
-        FS.syncfs(true, function(err)
-        {
-            assert(!err);
-            ccall("main_callback");
-        });
-    );
+    main_init();
+    emscripten_set_main_loop(main_loop, -1, 1);
     return 0;
 }
 #endif // BUILD_WEB
