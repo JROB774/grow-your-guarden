@@ -31,6 +31,7 @@ struct Entity
     nkF32         speed;
     nkF32         range;
     nkVec2        bounds;
+    nkF32         flip;          // Plants get this randomly set on spawn to add some visual variance.
     AnimState     anim_state;
     EntityType    collision_mask;
     nkF32         damage_timer;  // How long to flash red for when damaged.

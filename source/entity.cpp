@@ -176,7 +176,7 @@ GLOBAL void entity_draw(void)
 
         nkVec4 color = (e->damage_timer > 0.0f) ? NK_V4_RED : NK_V4_WHITE;
 
-        imm_texture(texture, ex,ey, &clip, color);
+        imm_texture_ex(texture, ex,ey, e->flip, 1.0f, 0.0f, NULL, &clip, color);
 
         #if defined(BUILD_DEBUG)
         if(g_entity_manager.draw_colliders)
@@ -239,6 +239,7 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
     entity.range          = desc.range    * TILE_HEIGHT;
     entity.bounds.x       = desc.bounds.x * TILE_WIDTH;
     entity.bounds.y       = desc.bounds.y * TILE_HEIGHT;
+    entity.flip           = 1.0f;
     entity.anim_state     = create_animation_state(desc.anim_file);
     entity.collision_mask = desc.collision_mask;
     entity.current_phase  = 0;
@@ -250,6 +251,12 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
     entity.active         = NK_TRUE;
 
     set_animation(&entity.anim_state, desc.start_anim, NK_TRUE);
+
+    // Plants can be flipped for more visual variance.
+    if(entity.type == EntityType_Plant && rng_s32(0,100) < 50)
+    {
+        entity.flip = -1.0f;
+    }
 
     // If there are free slots available then use them, otherwise append on the end (potentially grow memory).
     if(!nk_hashset_empty(&g_entity_manager.free_entity_slots))
