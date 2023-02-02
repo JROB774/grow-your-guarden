@@ -178,8 +178,8 @@ GLOBAL void entity_draw(void)
         AnimFrame frame = get_current_animation_frame(&e->anim_state);
         ImmClip clip = { frame.x,frame.y,frame.w,frame.h };
 
-        nkF32 ex = e->position.x;
-        nkF32 ey = e->position.y;
+        nkF32 ex = e->position.x + e->draw_offset.x;
+        nkF32 ey = e->position.y + e->draw_offset.y;
 
         nkVec4 color = (e->damage_timer > 0.0f) ? NK_V4_RED : NK_V4_WHITE;
 
@@ -188,8 +188,8 @@ GLOBAL void entity_draw(void)
         {
             nkVec4 shadow_color = { 1.0f,1.0f,1.0f,0.25f };
 
-            nkF32 pos_x = e->position.x;
-            nkF32 pos_y = e->position.y + (e->bounds.y * 0.4f);
+            nkF32 pos_x = e->position.x + e->draw_offset.x;
+            nkF32 pos_y = e->position.y + e->draw_offset.y + (e->bounds.y * 0.4f);
 
             nkF32 scale = e->bounds.x / NK_CAST(nkF32, get_texture_width(shadow));
 
