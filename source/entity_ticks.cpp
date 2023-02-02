@@ -104,7 +104,7 @@ DEF_ETICK(bramble)
 
 DEF_ETICK(walker)
 {
-    const nkF32 COOLDOWN = 3.0f;
+    const nkF32 COOLDOWN = 1.8f;
 
     nkF32& attack_cooldown = e.timer0;
 
@@ -128,7 +128,9 @@ DEF_ETICK(walker)
         {
             // Walk towards the house.
             nkVec2 dir = nk_normalize(target->position - e.position);
+
             e.velocity = dir * NK_CAST(nkF32, e.speed);
+            e.flip = (dir.x < 0.0f) ? -1.0f : 1.0f; // Face the walking direction.
         }
     }
 
