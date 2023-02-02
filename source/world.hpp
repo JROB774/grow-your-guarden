@@ -34,14 +34,17 @@ struct Tile
 
 struct World
 {
-    nkS32 width, height;
-    Tile* tilemap;
+    nkS32   width, height;
+    Tile*   tilemap;
+    Texture border;
+    nkVec4  border_color;
 };
 
 GLOBAL void  world_load      (const nkChar* level_name, nkU32 seed = 573273); // Just some default seed value for consistent randomization of tiles.
 GLOBAL void  world_free      (void);
 GLOBAL void  world_tick      (nkF32 dt);
-GLOBAL void  world_draw      (void);
+GLOBAL void  world_draw_below(void); // Draw the tiles below the entities.
+GLOBAL void  world_draw_above(void); // Draw the border above the entities.
 GLOBAL nkS32 get_world_width (void);
 GLOBAL nkS32 get_world_height(void);
 

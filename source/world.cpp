@@ -100,6 +100,9 @@ GLOBAL void world_load(const nkChar* level_name, nkU32 seed)
 
     rng_seed(seed);
 
+    g_world.border = asset_manager_load<Texture>("border.png");
+    g_world.border_color = { 0.0157f, 0.2863f, 0.1412f, 1.0f }; // @Incomplete: Hard-coded to match the border image!
+
     g_world.width  = lvlbmp.width;
     g_world.height = lvlbmp.height;
 
@@ -151,10 +154,11 @@ GLOBAL void world_tick(nkF32 dt)
     // Does nothing...
 }
 
-GLOBAL void world_draw(void)
+GLOBAL void world_draw_below(void)
 {
-    // @Incomplete: Batch tiles...
+    clear_screen(g_world.border_color);
 
+    // @Incomplete: Batch tiles...
     for(nkS32 y=0; y<g_world.height; ++y)
     {
         for(nkS32 x=0; x<g_world.width; ++x)
@@ -169,6 +173,52 @@ GLOBAL void world_draw(void)
             imm_texture(texture, tx,ty, &tile.clip);
         }
     }
+}
+
+GLOBAL void world_draw_above(void)
+{
+    imm_begin_texture_batch(g_world.border);
+    // Top
+    {
+        nkF32 x = 0.0f;
+        nkF32 y = 0.0f;
+        while(x <= (g_world.width * TILE_WIDTH))
+        {
+            imm_texture_batched_ex(x,y, 1.0f,1.0f, nk_torad(180.0f), NULL);
+            x += get_texture_width(g_world.border);
+        }
+    }
+    // Right
+    {
+        nkF32 x = (g_world.width * TILE_WIDTH);
+        nkF32 y = 0.0f;
+        while(y <= (g_world.height * TILE_HEIGHT))
+        {
+            imm_texture_batched_ex(x,y, 1.0f,1.0f, nk_torad(270.0f), NULL);
+            y += get_texture_height(g_world.border);
+        }
+    }
+    // Bottom
+    {
+        nkF32 x = 0.0f;
+        nkF32 y = (g_world.height * TILE_HEIGHT);
+        while(x <= (g_world.width * TILE_WIDTH))
+        {
+            imm_texture_batched_ex(x,y, 1.0f,1.0f, 0.0f, NULL);
+            x += get_texture_width(g_world.border);
+        }
+    }
+    // Left
+    {
+        nkF32 x = 0.0f;
+        nkF32 y = 0.0f;
+        while(y <= (g_world.height * TILE_HEIGHT))
+        {
+            imm_texture_batched_ex(x,y, 1.0f,1.0f, nk_torad(90.0f), NULL);
+            y += get_texture_height(g_world.border);
+        }
+    }
+    imm_end_texture_batch();
 }
 
 GLOBAL nkS32 get_world_width(void)
