@@ -132,6 +132,11 @@ GLOBAL NKFORCEINLINE nkBool rect_vs_rect(const fRect& r1, const fRect& r2)
     return ((r1.x < r2.x + r2.w) && (r1.x + r1.w > r2.x) && (r1.y < r2.y + r2.h) && (r1.y + r1.h > r2.y));
 }
 
+GLOBAL NKFORCEINLINE nkBool circle_vs_circle(nkF32 ax, nkF32 ay, nkF32 ar, nkF32 bx, nkF32 by, nkF32 br)
+{
+    return (nk_length(nkVec2{ ax-bx, ay-by }) < (ar + br));
+}
+
 //
 // Random number generation.
 //

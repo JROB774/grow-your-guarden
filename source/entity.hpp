@@ -30,11 +30,13 @@ struct Entity
     nkF32         damage;
     nkF32         speed;
     nkF32         range;
-    nkVec2        bounds;
+    nkF32         radius;
     nkF32         z_depth;       // Controls how "high" the visual of the entity is compared to its shadow.
     nkF32         flip;          // Plants get this randomly set on spawn to add some visual variance.
     AnimState     anim_state;
     EntityType    collision_mask;
+    nkVec2        draw_offset;
+    nkVec2        bounds;
     nkF32         damage_timer;  // How long to flash red for when damaged.
     nkS32         current_phase; // Only used by plants for tracking growth stages.
     nkF32         phase_timer;   // Only used by plants for tracking growth stages.
@@ -58,8 +60,10 @@ struct EntityDesc
     nkF32         damage;
     nkF32         speed;
     nkF32         range;
+    nkF32         radius;
     nkF32         z_depth;
     EntityType    collision_mask;
+    nkVec2        draw_offset;
     nkVec2        bounds;
     nkF32         phase_times[8]; // Only used by plants, can be ignored by other entity types.
 };
@@ -75,8 +79,8 @@ GLOBAL nkU64 entity_spawn (EntityID id, nkF32 x, nkF32 y); // Returns the index 
                                                            // is marked dead, in which case other entities can claim it.
 
 // Return the index of the entity collided with or NK_U64_MAX if there was no collision.
-GLOBAL nkU64  check_entity_collision(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityType collision_mask = EntityType_All);
-GLOBAL nkU64  check_entity_collision(const Entity& e,                    EntityType collision_mask = EntityType_All);
+GLOBAL nkU64  check_entity_bounds   (nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityType collision_mask = EntityType_All);
+GLOBAL nkU64  check_entity_collision(const Entity& e, EntityType collision_mask = EntityType_All);
 GLOBAL nkBool check_entity_collision(const Entity& a, const Entity& b);
 
 GLOBAL nkU64   get_entity_count              (void);

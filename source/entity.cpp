@@ -140,7 +140,7 @@ GLOBAL void entity_tick(nkF32 dt)
             }
 
             // Kill if dead.
-            if(e.health < 0)
+            if(e.health <= 0.0f)
             {
                 if(e.type == EntityType_Monster)
                     play_sound(g_entity_manager.monster_die_sfx);
@@ -188,8 +188,9 @@ GLOBAL void entity_draw(void)
         {
             nkVec4 shadow_color = { 1.0f,1.0f,1.0f,0.25f };
 
-            nkF32 pos_x = ex;
-            nkF32 pos_y = ey + (e->bounds.y * 0.4f);
+            nkF32 pos_x = e->position.x;
+            nkF32 pos_y = e->position.y + (e->bounds.y * 0.4f);
+
             nkF32 scale = e->bounds.x / NK_CAST(nkF32, get_texture_width(shadow));
 
             imm_texture_ex(shadow, pos_x,pos_y, scale,scale*0.75f, 0.0f, NULL, NULL, shadow_color);
@@ -200,11 +201,6 @@ GLOBAL void entity_draw(void)
         #if defined(BUILD_DEBUG)
         if(g_entity_manager.draw_colliders)
         {
-            nkF32 cx = ex - (e->bounds.x * 0.5f);
-            nkF32 cy = ey - (e->bounds.y * 0.5f);
-            nkF32 cw = e->bounds.x;
-            nkF32 ch = e->bounds.y;
-
             nkVec4 collider_color = { 1.0f,1.0f,1.0f,0.5f };
             switch(e->type)
             {
@@ -215,7 +211,10 @@ GLOBAL void entity_draw(void)
                 case EntityType_Object:  collider_color = { 0.0f,1.0f,1.0f,0.5f }; break;
             }
 
-            imm_rect_filled(cx,cy,cw,ch, collider_color);
+            nkF32 pos_x = e->position.x;
+            nkF32 pos_y = e->position.y;
+
+            imm_circle_filled(pos_x,pos_y, e->radius, 48, collider_color);
         }
         #endif // BUILD_DEBUG
     }
@@ -254,14 +253,17 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
     entity.velocity       = { 0,0 };
     entity.health         = desc.health;
     entity.damage         = desc.damage;
-    entity.speed          = desc.speed    * TILE_WIDTH;
-    entity.range          = desc.range    * TILE_HEIGHT;
-    entity.bounds.x       = desc.bounds.x * TILE_WIDTH;
-    entity.bounds.y       = desc.bounds.y * TILE_HEIGHT;
-    entity.z_depth        = desc.z_depth  * TILE_HEIGHT;
+    entity.speed          = desc.speed   * TILE_WIDTH;
+    entity.range          = desc.range   * TILE_HEIGHT;
+    entity.radius         = desc.radius  * TILE_WIDTH;
+    entity.z_depth        = desc.z_depth * TILE_HEIGHT;
     entity.flip           = 1.0f;
     entity.anim_state     = create_animation_state(desc.anim_file);
     entity.collision_mask = desc.collision_mask;
+    entity.draw_offset.x  = desc.draw_offset.x * TILE_WIDTH;
+    entity.draw_offset.y  = desc.draw_offset.y * TILE_HEIGHT;
+    entity.bounds.x       = desc.bounds.x      * TILE_WIDTH;
+    entity.bounds.y       = desc.bounds.y      * TILE_HEIGHT;
     entity.current_phase  = 0;
     entity.phase_timer    = 0.0f;
     entity.timer0         = 0.0f;
@@ -293,7 +295,8 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
     }
 }
 
-GLOBAL nkU64 check_entity_collision(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityType collision_mask)
+
+GLOBAL nkU64 check_entity_bounds(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityType collision_mask)
 {
     nkU64 index = 0;
 
@@ -320,27 +323,48 @@ GLOBAL nkU64 check_entity_collision(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityTy
 
 GLOBAL nkU64 check_entity_collision(const Entity& e, EntityType collision_mask)
 {
-    nkF32 x = e.position.x - (e.bounds.x * 0.5f);
-    nkF32 y = e.position.y - (e.bounds.y * 0.5f);
-    nkF32 w = e.bounds.x;
-    nkF32 h = e.bounds.y;
+    if(e.active)
+    {
+        nkU64 index = 0;
 
-    return check_entity_collision(x,y,w,h, collision_mask);
+        for(auto& o: g_entity_manager.entities)
+        {
+            if(o.id != EntityType_None && o.active && NK_CHECK_FLAGS(collision_mask, o.type))
+            {
+                nkF32 ax = e.position.x;
+                nkF32 ay = e.position.y;
+                nkF32 ar = e.radius;
+
+                nkF32 bx = o.position.x;
+                nkF32 by = o.position.y;
+                nkF32 br = o.radius;
+
+                if(circle_vs_circle(ax,ay,ar, bx,by,br))
+                {
+                    return index;
+                }
+            }
+
+            ++index;
+        }
+    }
+
+    return NK_U64_MAX;
 }
 
 GLOBAL nkBool check_entity_collision(const Entity& a, const Entity& b)
 {
-    nkF32 aw = a.bounds.x;
-    nkF32 ah = a.bounds.y;
-    nkF32 ax = a.position.x - (aw * 0.5f);
-    nkF32 ay = a.position.y - (ah * 0.5f);
+    if(!a.active || !b.active) return NK_FALSE;
 
-    nkF32 bw = b.bounds.x;
-    nkF32 bh = b.bounds.y;
-    nkF32 bx = b.position.x - (bw * 0.5f);
-    nkF32 by = b.position.y - (bh * 0.5f);
+    nkF32 ax = a.position.x;
+    nkF32 ay = a.position.y;
+    nkF32 ar = a.radius;
 
-    return rect_vs_rect({ ax,ay,aw,ah }, { bx,by,bw,bh });
+    nkF32 bx = b.position.x;
+    nkF32 by = b.position.y;
+    nkF32 br = b.radius;
+
+    return circle_vs_circle(ax,ay,ar, bx,by,br);
 }
 
 GLOBAL nkU64 get_entity_count(void)

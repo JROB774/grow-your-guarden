@@ -50,9 +50,10 @@ GLOBAL void     potentially_append_slash(nkChar* file_path, nkU64 size);
 GLOBAL nkString potentially_append_slash(const nkChar* file_path);
 
 // Collision.
-GLOBAL NKFORCEINLINE nkBool point_vs_rect(nkF32 px, nkF32 py, nkF32 rx, nkF32 ry, nkF32 rw, nkF32 rh);
-GLOBAL NKFORCEINLINE nkBool point_vs_rect(const nkVec2& p, nkF32 rx, nkF32 ry, nkF32 rw, nkF32 rh);
-GLOBAL NKFORCEINLINE nkBool rect_vs_rect (const fRect& r1, const fRect& r2);
+GLOBAL NKFORCEINLINE nkBool point_vs_rect   (nkF32 px, nkF32 py, nkF32 rx, nkF32 ry, nkF32 rw, nkF32 rh);
+GLOBAL NKFORCEINLINE nkBool point_vs_rect   (const nkVec2& p, nkF32 rx, nkF32 ry, nkF32 rw, nkF32 rh);
+GLOBAL NKFORCEINLINE nkBool rect_vs_rect    (const fRect& r1, const fRect& r2);
+GLOBAL NKFORCEINLINE nkBool circle_vs_circle(nkF32 ax, nkF32 ay, nkF32 ar, nkF32 bx, nkF32 by, nkF32 br);
 
 // Random number generation.
 GLOBAL void   rng_seed(nkU32 seed);
