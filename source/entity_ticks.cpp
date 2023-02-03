@@ -138,7 +138,7 @@ DEF_ETICK(walker)
         nkF32 w = (e.radius * 0.75f) * 2.0f;
         nkF32 h = (e.radius * 0.75f) * 2.0f;
 
-        decal_spawn(x,y,w,h, 1,5, 8.0f,10.0f, "splat_small");
+        decal_spawn("splat_small", x,y,w,h, 1,5, 8.0f,10.0f);
     }
 }
 

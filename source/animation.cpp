@@ -99,7 +99,7 @@ GLOBAL AnimState create_animation_state(AnimGroup* group)
 
     AnimState state;
     state.anims   = group;
-    state.current = NULL; // @Todo: Should we set this?
+    state.current = &group->anims.begin()->value; // By default just pick whatever animation is first in the group.
     state.frame   = 0;
     state.timer   = 0.0f;
     return state;

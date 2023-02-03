@@ -84,23 +84,23 @@ GLOBAL void decal_draw(void)
     imm_end_texture_batch();
 }
 
-GLOBAL void decal_spawn(nkF32 x, nkF32 y, nkF32 life_min, nkF32 life_max, const nkChar* anim_name)
+GLOBAL void decal_spawn(const nkChar* name, nkF32 x, nkF32 y, nkF32 life_min, nkF32 life_max)
 {
-    nkString anim_name_str = anim_name;
+    nkString anim_name = name;
 
-    if(!nk_hashmap_contains(&g_decal_manager.animations->anims, anim_name_str)) return;
+    if(!nk_hashmap_contains(&g_decal_manager.animations->anims, anim_name)) return;
 
     // Pick a random graphic for the decal to use.
-    const Anim& anim = nk_hashmap_getref(&g_decal_manager.animations->anims, anim_name_str);
+    const Anim& anim = nk_hashmap_getref(&g_decal_manager.animations->anims, anim_name);
     AnimFrame frame = anim.frames[rng_s32(0,NK_CAST(nkS32, anim.frames.length)-1)];
 
-    Decal decal = NK_ZERO_MEM;
+    Decal decal    = NK_ZERO_MEM;
     decal.position = { x,y };
     decal.clip     = { frame.x,frame.y,frame.w,frame.h };
     decal.lifetime = rng_f32(life_min, life_max);
-    decal.scale    = rng_f32(0.5f, 1.0f); // @Incomplete: Currently all decals get a random scale?
-    decal.angle    = 0.0f; // rng_f32(0.0f, NK_TAU_F32); // @Incomplete: Currently all decals get a random rotation?
-    decal.alpha    = 1.0f; // rng_f32(0.4f, 0.9f); // @Incomplete: Currently all decals get a random alpha?
+    decal.scale    = rng_f32(0.5f, 1.0f);
+    decal.angle    = 0.0f;
+    decal.alpha    = 1.0f;
 
     // If there are free slots available then use them, otherwise append on the end (potentially grow memory).
     if(!nk_hashset_empty(&g_decal_manager.free_slots))
@@ -118,14 +118,14 @@ GLOBAL void decal_spawn(nkF32 x, nkF32 y, nkF32 life_min, nkF32 life_max, const 
     }
 }
 
-GLOBAL void decal_spawn(nkF32 x, nkF32 y, nkF32 w, nkF32 h, nkS32 min, nkS32 max, nkF32 life_min, nkF32 life_max, const nkChar* anim_name)
+GLOBAL void decal_spawn(const nkChar* name, nkF32 x, nkF32 y, nkF32 w, nkF32 h, nkS32 min, nkS32 max, nkF32 life_min, nkF32 life_max)
 {
     nkS32 count = rng_s32(min,max);
     for(nkS32 i=0; i<count; ++i)
     {
         nkF32 dx = rng_f32(x, x+w);
         nkF32 dy = rng_f32(y, y+h);
-        decal_spawn(dx,dy, life_min, life_max, anim_name);
+        decal_spawn(name, dx,dy, life_min, life_max);
     }
 }
 

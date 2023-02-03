@@ -318,7 +318,7 @@ GLOBAL void entity_kill(nkU64 index)
             nkF32 w = (e->radius * 1.5f) * 2.0f;
             nkF32 h = (e->radius * 1.5f) * 2.0f;
 
-            decal_spawn(x,y,w,h, desc.death_decal_min, desc.death_decal_max, 15.0f,20.0f, desc.death_decal);
+            decal_spawn(desc.death_decal, x,y,w,h, desc.death_decal_min, desc.death_decal_max, 15.0f,20.0f);
         }
     }
 }

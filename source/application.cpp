@@ -41,6 +41,7 @@
 #include "controller.hpp"
 #include "world.hpp"
 #include "decals.hpp"
+#include "particles.hpp"
 #include "menu.hpp"
 #include "game.hpp"
 
@@ -59,6 +60,7 @@
 #include "controller.cpp"
 #include "world.cpp"
 #include "decals.cpp"
+#include "particles.cpp"
 #include "menu.cpp"
 #include "game.cpp"
 

@@ -6,6 +6,7 @@ GLOBAL void game_start(void)
     world_load("level00.png");
     entity_init();
     controller_init();
+    particle_init();
     decal_init();
 
     // Spawn the house.
@@ -19,6 +20,7 @@ GLOBAL void game_start(void)
 GLOBAL void game_quit(void)
 {
     decal_quit();
+    particle_quit();
     entity_quit();
     world_free();
 }
@@ -28,6 +30,7 @@ GLOBAL void game_tick(nkF32 dt)
     controller_tick(dt);
     world_tick(dt);
     entity_tick(dt);
+    particle_tick(dt);
     decal_tick(dt);
 }
 
@@ -37,6 +40,7 @@ GLOBAL void game_draw(void)
     world_draw_below();
     decal_draw();
     entity_draw();
+    particle_draw();
     world_draw_above();
     controller_draw(); // This internally unsets the controller camera!
 }
