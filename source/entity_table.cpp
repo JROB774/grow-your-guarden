@@ -36,7 +36,10 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Collision Mask  */ EntityType_None,
 /* Draw Offset     */ { 0.0f,0.0f },
 /* Bounds          */ { 0.0f,0.0f },
-/* Growth Phases   */ { 0,0,0,0,0,0,0,0 }
+/* Growth Phases   */ { 0,0,0,0,0,0,0,0 },
+/* Death Decal     */ NULL,
+/* Death Decal Min */ 0,
+/* Death Decal Max */ 0,
 },
 
 // EntityID_Daisy
@@ -55,7 +58,10 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Collision Mask  */ EntityType_None,
 /* Draw Offset     */ { 0.0f,-0.4f },
 /* Bounds          */ { 1.0f,1.0f },
-/* Growth Phases   */ { 2,2,0,0,0,0,0,0 }
+/* Growth Phases   */ { 2,2,0,0,0,0,0,0 },
+/* Death Decal     */ NULL,
+/* Death Decal Min */ 0,
+/* Death Decal Max */ 0,
 },
 
 // EntityID_Bramble
@@ -74,7 +80,10 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Collision Mask  */ EntityType_None,
 /* Draw Offset     */ { 0.0f,0.0f },
 /* Bounds          */ { 1.0f,1.0f },
-/* Growth Phases   */ { 30,40,50,0,0,0,0,0 }
+/* Growth Phases   */ { 30,40,50,0,0,0,0,0 },
+/* Death Decal     */ NULL,
+/* Death Decal Min */ 0,
+/* Death Decal Max */ 0,
 },
 
 // EntityID_Walker
@@ -93,7 +102,10 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Collision Mask  */ EntityType_None,
 /* Draw Offset     */ { 0.0f,-0.25f },
 /* Bounds          */ { 1.0f,1.0f },
-/* Growth Phases   */ { 0,0,0,0,0,0,0,0 }
+/* Growth Phases   */ { 0,0,0,0,0,0,0,0 },
+/* Death Decal     */ "splat_large",
+/* Death Decal Min */ 8,
+/* Death Decal Max */ 12,
 },
 
 // EntityID_Pollen
@@ -112,7 +124,10 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Collision Mask  */ EntityType_Monster,
 /* Draw Offset     */ { 0.0f,0.0f },
 /* Bounds          */ { 0.5f,0.5f },
-/* Growth Phases   */ { 0,0,0,0,0,0,0,0 }
+/* Growth Phases   */ { 0,0,0,0,0,0,0,0 },
+/* Death Decal     */ NULL,
+/* Death Decal Min */ 0,
+/* Death Decal Max */ 0,
 },
 
 // EntityID_House
@@ -131,7 +146,10 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Collision Mask  */ EntityType_None,
 /* Draw Offset     */ { 0.0f,0.0f },
 /* Bounds          */ { 3.0f,3.0f },
-/* Growth Phases   */ { 0,0,0,0,0,0,0,0 }
+/* Growth Phases   */ { 0,0,0,0,0,0,0,0 },
+/* Death Decal     */ NULL,
+/* Death Decal Min */ 0,
+/* Death Decal Max */ 0,
 },
 
 }; // ENTITY_TABLE

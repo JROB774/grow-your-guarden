@@ -33,6 +33,16 @@ INTERNAL nkString get_current_entity_anim_name(Entity& e)
     return name;
 }
 
+INTERNAL void fully_kill_entity(Entity& e, nkU64 index)
+{
+    // This is what happens once an entities death animation completes (if it has one).
+    e.active = NK_FALSE;
+    if(!nk_hashset_contains(&g_entity_manager.free_entity_slots, index)) // Just do a check here as we were running into issues with attempting to store the same value twice.
+    {
+        nk_hashset_insert(&g_entity_manager.free_entity_slots, index);
+    }
+}
+
 GLOBAL void entity_init(void)
 {
     // Pre-load all of the entity sprite textures and animation.
@@ -163,11 +173,7 @@ GLOBAL void entity_tick(nkF32 dt)
                     change_entity_state(e, desc.default_state);
                 else
                 {
-                    e.active = NK_FALSE;
-                    if(!nk_hashset_contains(&g_entity_manager.free_entity_slots, index)) // Just do a check here as we were running into issues with attempting to store the same value twice.
-                    {
-                        nk_hashset_insert(&g_entity_manager.free_entity_slots, index);
-                    }
+                    fully_kill_entity(e, index);
                 }
             }
 
@@ -288,12 +294,26 @@ GLOBAL void entity_kill(nkU64 index)
     if(index >= g_entity_manager.entities.length) return;
     change_entity_state(index, EntityState_Dead);
 
-    // If the entity doesn't have a death animation then just handle the death logic straight away!
     Entity* e = get_entity(index);
-    if(e && !has_animation(&e->anim_state, get_current_entity_anim_name(*e).cstr))
+    if(e)
     {
-        e->active = NK_FALSE;
-        nk_hashset_insert(&g_entity_manager.free_entity_slots, index);
+        // If the entity doesn't have a death animation then just handle the death logic straight away!
+        if(!has_animation(&e->anim_state, get_current_entity_anim_name(*e).cstr))
+        {
+            fully_kill_entity(*e, index);
+        }
+
+        // If the entity has death decals then spawn them.
+        const EntityDesc& desc = ENTITY_TABLE[e->id];
+        if(desc.death_decal)
+        {
+            nkF32 x = e->position.x - (e->radius * 1.5f);
+            nkF32 y = e->position.y - (e->radius * 1.5f);
+            nkF32 w = (e->radius * 1.5f) * 2.0f;
+            nkF32 h = (e->radius * 1.5f) * 2.0f;
+
+            decal_spawn(x,y,w,h, desc.death_decal_min, desc.death_decal_max, 15.0f,20.0f, desc.death_decal);
+        }
     }
 }
 

@@ -124,9 +124,21 @@ DEF_ETICK(walker)
         }
     }
 
+    // Cooldown our attack.
     if(attack_cooldown > 0.0f)
     {
         attack_cooldown -= dt;
+    }
+
+    // Randomly spawn splats under us.
+    if(rng_s32(0,100) < 5)
+    {
+        nkF32 x = e.position.x - (e.radius * 0.75f);
+        nkF32 y = e.position.y - (e.radius * 0.75f);
+        nkF32 w = (e.radius * 0.75f) * 2.0f;
+        nkF32 h = (e.radius * 0.75f) * 2.0f;
+
+        decal_spawn(x,y,w,h, 1,5, 8.0f,10.0f, "splat_small");
     }
 }
 

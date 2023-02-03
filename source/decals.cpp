@@ -2,6 +2,8 @@
 
 INTERNAL constexpr nkF32 DECAL_FADE_SPEED = 1.0f;
 
+INTERNAL constexpr nkU32 MAX_DECALS = 8192; // Hard limit on decals, if we hit this we don't spawn more until new slots are available...
+
 struct Decal
 {
     nkVec2  position;
@@ -98,7 +100,7 @@ GLOBAL void decal_spawn(nkF32 x, nkF32 y, nkF32 life_min, nkF32 life_max, const 
     decal.lifetime = rng_f32(life_min, life_max);
     decal.scale    = rng_f32(0.5f, 1.0f); // @Incomplete: Currently all decals get a random scale?
     decal.angle    = 0.0f; // rng_f32(0.0f, NK_TAU_F32); // @Incomplete: Currently all decals get a random rotation?
-    decal.alpha    = rng_f32(0.4f, 0.9f); // @Incomplete: Currently all decals get a random alpha?
+    decal.alpha    = 1.0f; // rng_f32(0.4f, 0.9f); // @Incomplete: Currently all decals get a random alpha?
 
     // If there are free slots available then use them, otherwise append on the end (potentially grow memory).
     if(!nk_hashset_empty(&g_decal_manager.free_slots))
@@ -109,7 +111,10 @@ GLOBAL void decal_spawn(nkF32 x, nkF32 y, nkF32 life_min, nkF32 life_max, const 
     }
     else
     {
-        nk_array_append(&g_decal_manager.decals, decal);
+        if(g_decal_manager.decals.length < MAX_DECALS)
+        {
+            nk_array_append(&g_decal_manager.decals, decal);
+        }
     }
 }
 

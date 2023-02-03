@@ -87,6 +87,9 @@ struct EntityDesc
     nkVec2        draw_offset;
     nkVec2        bounds;
     nkF32         phase_times[8]; // Only used by plants, can be ignored by other entity types.
+    const nkChar* death_decal;
+    nkS32         death_decal_min;
+    nkS32         death_decal_max;
 };
 
 GLOBAL void  entity_init  (void);
