@@ -29,9 +29,9 @@ INTERNAL Texture get_tile_texture_from_id(TileID id)
     switch(id)
     {
         case TileID_None:     return NULL;
-        case TileID_Dirt:     return asset_manager_load<Texture>("tiles/dirt.png");
-        case TileID_DirtDark: return asset_manager_load<Texture>("tiles/dirt_dark.png");
-        case TileID_Grass:    return asset_manager_load<Texture>("tiles/grass.png");
+        case TileID_Dirt:     return asset_manager_load<Texture>("tileset/dirt.png");
+        case TileID_DirtDark: return asset_manager_load<Texture>("tileset/dirt_dark.png");
+        case TileID_Grass:    return asset_manager_load<Texture>("tileset/grass.png");
     }
     NK_ASSERT(NK_FALSE); // Texture case needs assing for the given tile ID!
     return NULL;
