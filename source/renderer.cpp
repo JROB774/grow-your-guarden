@@ -585,20 +585,19 @@ GLOBAL nkS32 get_texture_height(Texture texture)
 /*////////////////////////////////////////////////////////////////////////////*/
 /*////////////////////////////////////////////////////////////////////////////*/
 
-INTERNAL constexpr nkU32 IMM_MAX_VERTS = 16384 * 10;
+INTERNAL constexpr nkU32 IMM_INITIAL_VERTS = 16384;
 
 struct ImmContext
 {
-    DrawMode     draw_mode;
-    VertexBuffer buffer;
-    Shader       shader;
-    Shader       bound_shader;
-    Texture      bound_texture;
-    nkMat4       projection;
-    nkMat4       view;
-    nkMat4       model;
-    ImmVertex    verts[IMM_MAX_VERTS];
-    nkU64        vert_count;
+    DrawMode           draw_mode;
+    VertexBuffer       buffer;
+    Shader             shader;
+    Shader             bound_shader;
+    Texture            bound_texture;
+    nkMat4             projection;
+    nkMat4             view;
+    nkMat4             model;
+    nkArray<ImmVertex> vertices;
 };
 
 INTERNAL ImmContext g_imm;
@@ -615,10 +614,13 @@ GLOBAL void imm_init(void)
     g_imm.projection = nk_m4_identity();
     g_imm.view       = nk_m4_identity();
     g_imm.model      = nk_m4_identity();
+
+    nk_array_reserve(&g_imm.vertices, IMM_INITIAL_VERTS);
 }
 
 GLOBAL void imm_quit(void)
 {
+    nk_array_free(&g_imm.vertices);
     free_vertex_buffer(g_imm.buffer);
 }
 
@@ -669,7 +671,8 @@ GLOBAL void imm_begin(DrawMode draw_mode, Texture tex, Shader shader)
     g_imm.draw_mode = draw_mode;
     g_imm.bound_texture = tex;
     g_imm.bound_shader = shader;
-    g_imm.vert_count = 0;
+
+    nk_array_clear(&g_imm.vertices);
 
     if(!g_imm.bound_shader)
     {
@@ -687,14 +690,13 @@ GLOBAL void imm_end(void)
     set_shader_mat4(g_imm.bound_shader, "u_view",       g_imm.view);
     set_shader_mat4(g_imm.bound_shader, "u_model",      g_imm.model);
 
-    update_vertex_buffer(g_imm.buffer, g_imm.verts, g_imm.vert_count * sizeof(ImmVertex), BufferType_Dynamic);
-    draw_vertex_buffer(g_imm.buffer, g_imm.draw_mode, g_imm.vert_count);
+    update_vertex_buffer(g_imm.buffer, g_imm.vertices.data, g_imm.vertices.length * sizeof(ImmVertex), BufferType_Dynamic);
+    draw_vertex_buffer(g_imm.buffer, g_imm.draw_mode, g_imm.vertices.length);
 }
 
 GLOBAL void imm_vertex(ImmVertex v)
 {
-    NK_ASSERT(g_imm.vert_count < IMM_MAX_VERTS);
-    g_imm.verts[g_imm.vert_count++] = v;
+    nk_array_append(&g_imm.vertices, v);
 }
 
 GLOBAL void imm_point(nkF32 x, nkF32 y, nkVec4 color)
