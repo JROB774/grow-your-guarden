@@ -27,10 +27,10 @@ GLOBAL void cursor_draw(void)
     if(!g_cursor.texture)
     {
         // Draw the default cursor.
-        Texture texture = asset_manager_load<Texture>("cursor.png");
-        nkF32 cx = cursor_pos.x + (NK_CAST(nkF32, get_texture_width(texture) * 0.5f) * img_scale) - (4 * hud_scale);
-        nkF32 cy = cursor_pos.y + (NK_CAST(nkF32, get_texture_height(texture) * 0.5f) * img_scale) - (4 * hud_scale);
-        imm_texture_ex(texture, cx,cy, img_scale,img_scale, 0.0f, NULL);
+        Texture texture = asset_manager_load<Texture>("hud.png");
+        nkF32 cx = cursor_pos.x + ((HUD_CLIP_CURSOR.w * 0.5f) * img_scale) - (4 * hud_scale);
+        nkF32 cy = cursor_pos.y + ((HUD_CLIP_CURSOR.h * 0.5f) * img_scale) - (4 * hud_scale);
+        imm_texture_ex(texture, cx,cy, img_scale,img_scale, 0.0f, NULL, &HUD_CLIP_CURSOR);
     }
     else
     {

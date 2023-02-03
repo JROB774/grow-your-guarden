@@ -45,6 +45,7 @@
 #include "menu.hpp"
 #include "game.hpp"
 #include "cursor.hpp"
+#include "hud_clips.hpp"
 
 #include "utility.cpp"
 #include "platform.cpp"
