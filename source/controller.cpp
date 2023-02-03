@@ -37,7 +37,6 @@ struct Controller
     Texture icons_tex;
     Texture watercan_tex;
     Texture shovel_tex;
-    Texture cursor_tex;
 
     Sound shovel_sfx[5];
 
@@ -181,7 +180,6 @@ GLOBAL void controller_init(void)
     g_controller.highlight_tex = asset_manager_load<Texture>("highlight.png");
     g_controller.watercan_tex  = asset_manager_load<Texture>("tool_water.png");
     g_controller.shovel_tex    = asset_manager_load<Texture>("tool_shovel.png");
-    g_controller.cursor_tex    = asset_manager_load<Texture>("cursor.png");
 
     g_controller.shovel_sfx[0] = asset_manager_load<Sound>("shovel_000.wav");
     g_controller.shovel_sfx[1] = asset_manager_load<Sound>("shovel_001.wav");
@@ -303,6 +301,24 @@ GLOBAL void controller_tick(nkF32 dt)
         if(g_controller.removing)
         {
             remove_plant(pos.x, pos.y);
+        }
+    }
+
+    // Update the cursor graphic.
+    if(!is_game_paused())
+    {
+        if(g_controller.watering)
+        {
+            set_custom_cursor(g_controller.watercan_tex);
+        }
+        if(g_controller.removing)
+        {
+            set_custom_cursor(g_controller.shovel_tex);
+        }
+        if(g_controller.selected != NO_SELECTION)
+        {
+            ImmClip clip = { NK_CAST(nkF32, g_controller.selected) * ICON_WIDTH, 0.0f, ICON_WIDTH, ICON_HEIGHT };
+            set_custom_cursor(g_controller.icons_tex, clip);
         }
     }
 }

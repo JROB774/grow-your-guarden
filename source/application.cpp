@@ -186,6 +186,8 @@ GLOBAL void app_quit(void)
 
 GLOBAL void app_tick(nkF32 dt)
 {
+    set_custom_cursor(NULL); // Reset the cursor every frame.
+
     switch(g_app.state)
     {
         case AppState_Menu: menu_tick(dt); break;
