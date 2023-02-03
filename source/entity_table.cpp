@@ -118,7 +118,7 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Draw Offset        */ { 0.0f,-0.25f },
 /* Bounds             */ { 1.0f,1.0f },
 /* Growth Phases      */ { 0,0,0,0,0,0,0,0 },
-/* Death Sounds       */ { "monster_die.wav",NULL,NULL,NULL,NULL,NULL,NULL,NULL },
+/* Death Sounds       */ { "splat_wet_000.wav","splat_wet_001.wav","splat_wet_002.wav",NULL,NULL,NULL,NULL,NULL },
 /* Death Effect       */ "tar_explosion",
 /* Death Particle     */ "blobs_small",
 /* Death Particle Min */ 18,
