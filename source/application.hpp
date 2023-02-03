@@ -24,4 +24,6 @@ GLOBAL void app_draw(void);
 GLOBAL void     set_app_state(AppState state);
 GLOBAL AppState get_app_state(void);
 
+GLOBAL nkF32 get_hud_scale(void);
+
 /*////////////////////////////////////////////////////////////////////////////*/

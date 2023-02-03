@@ -17,8 +17,6 @@ struct Controller
     PlantSpawn hotbar[8];
     nkU32      selected;
 
-    nkF32 hud_scale;
-
     nkS32 money;
 
     nkVec2 camera_current_pos;
@@ -28,7 +26,6 @@ struct Controller
     nkMat4 camera_proj;
     nkMat4 camera_view;
 
-    nkVec2 cursor_pos;
     nkBool panning;
     nkBool occluded;
     nkBool watering;
@@ -188,10 +185,6 @@ GLOBAL void controller_init(void)
     g_controller.camera_current_zoom = CAMERA_START_ZOOM;
     g_controller.camera_target_zoom  = CAMERA_START_ZOOM;
 
-    // @Incomplete: Hook up a way to change this (or do it dynamically)?
-    // Allow the HUD to scale so that it is clearly visible on large displays.
-    g_controller.hud_scale = 1.5f;
-
     g_controller.money = STARTING_MONEY;
 
     // @Incomplete: Just giving some plants for testing.
@@ -219,8 +212,7 @@ GLOBAL void controller_init(void)
 
 GLOBAL void controller_tick(nkF32 dt)
 {
-    // Convert the raw mouse position into screen position for the cursor.
-    g_controller.cursor_pos = get_window_mouse_pos();
+    nkVec2 cursor_pos = get_window_mouse_pos();
 
     // Pan the camera around the world.
     g_controller.panning = is_mouse_button_down(MouseButton_Middle);
@@ -229,7 +221,6 @@ GLOBAL void controller_tick(nkF32 dt)
         g_controller.camera_target_pos -= (get_relative_mouse_pos() / g_controller.camera_current_zoom);
         g_controller.camera_target_pos.x = nk_clamp(g_controller.camera_target_pos.x, 0.0f, get_world_width() * TILE_WIDTH);
         g_controller.camera_target_pos.y = nk_clamp(g_controller.camera_target_pos.y, 0.0f, get_world_height() * TILE_HEIGHT);
-
     }
 
     g_controller.camera_current_pos = nk_lerp(g_controller.camera_current_pos, g_controller.camera_target_pos, CAMERA_PAN_SPEED * dt);
@@ -246,14 +237,14 @@ GLOBAL void controller_tick(nkF32 dt)
 
     // Images need to be scaled down because they are actually at the max scale initially and scaled down for lower scales.
     // Other elements like text and general positioning need to still be scaled up, so we have these two variables to do it.
-    nkF32 img_scale = g_controller.hud_scale / 4.0f;
-    nkF32 hud_scale = g_controller.hud_scale;
+    nkF32 img_scale = get_hud_scale() / 4.0f;
+    nkF32 hud_scale = get_hud_scale();
 
     // Check if the cursor is occluded from the world by the HUD.
     nkF32 hw = NK_CAST(nkF32, get_texture_width(g_controller.hotbar_tex)) * img_scale;
     nkF32 hh = NK_CAST(nkF32, get_texture_height(g_controller.hotbar_tex)) * img_scale;
 
-    g_controller.occluded = point_vs_rect(g_controller.cursor_pos, 0.0f,0.0f,hw,hh);
+    g_controller.occluded = point_vs_rect(cursor_pos, 0.0f,0.0f,hw,hh);
 
     // Select the hovered plant/tool.
     if(g_controller.occluded && is_mouse_button_pressed(MouseButton_Left))
@@ -266,7 +257,7 @@ GLOBAL void controller_tick(nkF32 dt)
             const PlantSpawn& spawn = g_controller.hotbar[i];
             if(spawn.id != EntityID_None)
             {
-                if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f*hud_scale,32.0f*hud_scale))
+                if(point_vs_rect(cursor_pos, ix,iy,32.0f*hud_scale,32.0f*hud_scale))
                 {
                     if(g_controller.money >= spawn.cost)
                     {
@@ -281,7 +272,7 @@ GLOBAL void controller_tick(nkF32 dt)
         }
 
         ix += 8.0f * hud_scale;
-        if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f*hud_scale,32.0f*hud_scale))
+        if(point_vs_rect(cursor_pos, ix,iy,32.0f*hud_scale,32.0f*hud_scale))
         {
             g_controller.selected = NO_SELECTION;
             g_controller.watering = !g_controller.watering;
@@ -289,7 +280,7 @@ GLOBAL void controller_tick(nkF32 dt)
         }
 
         ix += 40.0f * hud_scale;
-        if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f*hud_scale,32.0f*hud_scale))
+        if(point_vs_rect(cursor_pos, ix,iy,32.0f*hud_scale,32.0f*hud_scale))
         {
             g_controller.selected = NO_SELECTION;
             g_controller.watering = NK_FALSE;
@@ -308,7 +299,7 @@ GLOBAL void controller_tick(nkF32 dt)
     // Place current plant / perform the current tool action.
     if(!g_controller.occluded && !g_controller.panning && is_mouse_button_pressed(MouseButton_Left))
     {
-        nkVec2 pos = screen_to_world(g_controller.cursor_pos);
+        nkVec2 pos = screen_to_world(cursor_pos);
 
         if(g_controller.selected != NO_SELECTION)
         {
@@ -338,23 +329,28 @@ GLOBAL void controller_draw(void)
 {
     // @Incomplete: We aren't drawing the highlight when in shovel or watering-can mode!
 
-    // Draw the highlighted tile if not panning.
-    if(!g_controller.panning && !g_controller.occluded && (g_controller.selected != NO_SELECTION || g_controller.watering || g_controller.removing))
+    nkVec2 cursor_pos = get_window_mouse_pos();
+
+    // Draw the highlighted tile.
+    if(!is_game_paused())
     {
-        nkVec2 pos = screen_to_world(g_controller.cursor_pos);
-
-        iPoint tile;
-
-        tile.x = NK_CAST(nkS32, floorf(pos.x / (NK_CAST(nkF32, TILE_WIDTH))));
-        tile.y = NK_CAST(nkS32, floorf(pos.y / (NK_CAST(nkF32, TILE_HEIGHT))));
-
-        // Make sure we can place at the spot.
-        if(can_place_plant_at_position(tile.x, tile.y))
+        if(!g_controller.panning && !g_controller.occluded && (g_controller.selected != NO_SELECTION || g_controller.watering || g_controller.removing))
         {
-            nkF32 tx = NK_CAST(nkF32, tile.x * TILE_WIDTH) + (NK_CAST(nkF32,TILE_WIDTH) * 0.5f);
-            nkF32 ty = NK_CAST(nkF32, tile.y * TILE_HEIGHT) + (NK_CAST(nkF32,TILE_HEIGHT) * 0.5f);
+            nkVec2 pos = screen_to_world(cursor_pos);
 
-            imm_texture(g_controller.highlight_tex, tx,ty);
+            iPoint tile;
+
+            tile.x = NK_CAST(nkS32, floorf(pos.x / (NK_CAST(nkF32, TILE_WIDTH))));
+            tile.y = NK_CAST(nkS32, floorf(pos.y / (NK_CAST(nkF32, TILE_HEIGHT))));
+
+            // Make sure we can place at the spot.
+            if(can_place_plant_at_position(tile.x, tile.y))
+            {
+                nkF32 tx = NK_CAST(nkF32, tile.x * TILE_WIDTH) + (NK_CAST(nkF32,TILE_WIDTH) * 0.5f);
+                nkF32 ty = NK_CAST(nkF32, tile.y * TILE_HEIGHT) + (NK_CAST(nkF32,TILE_HEIGHT) * 0.5f);
+
+                imm_texture(g_controller.highlight_tex, tx,ty);
+            }
         }
     }
 
@@ -363,8 +359,8 @@ GLOBAL void controller_draw(void)
 
     // Images need to be scaled down because they are actually at the max scale initially and scaled down for lower scales.
     // Other elements like text and general positioning need to still be scaled up, so we have these two variables to do it.
-    nkF32 img_scale = g_controller.hud_scale / 4.0f;
-    nkF32 hud_scale = g_controller.hud_scale;
+    nkF32 img_scale = get_hud_scale() / 4.0f;
+    nkF32 hud_scale = get_hud_scale();
 
     // Draw the hotbar.
     nkF32 hx = roundf((NK_CAST(nkF32, get_texture_width(g_controller.hotbar_tex)) * 0.5f) * img_scale);
@@ -416,33 +412,6 @@ GLOBAL void controller_draw(void)
     nkF32 text_y = (get_texture_height(g_controller.hotbar_tex) * img_scale) + get_truetype_line_height(g_controller.font);
     draw_truetype_text(g_controller.font, text_x+(2*hud_scale),text_y+(2*hud_scale), string.cstr, NK_V4_BLACK);
     draw_truetype_text(g_controller.font, text_x,text_y, string.cstr, NK_V4_WHITE);
-
-    // Draw the cursor.
-    if(g_controller.watering)
-    {
-        nkF32 cx = g_controller.cursor_pos.x;
-        nkF32 cy = g_controller.cursor_pos.y;
-        imm_texture_ex(g_controller.watercan_tex, cx,cy, img_scale,img_scale, 0.0f, NULL);
-    }
-    else if(g_controller.removing)
-    {
-        nkF32 cx = g_controller.cursor_pos.x;
-        nkF32 cy = g_controller.cursor_pos.y;
-        imm_texture_ex(g_controller.shovel_tex, cx,cy, img_scale,img_scale, 0.0f, NULL);
-    }
-    else if(g_controller.selected != NO_SELECTION)
-    {
-        ImmClip clip = { NK_CAST(nkF32, g_controller.selected) * ICON_WIDTH, 0.0f, ICON_WIDTH, ICON_HEIGHT };
-        nkF32 cx = g_controller.cursor_pos.x;
-        nkF32 cy = g_controller.cursor_pos.y;
-        imm_texture_ex(g_controller.icons_tex, cx,cy, img_scale,img_scale, 0.0f, NULL, &clip);
-    }
-    else
-    {
-        nkF32 cx = g_controller.cursor_pos.x + (NK_CAST(nkF32, get_texture_width(g_controller.cursor_tex) * 0.5f) * img_scale) - (4 * hud_scale);
-        nkF32 cy = g_controller.cursor_pos.y + (NK_CAST(nkF32, get_texture_height(g_controller.cursor_tex) * 0.5f) * img_scale) - (4 * hud_scale);
-        imm_texture_ex(g_controller.cursor_tex, cx,cy, img_scale,img_scale, 0.0f, NULL);
-    }
 }
 
 GLOBAL void set_controller_camera(void)

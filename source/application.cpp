@@ -42,6 +42,7 @@
 #include "world.hpp"
 #include "decals.hpp"
 #include "particles.hpp"
+#include "cursor.hpp"
 #include "menu.hpp"
 #include "game.hpp"
 
@@ -61,6 +62,7 @@
 #include "world.cpp"
 #include "decals.cpp"
 #include "particles.cpp"
+#include "cursor.cpp"
 #include "menu.cpp"
 #include "game.cpp"
 
@@ -70,6 +72,7 @@ struct AppContext
     VertexBuffer screen_buffer;
     Shader       screen_shader;
     AppState     state;
+    nkF32        hud_scale;
 };
 
 INTERNAL AppContext g_app;
@@ -162,6 +165,10 @@ GLOBAL void app_init(void)
     // Hide the cursor (we have a custom one).
     show_cursor(NK_FALSE);
 
+    // @Incomplete: Hook up a way to change this (or do it dynamically)?
+    // Allow the HUD to scale so that it is clearly visible on large displays.
+    g_app.hud_scale = 1.5f;
+
     g_app.state = AppState_Menu;
 
     printf("Init Complete!\n");
@@ -205,6 +212,11 @@ GLOBAL void set_app_state(AppState state)
 GLOBAL AppState get_app_state(void)
 {
     return g_app.state;
+}
+
+GLOBAL nkF32 get_hud_scale(void)
+{
+    return g_app.hud_scale;
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

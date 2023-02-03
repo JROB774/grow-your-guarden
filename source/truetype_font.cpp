@@ -6,7 +6,7 @@
 // Converts from FreeType's fixed-point to floating-point.
 #define FT_CEIL(x) ((nkF32)(((x + 63) & -64) / 64))
 
-INTERNAL constexpr nkS32 FONT_ATLAS_SIZE    = 1024;
+INTERNAL constexpr nkS32 FONT_ATLAS_SIZE    = 2048;
 INTERNAL constexpr nkS32 FONT_ATLAS_PADDING = 4;
 
 // Glyphs are indexed into a hashmap using this structure because just the codepoint is not enough information. We
