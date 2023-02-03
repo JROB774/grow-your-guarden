@@ -131,14 +131,13 @@ INTERNAL void pause_draw(void)
 
 GLOBAL void game_start(void)
 {
-    g_game.pause_sound = asset_manager_load<Sound>("pause.wav");
-
-    // NOTE: DO NOT TOUCH THE ORDER WITHOUT CONSIDERING WHAT IT MIGHT BREAK!
     world_load("level00.png");
-    entity_init();
-    controller_init();
-    particle_init();
-    decal_init();
+
+    // Reset the systems.
+    entity_reset();
+    controller_reset();
+    particle_reset();
+    decal_reset();
 
     // Spawn the house.
     nkF32 hx = NK_CAST(nkF32, get_world_width() * TILE_WIDTH) * 0.5f;
@@ -149,6 +148,16 @@ GLOBAL void game_start(void)
     g_game.paused = NK_FALSE;
 
     set_app_state(AppState_Game);
+}
+
+GLOBAL void game_init(void)
+{
+    g_game.pause_sound = asset_manager_load<Sound>("pause.wav");
+
+    entity_init();
+    controller_init();
+    particle_init();
+    decal_init();
 }
 
 GLOBAL void game_quit(void)

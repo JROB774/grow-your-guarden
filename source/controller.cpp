@@ -175,24 +175,6 @@ INTERNAL void water_plant(nkF32 x, nkF32 y)
 
 GLOBAL void controller_init(void)
 {
-    // Center the camera on the map.
-    nkF32 center_x = NK_CAST(nkF32, (get_world_width() * TILE_WIDTH)) * 0.5f;
-    nkF32 center_y = NK_CAST(nkF32, (get_world_height() * TILE_HEIGHT)) * 0.5f;
-
-    g_controller.camera_current_pos = { center_x, center_y };
-    g_controller.camera_target_pos  = { center_x, center_y };
-
-    g_controller.camera_current_zoom = CAMERA_START_ZOOM;
-    g_controller.camera_target_zoom  = CAMERA_START_ZOOM;
-
-    g_controller.money = STARTING_MONEY;
-
-    // @Incomplete: Just giving some plants for testing.
-    g_controller.hotbar[0] = { EntityID_Daisy,  100 };
-    g_controller.hotbar[1] = { EntityID_Bramble, 50 };
-
-    g_controller.selected = NO_SELECTION;
-
     // Pre-load a bunch of assets.
     g_controller.hotbar_tex    = asset_manager_load<Texture>("hotbar.png");
     g_controller.icons_tex     = asset_manager_load<Texture>("hotbar_icons.png");
@@ -412,6 +394,27 @@ GLOBAL void controller_draw(void)
     nkF32 text_y = (get_texture_height(g_controller.hotbar_tex) * img_scale) + get_truetype_line_height(g_controller.font);
     draw_truetype_text(g_controller.font, text_x+(2*hud_scale),text_y+(2*hud_scale), string.cstr, NK_V4_BLACK);
     draw_truetype_text(g_controller.font, text_x,text_y, string.cstr, NK_V4_WHITE);
+}
+
+GLOBAL void controller_reset(void)
+{
+    // Center the camera on the map.
+    nkF32 center_x = NK_CAST(nkF32, (get_world_width() * TILE_WIDTH)) * 0.5f;
+    nkF32 center_y = NK_CAST(nkF32, (get_world_height() * TILE_HEIGHT)) * 0.5f;
+
+    g_controller.camera_current_pos = { center_x, center_y };
+    g_controller.camera_target_pos  = { center_x, center_y };
+
+    g_controller.camera_current_zoom = CAMERA_START_ZOOM;
+    g_controller.camera_target_zoom  = CAMERA_START_ZOOM;
+
+    g_controller.money = STARTING_MONEY;
+
+    // @Incomplete: Just giving some plants for testing.
+    g_controller.hotbar[0] = { EntityID_Daisy,  100 };
+    g_controller.hotbar[1] = { EntityID_Bramble, 50 };
+
+    g_controller.selected = NO_SELECTION;
 }
 
 GLOBAL void set_controller_camera(void)

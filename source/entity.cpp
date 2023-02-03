@@ -271,6 +271,12 @@ GLOBAL void entity_draw(void)
     #endif // BUILD_DEBUG
 }
 
+GLOBAL void entity_reset(void)
+{
+    nk_array_clear(&g_entity_manager.entities);
+    nk_hashset_clear(&g_entity_manager.free_entity_slots);
+}
+
 GLOBAL void entity_damage(nkU64 index, nkF32 damage)
 {
     if(index >= g_entity_manager.entities.length) return;

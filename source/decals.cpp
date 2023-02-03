@@ -30,7 +30,6 @@ GLOBAL void decal_init(void)
     g_decal_manager.animations = asset_manager_load<AnimGroup*>("decals.anm");
 
     nk_array_reserve(&g_decal_manager.decals, 256);
-    nk_hashset_clear(&g_decal_manager.free_slots);
 }
 
 GLOBAL void decal_quit(void)
@@ -82,6 +81,12 @@ GLOBAL void decal_draw(void)
         }
     }
     imm_end_texture_batch();
+}
+
+GLOBAL void decal_reset(void)
+{
+    nk_array_clear(&g_decal_manager.decals);
+    nk_hashset_clear(&g_decal_manager.free_slots);
 }
 
 GLOBAL void decal_spawn(const nkChar* name, nkF32 x, nkF32 y, nkF32 life_min, nkF32 life_max)

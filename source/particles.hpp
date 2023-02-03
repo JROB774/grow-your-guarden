@@ -20,10 +20,11 @@ struct Particle
     nkBool       active;
 };
 
-GLOBAL void particle_init(void);
-GLOBAL void particle_quit(void);
-GLOBAL void particle_tick(nkF32 dt);
-GLOBAL void particle_draw(void);
+GLOBAL void particle_init (void);
+GLOBAL void particle_quit (void);
+GLOBAL void particle_tick (nkF32 dt);
+GLOBAL void particle_draw (void);
+GLOBAL void particle_reset(void);
 
 // Use animations within the "particles.anm" group to define the different particle clips/animations.
 // The name passed into these functions not only picks what animation to use but also the behavior to

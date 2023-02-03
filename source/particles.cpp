@@ -69,9 +69,6 @@ GLOBAL void particle_init(void)
     g_particle_manager.animations = asset_manager_load<AnimGroup*>("particles.anm");
 
     nk_array_reserve(&g_particle_manager.particles, 256);
-    nk_hashset_clear(&g_particle_manager.free_slots);
-    nk_hashmap_clear(&g_particle_manager.ticks);
-    nk_hashmap_clear(&g_particle_manager.spawns);
 
     // Register particles!
     REG_PARTICLE(tar_blobs_small);
@@ -133,6 +130,12 @@ GLOBAL void particle_draw(void)
         }
     }
     imm_end_texture_batch();
+}
+
+GLOBAL void particle_reset(void)
+{
+    nk_array_clear(&g_particle_manager.particles);
+    nk_hashset_clear(&g_particle_manager.free_slots);
 }
 
 GLOBAL void particle_spawn(const nkChar* name, nkF32 x, nkF32 y)

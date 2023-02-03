@@ -101,6 +101,7 @@ GLOBAL void  entity_init  (void);
 GLOBAL void  entity_quit  (void);
 GLOBAL void  entity_tick  (nkF32 dt);
 GLOBAL void  entity_draw  (void);
+GLOBAL void  entity_reset (void);
 GLOBAL void  entity_damage(nkU64 index, nkF32 damage);
 GLOBAL void  entity_kill  (nkU64 index);
 GLOBAL nkU64 entity_spawn (EntityID id, nkF32 x, nkF32 y); // Returns the index in the world entity array where the entity

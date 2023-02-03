@@ -1,9 +1,10 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
-GLOBAL void decal_init(void);
-GLOBAL void decal_quit(void);
-GLOBAL void decal_tick(nkF32 dt);
-GLOBAL void decal_draw(void);
+GLOBAL void decal_init (void);
+GLOBAL void decal_quit (void);
+GLOBAL void decal_tick (nkF32 dt);
+GLOBAL void decal_draw (void);
+GLOBAL void decal_reset(void);
 
 // Use animations within the "decals.anm" group to define the different decal clips. Whatever animation name
 // you pass in, the decal system will randomly select a frame from within that animation and that will be drawn.

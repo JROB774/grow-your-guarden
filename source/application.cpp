@@ -171,6 +171,8 @@ GLOBAL void app_init(void)
 
     g_app.state = AppState_Menu;
 
+    game_init();
+
     printf("Init Complete!\n");
 }
 
