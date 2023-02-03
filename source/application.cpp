@@ -161,7 +161,7 @@ GLOBAL void app_init(void)
 
     // Setup the font.
     TrueTypeFontDesc font_desc;
-    font_desc.px_sizes = { 15, 30, 35, 40, 100 };
+    font_desc.px_sizes = { 30, 35, 40, 100 };
     g_app.font = asset_manager_load<TrueTypeFont>("helsinki.ttf", &font_desc);
 
     // Hide the cursor (we have a custom one).
@@ -169,7 +169,7 @@ GLOBAL void app_init(void)
 
     // @Incomplete: Hook up a way to change this (or do it dynamically)?
     // Allow the HUD to scale so that it is clearly visible on large displays.
-    g_app.hud_scale = 1.5f;
+    g_app.hud_scale = 2.0f;
 
     g_app.state = AppState_Menu;
 
@@ -190,7 +190,7 @@ GLOBAL void app_quit(void)
 
 GLOBAL void app_tick(nkF32 dt)
 {
-    set_custom_cursor(NULL); // Reset the cursor every frame.
+    set_default_cursor();
 
     cursor_tick(dt);
 
