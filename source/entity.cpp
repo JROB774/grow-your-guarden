@@ -216,7 +216,7 @@ GLOBAL void entity_draw(void)
     for(Entity* e: entity_draw_list)
     {
         // Only bullets and monsters have shadows.
-        if(e->type == EntityType_Monster || e->type == EntityType_Bullet)
+        if((e->type == EntityType_Monster || e->type == EntityType_Bullet) && (e->state != EntityState_Dead))
         {
             nkVec4 shadow_color = { 1.0f,1.0f,1.0f,0.25f };
 
