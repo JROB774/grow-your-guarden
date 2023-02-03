@@ -1,5 +1,5 @@
 BEGINANIM
-NAME splat_small
+NAME tar_splat_small
 CLIP   0 0 96 48 0.0
 CLIP  96 0 96 48 0.0
 CLIP 192 0 96 48 0.0
@@ -9,7 +9,7 @@ CLIP 480 0 96 48 0.0
 ENDANIM
 
 BEGINANIM
-NAME splat_large
+NAME tar_splat_large
 CLIP   0 48 256 128 0.0
 CLIP 256 48 256 128 0.0
 CLIP 512 48 256 128 0.0

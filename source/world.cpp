@@ -176,7 +176,30 @@ GLOBAL void world_free(void)
 
 GLOBAL void world_tick(nkF32 dt)
 {
-    // Does nothing...
+    // @Temporary: Spawn random monsters!
+    if(rng_s32(0,100) < 2)
+    {
+        nkS32 tw = NK_CAST(nkS32, TILE_WIDTH);
+        nkS32 th = NK_CAST(nkS32, TILE_HEIGHT);
+
+        nkS32 pos = rng_s32(0,100);
+        if(pos < 25)
+        {
+            entity_spawn(EntityID_Walker, 0, NK_CAST(nkF32, rng_s32(0, g_world.height * th)));
+        }
+        else if(pos < 50)
+        {
+            entity_spawn(EntityID_Walker, NK_CAST(nkF32, g_world.width * tw), NK_CAST(nkF32, rng_s32(0, g_world.height * th)));
+        }
+        else if(pos < 75)
+        {
+            entity_spawn(EntityID_Walker, NK_CAST(nkF32, rng_s32(0, g_world.width * tw)), 0);
+        }
+        else
+        {
+            entity_spawn(EntityID_Walker, NK_CAST(nkF32, rng_s32(0, g_world.width * tw)), NK_CAST(nkF32, g_world.height * th));
+        }
+    }
 }
 
 GLOBAL void world_draw_below(void)

@@ -1,5 +1,5 @@
 BEGINANIM
-NAME blobs_small
+NAME tar_blobs_small
 CLIP   0 0 48 48 0.0
 CLIP  48 0 48 48 0.0
 CLIP  96 0 48 48 0.0
