@@ -51,7 +51,7 @@ void asset_free<AnimGroup*>(Asset<AnimGroup*>& asset)
 template<>
 const nkChar* asset_path<AnimGroup*>(void)
 {
-    return "anims/";
+    return "textures/";
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

@@ -7,6 +7,7 @@ struct EntityManager
 {
     nkArray<Entity>  entities;
     nkHashSet<nkU64> free_entity_slots; // Track entity slots that were in use but no longer are as they can be filled without growing the array.
+    Texture          shadow_texture;
     Sound            splat_sfx[3];
     Sound            monster_die_sfx;
     nkBool           draw_colliders;
@@ -42,8 +43,10 @@ GLOBAL void entity_init(void)
         if(desc.texture_file)
             asset_manager_load<Texture>(desc.texture_file);
         if(desc.anim_file)
-            asset_manager_load<AnimGroup*>(desc.anim_file, NULL, "textures/");
+            asset_manager_load<AnimGroup*>(desc.anim_file, NULL);
     }
+
+    g_entity_manager.shadow_texture = asset_manager_load<Texture>("shadow.png");
 
     // @Incomplete: CREDIT: https://freesound.org/people/duckduckpony/sounds/204027/
     g_entity_manager.splat_sfx[0] = asset_manager_load<Sound>("splat_000.wav");
@@ -203,10 +206,8 @@ GLOBAL void entity_draw(void)
 
     qsort(entity_draw_list.data, entity_draw_list.length, sizeof(Entity*), entity_sort_op);
 
-    Texture shadow = asset_manager_load<Texture>("shadow.png");
-
     // Draw all the entity shadows first.
-    imm_begin_texture_batch(shadow);
+    imm_begin_texture_batch(g_entity_manager.shadow_texture);
     for(Entity* e: entity_draw_list)
     {
         // Only bullets and monsters have shadows.
@@ -217,7 +218,7 @@ GLOBAL void entity_draw(void)
             nkF32 pos_x = e->position.x + e->draw_offset.x;
             nkF32 pos_y = e->position.y + e->draw_offset.y + (e->bounds.y * 0.4f);
 
-            nkF32 scale = e->bounds.x / NK_CAST(nkF32, get_texture_width(shadow));
+            nkF32 scale = e->bounds.x / NK_CAST(nkF32, get_texture_width(g_entity_manager.shadow_texture));
 
             imm_texture_batched_ex(pos_x,pos_y, scale,scale*0.75f, 0.0f, NULL, NULL, shadow_color);
         }

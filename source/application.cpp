@@ -40,6 +40,7 @@
 #include "entity.hpp"
 #include "controller.hpp"
 #include "world.hpp"
+#include "decals.hpp"
 #include "menu.hpp"
 #include "game.hpp"
 
@@ -57,6 +58,7 @@
 #include "entity_ticks.cpp"
 #include "controller.cpp"
 #include "world.cpp"
+#include "decals.cpp"
 #include "menu.cpp"
 #include "game.cpp"
 

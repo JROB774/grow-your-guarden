@@ -163,6 +163,10 @@ GLOBAL void world_load(const nkChar* level_name, nkU32 seed)
             }
         }
     }
+
+    // After we've loaded set the random seed to be the current time. Otherwise stuff like entity
+    // spawning patterns, etc. will all be the same every single time which isn't very good...
+    rng_seed(NK_CAST(nkU32, time(NULL)));
 }
 
 GLOBAL void world_free(void)
