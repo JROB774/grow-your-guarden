@@ -8,8 +8,6 @@ struct EntityManager
     nkArray<Entity>  entities;
     nkHashSet<nkU64> free_entity_slots; // Track entity slots that were in use but no longer are as they can be filled without growing the array.
     Texture          shadow_texture;
-    Sound            splat_sfx[3];
-    Sound            monster_die_sfx;
     nkBool           draw_colliders;
 };
 
@@ -45,26 +43,29 @@ INTERNAL void fully_kill_entity(Entity& e, nkU64 index)
 
 GLOBAL void entity_init(void)
 {
-    // Pre-load all of the entity sprite textures and animation.
+    // Pre-load all of the entity assets.
+    g_entity_manager.shadow_texture = asset_manager_load<Texture>("shadow.png");
+
     for(nkU32 i=0; i<EntityID_TOTAL; ++i)
     {
         const EntityDesc& desc = ENTITY_TABLE[i];
 
-        if(desc.texture_file)
-            asset_manager_load<Texture>(desc.texture_file);
-        if(desc.anim_file)
-            asset_manager_load<AnimGroup*>(desc.anim_file, NULL);
+        if(desc.texture)
+        {
+            asset_manager_load<Texture>(desc.texture);
+        }
+        if(desc.animation)
+        {
+            asset_manager_load<AnimGroup*>(desc.animation);
+        }
+        for(nkS32 j=0,n=NK_ARRAY_SIZE(desc.death_sounds); j<n; ++j)
+        {
+            if(desc.death_sounds[j])
+            {
+                asset_manager_load<Sound>(desc.death_sounds[j]);
+            }
+        }
     }
-
-    g_entity_manager.shadow_texture = asset_manager_load<Texture>("shadow.png");
-
-    // @Incomplete: CREDIT: https://freesound.org/people/duckduckpony/sounds/204027/
-    g_entity_manager.splat_sfx[0] = asset_manager_load<Sound>("splat_000.wav");
-    g_entity_manager.splat_sfx[1] = asset_manager_load<Sound>("splat_001.wav");
-    g_entity_manager.splat_sfx[2] = asset_manager_load<Sound>("splat_002.wav");
-
-    // @Incomplete: CREDIT: https://freesound.org/people/Michel88/sounds/76962/
-    g_entity_manager.monster_die_sfx = asset_manager_load<Sound>("monster_die.wav");
 }
 
 GLOBAL void entity_quit(void)
@@ -186,8 +187,6 @@ GLOBAL void entity_tick(nkF32 dt)
             // Kill if dead.
             if(e.health <= 0.0f)
             {
-                if(e.type == EntityType_Monster)
-                    play_sound(g_entity_manager.monster_die_sfx);
                 entity_kill(index);
             }
         }
@@ -234,7 +233,7 @@ GLOBAL void entity_draw(void)
     // Draw the sorted entities.
     for(Entity* e: entity_draw_list)
     {
-        Texture texture = asset_manager_load<Texture>(ENTITY_TABLE[e->id].texture_file);
+        Texture texture = asset_manager_load<Texture>(ENTITY_TABLE[e->id].texture);
 
         AnimFrame frame = get_current_animation_frame(&e->anim_state);
         ImmClip clip = { frame.x,frame.y,frame.w,frame.h };
@@ -279,10 +278,6 @@ GLOBAL void entity_damage(nkU64 index, nkF32 damage)
     Entity* e = get_entity(index);
     if(!e || e->state == EntityState_Dead) return;
 
-    // @Incomplete: Different sound effects!
-    nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_entity_manager.splat_sfx)-1);
-    play_sound(g_entity_manager.splat_sfx[sound_index]);
-
     e->health -= damage;
     e->damage_timer = 0.1f;
 
@@ -303,8 +298,19 @@ GLOBAL void entity_kill(nkU64 index)
             fully_kill_entity(*e, index);
         }
 
-        // If the entity has death decals then spawn them.
         const EntityDesc& desc = ENTITY_TABLE[e->id];
+
+        // If the entity has death sounds then pick one and play it.
+        nkS32 max_sounds = 0;
+        while(desc.death_sounds[max_sounds])
+            max_sounds++;
+        if(max_sounds > 0)
+        {
+            nkS32 sound_index = rng_s32(0,max_sounds-1);
+            play_sound(asset_manager_load<Sound>(desc.death_sounds[sound_index]));
+        }
+
+        // If the entity has death decals then spawn them.
         if(desc.death_decal)
         {
             nkF32 x = e->position.x - (e->radius * 1.5f);
@@ -337,7 +343,7 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
     entity.radius         = desc.radius  * TILE_WIDTH;
     entity.z_depth        = desc.z_depth * TILE_HEIGHT;
     entity.flip           = 1.0f;
-    entity.anim_state     = create_animation_state(desc.anim_file);
+    entity.anim_state     = create_animation_state(desc.animation);
     entity.collision_mask = desc.collision_mask;
     entity.draw_offset.x  = desc.draw_offset.x * TILE_WIDTH;
     entity.draw_offset.y  = desc.draw_offset.y * TILE_HEIGHT;

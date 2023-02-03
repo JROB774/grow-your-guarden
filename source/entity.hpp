@@ -72,8 +72,8 @@ typedef void(*EntityTick)(Entity&, nkF32);
 
 struct EntityDesc
 {
-    const nkChar* texture_file;
-    const nkChar* anim_file;
+    const nkChar* texture;
+    const nkChar* animation;
     EntityType    type;
     EntityState   default_state;
     EntityTick    tick;
@@ -87,6 +87,7 @@ struct EntityDesc
     nkVec2        draw_offset;
     nkVec2        bounds;
     nkF32         phase_times[8]; // Only used by plants, can be ignored by other entity types.
+    const nkChar* death_sounds[8];
     const nkChar* death_decal;
     nkS32         death_decal_min;
     nkS32         death_decal_max;

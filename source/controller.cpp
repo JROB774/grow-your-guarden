@@ -336,6 +336,8 @@ GLOBAL void controller_tick(nkF32 dt)
 
 GLOBAL void controller_draw(void)
 {
+    // @Incomplete: We aren't drawing the highlight when in shovel or watering-can mode!
+
     // Draw the highlighted tile if not panning.
     if(!g_controller.panning && !g_controller.occluded && (g_controller.selected != NO_SELECTION || g_controller.watering || g_controller.removing))
     {
