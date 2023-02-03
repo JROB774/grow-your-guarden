@@ -3,7 +3,7 @@
 INTERNAL constexpr nkS32 STARTING_MONEY = 20000;
 
 INTERNAL constexpr nkF32 ICON_WIDTH  = 128.0f;
-INTERNAL constexpr nkF32 ICON_HEIGHT = 128.0f;
+INTERNAL constexpr nkF32 ICON_HEIGHT = 160.0f;
 
 INTERNAL constexpr nkF32 CAMERA_START_ZOOM       = 0.50f;
 INTERNAL constexpr nkF32 CAMERA_MIN_ZOOM         = 0.25f;
