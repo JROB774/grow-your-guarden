@@ -88,6 +88,7 @@ struct EntityDesc
     nkVec2        bounds;
     nkF32         phase_times[8]; // Only used by plants, can be ignored by other entity types.
     const nkChar* death_sounds[8];
+    const nkChar* death_effect;   // This is also a particle, but we just spawn one of them.
     const nkChar* death_particle;
     nkS32         death_particle_min;
     nkS32         death_particle_max;

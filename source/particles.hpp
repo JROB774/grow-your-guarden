@@ -10,6 +10,8 @@ struct Particle
     nkVec2       position;
     nkVec2       velocity;
     nkVec4       color;
+    nkF32        thrust; // Applies to z-depth.
+    nkF32        weight;
     nkF32        rotation;
     nkF32        scale;
     nkF32        z_depth;

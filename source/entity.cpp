@@ -311,12 +311,20 @@ GLOBAL void entity_kill(nkU64 index)
         }
 
         // If the entity has death particles then spawn them.
+        if(desc.death_effect)
+        {
+            nkF32 x = e->position.x + e->draw_offset.x;
+            nkF32 y = e->position.y + e->draw_offset.y;
+
+            particle_spawn(desc.death_effect, x,y);
+        }
+
         if(desc.death_particle)
         {
-            nkF32 x = e->position.x - (e->radius * 1.5f);
-            nkF32 y = e->position.y - (e->radius * 1.5f);
-            nkF32 w = (e->radius * 1.5f) * 2.0f;
-            nkF32 h = (e->radius * 1.5f) * 2.0f;
+            nkF32 x = e->position.x - e->radius;
+            nkF32 y = e->position.y - e->radius;
+            nkF32 w = e->radius * 2.0f;
+            nkF32 h = e->radius * 2.0f;
 
             particle_spawn(desc.death_particle, x,y,w,h, desc.death_particle_min, desc.death_particle_max);
         }

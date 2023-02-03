@@ -7,15 +7,45 @@
 nk_hashmap_insert(&g_particle_manager.ticks,  nkString(#name), (ParticleTick )ptick__##name); \
 nk_hashmap_insert(&g_particle_manager.spawns, nkString(#name), (ParticleSpawn)pspawn__##name)
 
+//
 // blobs_small
 //
+
 DEF_PSPAWN(blobs_small)
 {
-    // @Incomplete: ...
+    const nkF32 MIN_SPEED = 100.0f;
+    const nkF32 MAX_SPEED = 400.0f;
+
+    p.anim_state.frame = rng_s32(0,NK_CAST(nkS32,p.anim_state.current->frames.length)-1); // Pick a random frame.
+
+    p.rotation = rng_f32(0.0f, NK_TAU_F32);
+    p.scale    = rng_f32(0.75f, 1.0f);
+    p.z_depth  = rng_f32(25.0f, 100.0f);
+    p.thrust   = rng_f32(1200.0f,1400.0f);
+    p.weight   = rng_f32(4200.0f,5000.0f);
+    p.velocity = nk_normalize(nk_rotate(NK_V2_UNIT_X, rng_f32(0.0f, NK_TAU_F32))) * rng_f32(MIN_SPEED,MAX_SPEED);
 }
+
+
 DEF_PTICK(blobs_small)
 {
-    // @Incomplete: ...
+    p.position += p.velocity * dt;
+    p.z_depth += p.thrust * dt;
+    p.thrust -= p.weight * dt;
+    p.rotation += p.velocity.x * 0.1f * dt;
+
+    // Randomly spawn drippings.
+    if(rng_s32(0,100) < 3)
+    {
+        decal_spawn("splat_small", p.position.x,p.position.y, 8.0f,10.0f);
+    }
+
+    // Once we hit the floor we vanish.
+    if(p.z_depth <= 0.0f)
+    {
+        p.active = NK_FALSE;
+        decal_spawn("splat_small", p.position.x,p.position.y, 8.0f,10.0f);
+    }
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/
@@ -116,6 +146,8 @@ GLOBAL void particle_spawn(const nkChar* name, nkF32 x, nkF32 y)
     particle.position   = { x,y };
     particle.velocity   = NK_ZERO_MEM;
     particle.color      = NK_V4_WHITE;
+    particle.thrust     = 0.0f;
+    particle.weight     = 0.0f;
     particle.rotation   = 0.0f;
     particle.scale      = 1.0f;
     particle.z_depth    = 0.0f;
