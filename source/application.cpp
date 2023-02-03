@@ -171,6 +171,7 @@ GLOBAL void app_init(void)
 
     g_app.state = AppState_Menu;
 
+    menu_init();
     game_init();
 
     printf("Init Complete!\n");
@@ -179,6 +180,7 @@ GLOBAL void app_init(void)
 GLOBAL void app_quit(void)
 {
     game_quit();
+    menu_quit();
 
     free_vertex_buffer(g_app.screen_buffer);
     free_render_target(g_app.screen_target);
@@ -187,6 +189,8 @@ GLOBAL void app_quit(void)
 GLOBAL void app_tick(nkF32 dt)
 {
     set_custom_cursor(NULL); // Reset the cursor every frame.
+
+    cursor_tick(dt);
 
     switch(g_app.state)
     {
@@ -204,6 +208,8 @@ GLOBAL void app_draw(void)
         case AppState_Menu: menu_draw(); break;
         case AppState_Game: game_draw(); break;
     }
+
+    cursor_draw();
 
     end_frame_draw();
 }

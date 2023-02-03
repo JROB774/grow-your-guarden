@@ -1,5 +1,7 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
+GLOBAL void menu_init(void);
+GLOBAL void menu_quit(void);
 GLOBAL void menu_tick(nkF32 dt);
 GLOBAL void menu_draw(void);
 

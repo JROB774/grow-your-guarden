@@ -180,7 +180,6 @@ GLOBAL void game_tick(nkF32 dt)
         decal_tick(dt);
     }
 
-    cursor_tick(dt);
     pause_tick(dt); // Make sure this happens at the end so clicks don't bleed through!
 }
 
@@ -194,7 +193,6 @@ GLOBAL void game_draw(void)
     world_draw_above();
     controller_draw(); // This internally unsets the controller camera!
     pause_draw();
-    cursor_draw();
 }
 
 GLOBAL nkBool is_game_paused(void)
