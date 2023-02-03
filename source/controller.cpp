@@ -118,6 +118,16 @@ INTERNAL nkBool can_place_plant_at_position(nkS32 tile_x, nkS32 tile_y)
     return NK_TRUE;
 }
 
+INTERNAL nkBool can_remove_plant_at_position(nkF32 x, nkF32 y)
+{
+    return (g_controller.removing && (check_entity_bounds(x,y,1,1, EntityType_Plant) != NK_U64_MAX));
+}
+
+INTERNAL nkBool can_water_plant_at_position(nkF32 x, nkF32 y)
+{
+    return (g_controller.watering && (check_entity_bounds(x,y,1,1, EntityType_Plant) != NK_U64_MAX));
+}
+
 INTERNAL void place_plant(nkS32 tile_x, nkS32 tile_y)
 {
     if(!can_place_plant_at_position(tile_x, tile_y)) return;
@@ -325,8 +335,6 @@ GLOBAL void controller_tick(nkF32 dt)
 
 GLOBAL void controller_draw(void)
 {
-    // @Incomplete: We aren't drawing the highlight when in shovel or watering-can mode!
-
     nkVec2 cursor_pos = get_window_mouse_pos();
 
     // Draw the highlighted tile.
@@ -342,7 +350,7 @@ GLOBAL void controller_draw(void)
             tile.y = NK_CAST(nkS32, floorf(pos.y / (NK_CAST(nkF32, TILE_HEIGHT))));
 
             // Make sure we can place at the spot.
-            if(can_place_plant_at_position(tile.x, tile.y))
+            if(can_place_plant_at_position(tile.x, tile.y) || can_remove_plant_at_position(pos.x, pos.y) || can_water_plant_at_position(pos.x, pos.y))
             {
                 nkF32 tx = NK_CAST(nkF32, tile.x * TILE_WIDTH) + (NK_CAST(nkF32,TILE_WIDTH) * 0.5f);
                 nkF32 ty = NK_CAST(nkF32, tile.y * TILE_HEIGHT) + (NK_CAST(nkF32,TILE_HEIGHT) * 0.5f);
