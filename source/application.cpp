@@ -28,7 +28,6 @@
 #include <stb_image.h>
 
 #include "utility.hpp"
-#include "application.hpp"
 #include "platform.hpp"
 #include "asset_manager.hpp"
 #include "audio.hpp"
@@ -37,14 +36,15 @@
 #include "truetype_font.hpp"
 #include "animation.hpp"
 #include "renderer.hpp"
+#include "application.hpp"
 #include "entity.hpp"
 #include "controller.hpp"
 #include "world.hpp"
 #include "decals.hpp"
 #include "particles.hpp"
-#include "cursor.hpp"
 #include "menu.hpp"
 #include "game.hpp"
+#include "cursor.hpp"
 
 #include "utility.cpp"
 #include "platform.cpp"
@@ -62,15 +62,16 @@
 #include "world.cpp"
 #include "decals.cpp"
 #include "particles.cpp"
-#include "cursor.cpp"
 #include "menu.cpp"
 #include "game.cpp"
+#include "cursor.cpp"
 
 struct AppContext
 {
     RenderTarget screen_target;
     VertexBuffer screen_buffer;
     Shader       screen_shader;
+    TrueTypeFont font;
     AppState     state;
     nkF32        hud_scale;
 };
@@ -157,10 +158,10 @@ GLOBAL void app_init(void)
     set_vertex_buffer_stride   (g_app.screen_buffer, sizeof(nkF32)*4);
     enable_vertex_buffer_attrib(g_app.screen_buffer, 0, AttribType_Float, 4, 0);
 
-    // Bake font sizes.
+    // Setup the font.
     TrueTypeFontDesc font_desc;
-    font_desc.px_sizes = { 10, 20, 80 };
-    asset_manager_load<TrueTypeFont>("helsinki.ttf", &font_desc);
+    font_desc.px_sizes = { 15, 30, 35, 40, 100 };
+    g_app.font = asset_manager_load<TrueTypeFont>("helsinki.ttf", &font_desc);
 
     // Hide the cursor (we have a custom one).
     show_cursor(NK_FALSE);
@@ -227,6 +228,11 @@ GLOBAL AppState get_app_state(void)
 GLOBAL nkF32 get_hud_scale(void)
 {
     return g_app.hud_scale;
+}
+
+GLOBAL TrueTypeFont get_font(void)
+{
+    return g_app.font;
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

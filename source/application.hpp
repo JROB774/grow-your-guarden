@@ -26,4 +26,6 @@ GLOBAL AppState get_app_state(void);
 
 GLOBAL nkF32 get_hud_scale(void);
 
+GLOBAL TrueTypeFont get_font(void);
+
 /*////////////////////////////////////////////////////////////////////////////*/

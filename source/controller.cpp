@@ -39,8 +39,6 @@ struct Controller
     Texture shovel_tex;
 
     Sound shovel_sfx[5];
-
-    TrueTypeFont font;
 };
 
 INTERNAL Controller g_controller;
@@ -196,8 +194,6 @@ GLOBAL void controller_init(void)
     g_controller.shovel_sfx[2] = asset_manager_load<Sound>("shovel_002.wav");
     g_controller.shovel_sfx[3] = asset_manager_load<Sound>("shovel_003.wav");
     g_controller.shovel_sfx[4] = asset_manager_load<Sound>("shovel_004.wav");
-
-    g_controller.font = asset_manager_load<TrueTypeFont>("helsinki.ttf");
 }
 
 GLOBAL void controller_tick(nkF32 dt)
@@ -335,6 +331,8 @@ GLOBAL void controller_tick(nkF32 dt)
 
 GLOBAL void controller_draw(void)
 {
+    TrueTypeFont font = get_font();
+
     nkVec2 cursor_pos = get_window_mouse_pos();
 
     // Draw the highlighted tile.
@@ -393,13 +391,13 @@ GLOBAL void controller_draw(void)
             imm_texture_ex(g_controller.icons_tex, ix,iy, img_scale,img_scale, 0.0f, NULL, &clip, color);
 
             // Draw the cost of the plant.
-            set_truetype_font_size(g_controller.font, NK_CAST(nkS32, 10 * hud_scale));
+            set_truetype_font_size(font, NK_CAST(nkS32, 10 * hud_scale));
             nkString string;
             number_to_string_with_commas(&string, spawn.cost);
             nkF32 text_x = ix - (16.0f * hud_scale);
             nkF32 text_y = iy + (16.0f * hud_scale);
-            draw_truetype_text(g_controller.font, text_x+(2*hud_scale),text_y+(2*hud_scale), string.cstr, NK_V4_BLACK * color);
-            draw_truetype_text(g_controller.font, text_x,text_y, string.cstr, NK_V4_WHITE * color);
+            draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), string.cstr, NK_V4_BLACK * color);
+            draw_truetype_text(font, text_x,text_y, string.cstr, NK_V4_WHITE * color);
         }
 
         ix += 40.0f * hud_scale;
@@ -411,13 +409,13 @@ GLOBAL void controller_draw(void)
     imm_texture_ex(g_controller.shovel_tex, ix,iy, img_scale,img_scale, 0.0f, NULL);
 
     // Draw the money counter.
-    set_truetype_font_size(g_controller.font, NK_CAST(nkS32, 20 * hud_scale));
+    set_truetype_font_size(font, NK_CAST(nkS32, 20 * hud_scale));
     nkString string = "$";
     number_to_string_with_commas(&string, g_controller.money);
     nkF32 text_x = 4.0f * hud_scale;
-    nkF32 text_y = (get_texture_height(g_controller.hotbar_tex) * img_scale) + get_truetype_line_height(g_controller.font);
-    draw_truetype_text(g_controller.font, text_x+(2*hud_scale),text_y+(2*hud_scale), string.cstr, NK_V4_BLACK);
-    draw_truetype_text(g_controller.font, text_x,text_y, string.cstr, NK_V4_WHITE);
+    nkF32 text_y = (get_texture_height(g_controller.hotbar_tex) * img_scale) + get_truetype_line_height(font);
+    draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), string.cstr, NK_V4_BLACK);
+    draw_truetype_text(font, text_x,text_y, string.cstr, NK_V4_WHITE);
 }
 
 GLOBAL void controller_reset(void)

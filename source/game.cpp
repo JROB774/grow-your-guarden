@@ -31,7 +31,7 @@ INTERNAL void pause_tick(nkF32 dt)
 
     if(!g_game.paused) return;
 
-    TrueTypeFont font = asset_manager_load<TrueTypeFont>("helsinki.ttf");
+    TrueTypeFont font = get_font();
 
     nkF32 ww = NK_CAST(nkF32, get_window_width());
     nkF32 wh = NK_CAST(nkF32, get_window_height());
@@ -73,7 +73,7 @@ INTERNAL void pause_draw(void)
 {
     if(!g_game.paused) return;
 
-    TrueTypeFont font = asset_manager_load<TrueTypeFont>("helsinki.ttf");
+    TrueTypeFont font = get_font();
 
     nkF32 ww = NK_CAST(nkF32, get_window_width());
     nkF32 wh = NK_CAST(nkF32, get_window_height());

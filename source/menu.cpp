@@ -14,7 +14,7 @@ INTERNAL constexpr nkF32 MENU_EXIT_YPOS  = 0.70f;
 
 INTERNAL nkBool tick_menu_button(const nkChar* text, nkF32 y, nkS32 size, nkBool interactive = NK_TRUE)
 {
-    TrueTypeFont font = asset_manager_load<TrueTypeFont>("helsinki.ttf");
+    TrueTypeFont font = get_font();
 
     set_truetype_font_size(font, size);
 
@@ -33,7 +33,7 @@ INTERNAL nkBool tick_menu_button(const nkChar* text, nkF32 y, nkS32 size, nkBool
 
 INTERNAL void draw_menu_button(const nkChar* text, nkF32 y, nkS32 size, nkBool interactive = NK_TRUE)
 {
-    TrueTypeFont font = asset_manager_load<TrueTypeFont>("helsinki.ttf");
+    TrueTypeFont font = get_font();
 
     set_truetype_font_size(font, size);
 
