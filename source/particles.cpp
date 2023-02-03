@@ -3,7 +3,20 @@
 #define DEF_PTICK( name) INTERNAL void ptick__##name(Particle& p, nkF32 dt)
 #define DEF_PSPAWN(name) INTERNAL void pspawn__##name(Particle& p)
 
-// @Incomplete: Particle ticks and spawns go here...
+#define REG_PARTICLE(name)                                                                    \
+nk_hashmap_insert(&g_particle_manager.ticks,  nkString(#name), (ParticleTick )ptick__##name); \
+nk_hashmap_insert(&g_particle_manager.spawns, nkString(#name), (ParticleSpawn)pspawn__##name)
+
+// blobs_small
+//
+DEF_PSPAWN(blobs_small)
+{
+    // @Incomplete: ...
+}
+DEF_PTICK(blobs_small)
+{
+    // @Incomplete: ...
+}
 
 /*////////////////////////////////////////////////////////////////////////////*/
 
@@ -31,7 +44,8 @@ GLOBAL void particle_init(void)
     nk_hashmap_clear(&g_particle_manager.ticks);
     nk_hashmap_clear(&g_particle_manager.spawns);
 
-    // @Incomplete: Fill out the tick and spawn map here...
+    // Register particles!
+    REG_PARTICLE(blobs_small);
 }
 
 GLOBAL void particle_quit(void)
@@ -54,12 +68,12 @@ GLOBAL void particle_tick(nkF32 dt)
                 particle.tick(particle, dt);
             else
             {
+                // We don't update animation normally because the animation might just be being used as a random frame selector...
+                // It's really up to the user of the particle system as to how they want to use the animation for thier particles.
+                update_animation(&particle.anim_state, dt);
                 if(is_animation_done(&particle.anim_state))
                     particle.active = NK_FALSE;
             }
-
-            // Update animation logic.
-            update_animation(&particle.anim_state, dt);
 
             // If we've been killed then mark the slot free.
             if(!particle.active && !nk_hashset_contains(&g_particle_manager.free_slots, index))

@@ -310,6 +310,17 @@ GLOBAL void entity_kill(nkU64 index)
             play_sound(asset_manager_load<Sound>(desc.death_sounds[sound_index]));
         }
 
+        // If the entity has death particles then spawn them.
+        if(desc.death_particle)
+        {
+            nkF32 x = e->position.x - (e->radius * 1.5f);
+            nkF32 y = e->position.y - (e->radius * 1.5f);
+            nkF32 w = (e->radius * 1.5f) * 2.0f;
+            nkF32 h = (e->radius * 1.5f) * 2.0f;
+
+            particle_spawn(desc.death_particle, x,y,w,h, desc.death_particle_min, desc.death_particle_max);
+        }
+
         // If the entity has death decals then spawn them.
         if(desc.death_decal)
         {
