@@ -263,14 +263,17 @@ GLOBAL void controller_tick(nkF32 dt)
 
         for(nkS32 i=0,n=NK_ARRAY_SIZE(g_controller.hotbar); i<n; ++i)
         {
-            if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f*hud_scale,32.0f*hud_scale))
+            const PlantSpawn& spawn = g_controller.hotbar[i];
+            if(spawn.id != EntityID_None)
             {
-                const PlantSpawn& spawn = g_controller.hotbar[i];
-                if(g_controller.money >= spawn.cost)
+                if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f*hud_scale,32.0f*hud_scale))
                 {
-                    g_controller.selected = i;
-                    g_controller.watering = NK_FALSE;
-                    g_controller.removing = NK_FALSE;
+                    if(g_controller.money >= spawn.cost)
+                    {
+                        g_controller.selected = i;
+                        g_controller.watering = NK_FALSE;
+                        g_controller.removing = NK_FALSE;
+                    }
                 }
             }
 
