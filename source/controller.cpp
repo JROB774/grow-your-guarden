@@ -2,6 +2,9 @@
 
 INTERNAL constexpr nkS32 STARTING_MONEY = 20000;
 
+INTERNAL constexpr nkF32 ICON_WIDTH  = 128.0f;
+INTERNAL constexpr nkF32 ICON_HEIGHT = 128.0f;
+
 INTERNAL constexpr nkF32 CAMERA_START_ZOOM       = 0.50f;
 INTERNAL constexpr nkF32 CAMERA_MIN_ZOOM         = 0.25f;
 INTERNAL constexpr nkF32 CAMERA_MAX_ZOOM         = 1.00f;
@@ -13,6 +16,8 @@ struct Controller
 {
     PlantSpawn hotbar[8];
     nkU32      selected;
+
+    nkF32 hud_scale;
 
     nkS32 money;
 
@@ -183,6 +188,10 @@ GLOBAL void controller_init(void)
     g_controller.camera_current_zoom = CAMERA_START_ZOOM;
     g_controller.camera_target_zoom  = CAMERA_START_ZOOM;
 
+    // @Incomplete: Hook up a way to change this (or do it dynamically)?
+    // Allow the HUD to scale so that it is clearly visible on large displays.
+    g_controller.hud_scale = 1.5f;
+
     g_controller.money = STARTING_MONEY;
 
     // @Incomplete: Just giving some plants for testing.
@@ -235,21 +244,26 @@ GLOBAL void controller_tick(nkF32 dt)
 
     g_controller.camera_current_zoom = nk_lerp(g_controller.camera_current_zoom, g_controller.camera_target_zoom, CAMERA_ZOOM_SPEED * dt);
 
+    // Images need to be scaled down because they are actually at the max scale initially and scaled down for lower scales.
+    // Other elements like text and general positioning need to still be scaled up, so we have these two variables to do it.
+    nkF32 img_scale = g_controller.hud_scale / 4.0f;
+    nkF32 hud_scale = g_controller.hud_scale;
+
     // Check if the cursor is occluded from the world by the HUD.
-    nkF32 hw = NK_CAST(nkF32, get_texture_width(g_controller.hotbar_tex));
-    nkF32 hh = NK_CAST(nkF32, get_texture_height(g_controller.hotbar_tex));
+    nkF32 hw = NK_CAST(nkF32, get_texture_width(g_controller.hotbar_tex)) * img_scale;
+    nkF32 hh = NK_CAST(nkF32, get_texture_height(g_controller.hotbar_tex)) * img_scale;
 
     g_controller.occluded = point_vs_rect(g_controller.cursor_pos, 0.0f,0.0f,hw,hh);
 
     // Select the hovered plant/tool.
     if(g_controller.occluded && is_mouse_button_pressed(MouseButton_Left))
     {
-        nkF32 ix = 8.0f;
-        nkF32 iy = 8.0f;
+        nkF32 ix = 8.0f * hud_scale;
+        nkF32 iy = 8.0f * hud_scale;
 
         for(nkS32 i=0,n=NK_ARRAY_SIZE(g_controller.hotbar); i<n; ++i)
         {
-            if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f,32.0f))
+            if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f*hud_scale,32.0f*hud_scale))
             {
                 const PlantSpawn& spawn = g_controller.hotbar[i];
                 if(g_controller.money >= spawn.cost)
@@ -260,19 +274,19 @@ GLOBAL void controller_tick(nkF32 dt)
                 }
             }
 
-            ix += 40.0f;
+            ix += 40.0f * hud_scale;
         }
 
-        ix += 8.0f;
-        if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f,32.0f))
+        ix += 8.0f * hud_scale;
+        if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f*hud_scale,32.0f*hud_scale))
         {
             g_controller.selected = NO_SELECTION;
             g_controller.watering = !g_controller.watering;
             g_controller.removing = NK_FALSE;
         }
 
-        ix += 40.0f;
-        if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f,32.0f))
+        ix += 40.0f * hud_scale;
+        if(point_vs_rect(g_controller.cursor_pos, ix,iy,32.0f*hud_scale,32.0f*hud_scale))
         {
             g_controller.selected = NO_SELECTION;
             g_controller.watering = NK_FALSE;
@@ -342,14 +356,19 @@ GLOBAL void controller_draw(void)
     // Unset the camera so that we render in screen-space for the HUD.
     unset_controller_camera();
 
+    // Images need to be scaled down because they are actually at the max scale initially and scaled down for lower scales.
+    // Other elements like text and general positioning need to still be scaled up, so we have these two variables to do it.
+    nkF32 img_scale = g_controller.hud_scale / 4.0f;
+    nkF32 hud_scale = g_controller.hud_scale;
+
     // Draw the hotbar.
-    nkF32 hx = roundf(NK_CAST(nkF32, get_texture_width(g_controller.hotbar_tex)) * 0.5f);
-    nkF32 hy = roundf(NK_CAST(nkF32, get_texture_height(g_controller.hotbar_tex)) * 0.5f);
+    nkF32 hx = roundf((NK_CAST(nkF32, get_texture_width(g_controller.hotbar_tex)) * 0.5f) * img_scale);
+    nkF32 hy = roundf((NK_CAST(nkF32, get_texture_height(g_controller.hotbar_tex)) * 0.5f) * img_scale);
 
-    imm_texture(g_controller.hotbar_tex, hx,hy);
+    imm_texture_ex(g_controller.hotbar_tex, hx,hy, img_scale,img_scale, 0.0f, NULL);
 
-    nkF32 ix = 24.0f;
-    nkF32 iy = 24.0f;
+    nkF32 ix = 24.0f * hud_scale;
+    nkF32 iy = 24.0f * hud_scale;
 
     for(nkS32 i=0,n=NK_ARRAY_SIZE(g_controller.hotbar); i<n; ++i)
     {
@@ -363,34 +382,34 @@ GLOBAL void controller_draw(void)
                 color *= 0.5f;
             }
 
-            ImmClip clip = { NK_CAST(nkF32, i * 32), 0.0f, 32.0f, 32.0f };
-            imm_texture(g_controller.icons_tex, ix,iy, &clip, color);
+            ImmClip clip = { NK_CAST(nkF32, i) * ICON_WIDTH, 0.0f, ICON_WIDTH, ICON_HEIGHT };
+            imm_texture_ex(g_controller.icons_tex, ix,iy, img_scale,img_scale, 0.0f, NULL, &clip, color);
 
             // Draw the cost of the plant.
-            set_truetype_font_size(g_controller.font, 10);
+            set_truetype_font_size(g_controller.font, NK_CAST(nkS32, 10 * hud_scale));
             nkString string;
             number_to_string_with_commas(&string, spawn.cost);
-            nkF32 text_x = ix - 16.0f;
-            nkF32 text_y = iy + 16.0f;
-            draw_truetype_text(g_controller.font, text_x+2,text_y+2, string.cstr, NK_V4_BLACK * color);
+            nkF32 text_x = ix - (16.0f * hud_scale);
+            nkF32 text_y = iy + (16.0f * hud_scale);
+            draw_truetype_text(g_controller.font, text_x+(2*hud_scale),text_y+(2*hud_scale), string.cstr, NK_V4_BLACK * color);
             draw_truetype_text(g_controller.font, text_x,text_y, string.cstr, NK_V4_WHITE * color);
         }
 
-        ix += 40.0f;
+        ix += 40.0f * hud_scale;
     }
 
-    ix += 8.0f;
-    imm_texture(g_controller.watercan_tex, ix,iy);
-    ix += 40.0f;
-    imm_texture(g_controller.shovel_tex, ix,iy);
+    ix += 8.0f * hud_scale;
+    imm_texture_ex(g_controller.watercan_tex, ix,iy, img_scale,img_scale, 0.0f, NULL);
+    ix += 40.0f * hud_scale;
+    imm_texture_ex(g_controller.shovel_tex, ix,iy, img_scale,img_scale, 0.0f, NULL);
 
     // Draw the money counter.
-    set_truetype_font_size(g_controller.font, 20);
+    set_truetype_font_size(g_controller.font, NK_CAST(nkS32, 20 * hud_scale));
     nkString string = "$";
     number_to_string_with_commas(&string, g_controller.money);
-    nkF32 text_x = 4.0f;
-    nkF32 text_y = get_texture_height(g_controller.hotbar_tex) + get_truetype_line_height(g_controller.font);
-    draw_truetype_text(g_controller.font, text_x+2,text_y+2, string.cstr, NK_V4_BLACK);
+    nkF32 text_x = 4.0f * hud_scale;
+    nkF32 text_y = (get_texture_height(g_controller.hotbar_tex) * img_scale) + get_truetype_line_height(g_controller.font);
+    draw_truetype_text(g_controller.font, text_x+(2*hud_scale),text_y+(2*hud_scale), string.cstr, NK_V4_BLACK);
     draw_truetype_text(g_controller.font, text_x,text_y, string.cstr, NK_V4_WHITE);
 
     // Draw the cursor.
@@ -398,26 +417,26 @@ GLOBAL void controller_draw(void)
     {
         nkF32 cx = g_controller.cursor_pos.x;
         nkF32 cy = g_controller.cursor_pos.y;
-        imm_texture(g_controller.watercan_tex, cx,cy);
+        imm_texture_ex(g_controller.watercan_tex, cx,cy, img_scale,img_scale, 0.0f, NULL);
     }
     else if(g_controller.removing)
     {
         nkF32 cx = g_controller.cursor_pos.x;
         nkF32 cy = g_controller.cursor_pos.y;
-        imm_texture(g_controller.shovel_tex, cx,cy);
+        imm_texture_ex(g_controller.shovel_tex, cx,cy, img_scale,img_scale, 0.0f, NULL);
     }
     else if(g_controller.selected != NO_SELECTION)
     {
-        ImmClip clip = { NK_CAST(nkF32, g_controller.selected * 32), 0.0f, 32.0f, 32.0f };
+        ImmClip clip = { NK_CAST(nkF32, g_controller.selected) * ICON_WIDTH, 0.0f, ICON_WIDTH, ICON_HEIGHT };
         nkF32 cx = g_controller.cursor_pos.x;
         nkF32 cy = g_controller.cursor_pos.y;
-        imm_texture(g_controller.icons_tex, cx,cy, &clip);
+        imm_texture_ex(g_controller.icons_tex, cx,cy, img_scale,img_scale, 0.0f, NULL, &clip);
     }
     else
     {
-        nkF32 cx = g_controller.cursor_pos.x + (NK_CAST(nkF32, get_texture_width(g_controller.cursor_tex) * 0.5f)) - 4;
-        nkF32 cy = g_controller.cursor_pos.y + (NK_CAST(nkF32, get_texture_height(g_controller.cursor_tex) * 0.5f)) - 4;
-        imm_texture(g_controller.cursor_tex, cx,cy);
+        nkF32 cx = g_controller.cursor_pos.x + (NK_CAST(nkF32, get_texture_width(g_controller.cursor_tex) * 0.5f) * img_scale) - (4 * hud_scale);
+        nkF32 cy = g_controller.cursor_pos.y + (NK_CAST(nkF32, get_texture_height(g_controller.cursor_tex) * 0.5f) * img_scale) - (4 * hud_scale);
+        imm_texture_ex(g_controller.cursor_tex, cx,cy, img_scale,img_scale, 0.0f, NULL);
     }
 }
 
