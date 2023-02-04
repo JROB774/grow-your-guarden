@@ -31,22 +31,31 @@ DEF_ETICK(daisy)
 
     nkF32& shot_cooldown = e.timer0;
 
-    // If we are fully grown then try and shoot any enemies that are close enough.
+    // If we are fully grown then try and shoot any enemies that are close enough (pick the closest one).
     if(plant_is_fully_grown(e) && shot_cooldown <= 0.0f)
     {
+        nkF32 shortest_distance = FLT_MAX;
+        nkF32 distance = 0.0f;
+
+        Entity* target = NULL;
+
         for(auto& m: g_entity_manager.entities)
         {
             if(m.type == EntityType_Monster && m.active)
             {
-                nkF32 distance = distance_between_points(e.position, m.position);
-                if(distance <= e.range)
+                distance = distance_between_points(e.position, m.position);
+                if(distance <= e.range && distance < shortest_distance)
                 {
-                    change_entity_state(e, EntityState_Attack);
-                    shot_cooldown = COOLDOWN;
-                    spawn_bullet_at_target(EntityID_Pollen, e.position.x,e.position.y, m);
-                    break; // Exit early we don't need to keep looping.
+                    shortest_distance = distance;
+                    target = &m;
                 }
             }
+        }
+        if(target)
+        {
+            change_entity_state(e, EntityState_Attack);
+            shot_cooldown = COOLDOWN;
+            spawn_bullet_at_target(EntityID_Pollen, e.position.x,e.position.y, *target);
         }
     }
 
