@@ -409,11 +409,6 @@ GLOBAL void controller_tick(nkF32 dt)
             g_controller.money_counter = g_controller.money;
         }
     }
-
-    if(is_key_pressed(KeyCode_Space))
-    {
-        g_controller.money += 1000;
-    }
 }
 
 GLOBAL void controller_draw(void)
