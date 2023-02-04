@@ -361,30 +361,35 @@ GLOBAL void controller_tick(nkF32 dt)
 
 GLOBAL void controller_draw(void)
 {
+    // We don't draw the HUD if the game is paused because it looks better that way.
+    // We still want to unset the controller camera transform though, so do that here.
+    if(is_game_paused())
+    {
+        unset_controller_camera();
+        return;
+    }
+
     TrueTypeFont font = get_font();
 
     nkVec2 cursor_pos = get_window_mouse_pos();
 
     // Draw the highlighted tile.
-    if(!is_game_paused())
+    if(!g_controller.panning && !g_controller.occluded && (g_controller.selected != NO_SELECTION || g_controller.watering || g_controller.removing))
     {
-        if(!g_controller.panning && !g_controller.occluded && (g_controller.selected != NO_SELECTION || g_controller.watering || g_controller.removing))
+        nkVec2 pos = screen_to_world(cursor_pos);
+
+        iPoint tile;
+
+        tile.x = NK_CAST(nkS32, floorf(pos.x / (NK_CAST(nkF32, TILE_WIDTH))));
+        tile.y = NK_CAST(nkS32, floorf(pos.y / (NK_CAST(nkF32, TILE_HEIGHT))));
+
+        // Make sure we can place at the spot.
+        if(can_place_plant_at_position(tile.x, tile.y) || can_remove_plant_at_position(pos.x, pos.y) || can_water_plant_at_position(pos.x, pos.y))
         {
-            nkVec2 pos = screen_to_world(cursor_pos);
+            nkF32 tx = NK_CAST(nkF32, tile.x * TILE_WIDTH) + (NK_CAST(nkF32,TILE_WIDTH) * 0.5f);
+            nkF32 ty = NK_CAST(nkF32, tile.y * TILE_HEIGHT) + (NK_CAST(nkF32,TILE_HEIGHT) * 0.5f);
 
-            iPoint tile;
-
-            tile.x = NK_CAST(nkS32, floorf(pos.x / (NK_CAST(nkF32, TILE_WIDTH))));
-            tile.y = NK_CAST(nkS32, floorf(pos.y / (NK_CAST(nkF32, TILE_HEIGHT))));
-
-            // Make sure we can place at the spot.
-            if(can_place_plant_at_position(tile.x, tile.y) || can_remove_plant_at_position(pos.x, pos.y) || can_water_plant_at_position(pos.x, pos.y))
-            {
-                nkF32 tx = NK_CAST(nkF32, tile.x * TILE_WIDTH) + (NK_CAST(nkF32,TILE_WIDTH) * 0.5f);
-                nkF32 ty = NK_CAST(nkF32, tile.y * TILE_HEIGHT) + (NK_CAST(nkF32,TILE_HEIGHT) * 0.5f);
-
-                imm_texture(g_controller.highlight_tex, tx,ty);
-            }
+            imm_texture(g_controller.highlight_tex, tx,ty);
         }
     }
 
@@ -398,7 +403,6 @@ GLOBAL void controller_draw(void)
 
     Texture texture = asset_manager_load<Texture>("hud.png");
 
-    // Draw the hotbar.
     nkF32 x = ((HUD_CLIP_SLOT.w * 0.80f) * 0.5f) * img_scale;
     nkF32 y = ((HUD_CLIP_SLOT.h * 0.80f) * 0.5f) * img_scale;
 
