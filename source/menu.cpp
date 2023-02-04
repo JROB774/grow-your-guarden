@@ -17,8 +17,8 @@ INTERNAL fRect calculate_menu_button_bounds(TrueTypeFont font, const nkChar* tex
     nkF32 ww = NK_CAST(nkF32, get_window_width());
     nkF32 wh = NK_CAST(nkF32, get_window_height());
 
-    // We multiply by 1.1 because it gives just a bit of a gap between the buttons which is nice.
-    if(curr_y <= -1.0f) curr_y = ((wh * prev_y) + (get_truetype_line_height(font) * 1.1f)) / wh; // Increment from the previous y-position.
+    // We multiply by a percentage because it gives just a bit of a gap between the buttons which is nice.
+    if(curr_y <= -1.0f) curr_y = ((wh * prev_y) + (get_truetype_line_height(font) * 1.3f)) / wh; // Increment from the previous y-position.
 
     fRect bounds;
 
