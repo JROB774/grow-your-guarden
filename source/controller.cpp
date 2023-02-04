@@ -37,6 +37,8 @@ struct Controller
     nkU32 hovered;
     nkU32 selected;
 
+    nkS32 money_counter; // This is used as the visual for money (for smooth interpolation).
+
     nkS32 money;
     nkS32 kills;
     nkS32 waves;
@@ -390,6 +392,28 @@ GLOBAL void controller_tick(nkF32 dt)
     {
         g_controller.health = NK_CAST(nkS32, ceilf(house->health));
     }
+
+    // Interpolate the money counter toward the actual money. We only do this when money goes up as it feels better
+    // to have it tick upwards and be set immediately when going down from purchasing stuff.
+    const nkS32 MONEY_INCREMENT = 25;
+
+    if(g_controller.money_counter > g_controller.money)
+    {
+        g_controller.money_counter = g_controller.money;
+    }
+    if(g_controller.money_counter < g_controller.money)
+    {
+        g_controller.money_counter += MONEY_INCREMENT;
+        if(g_controller.money_counter > g_controller.money)
+        {
+            g_controller.money_counter = g_controller.money;
+        }
+    }
+
+    if(is_key_pressed(KeyCode_Space))
+    {
+        g_controller.money += 1000;
+    }
 }
 
 GLOBAL void controller_draw(void)
@@ -497,7 +521,7 @@ GLOBAL void controller_draw(void)
     set_truetype_font_size(font, NK_CAST(nkS32, 15 * hud_scale));
 
     nkString string = "$";
-    number_to_string_with_commas(&string, g_controller.money);
+    number_to_string_with_commas(&string, g_controller.money_counter);
 
     nkF32 text_x = (8.0f * hud_scale);
     nkF32 text_y = ((HUD_ICON_HEIGHT * 1.4f) * img_scale) + get_truetype_line_height(font);
@@ -622,10 +646,11 @@ GLOBAL void controller_reset(void)
     g_controller.camera_current_zoom = CAMERA_START_ZOOM;
     g_controller.camera_target_zoom  = CAMERA_START_ZOOM;
 
-    g_controller.money  = STARTING_MONEY;
-    g_controller.kills  = 0;
-    g_controller.waves  = 0;
-    g_controller.health = NK_CAST(nkS32, ENTITY_TABLE[EntityID_House].health);
+    g_controller.money_counter = STARTING_MONEY;
+    g_controller.money         = STARTING_MONEY;
+    g_controller.kills         = 0;
+    g_controller.waves         = 0;
+    g_controller.health        = NK_CAST(nkS32, ENTITY_TABLE[EntityID_House].health);
 
     g_controller.selected = NO_SELECTION;
 }

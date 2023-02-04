@@ -42,13 +42,13 @@ INTERNAL void fully_kill_entity(Entity& e, nkU64 index)
 
     // Go through and unset any references to this entity as they are no longer valid.
     // Handling this automatically here simplifies things a lot for the entity logic.
-    for(auto& e: g_entity_manager.entities)
+    for(auto& entity: g_entity_manager.entities)
     {
-        if(e.id != EntityID_None && e.active && e.target != NO_TARGET)
+        if(entity.id != EntityID_None && entity.active && entity.target != NO_TARGET)
         {
-            if(!g_entity_manager.entities[e.target].active)
+            if(!g_entity_manager.entities[entity.target].active)
             {
-                e.target = NO_TARGET;
+                entity.target = NO_TARGET;
             }
         }
     }
