@@ -10,9 +10,9 @@ INTERNAL constexpr nkS32 PAUSE_TITLE_SIZE  = 100;
 INTERNAL constexpr nkS32 PAUSE_RESUME_SIZE =  40;
 INTERNAL constexpr nkS32 PAUSE_MENU_SIZE   =  35;
 
-INTERNAL constexpr nkF32 PAUSE_TITLE_YPOS  = 0.40f;
-INTERNAL constexpr nkF32 PAUSE_RESUME_YPOS = 0.65f;
-INTERNAL constexpr nkF32 PAUSE_MENU_YPOS   = 0.70f;
+INTERNAL constexpr nkF32 PAUSE_TITLE_YPOS  =  0.40f;
+INTERNAL constexpr nkF32 PAUSE_RESUME_YPOS =  0.65f;
+INTERNAL constexpr nkF32 PAUSE_MENU_YPOS   = -1.00f;
 
 struct GameState
 {
@@ -33,38 +33,12 @@ INTERNAL void pause_tick(nkF32 dt)
 
     if(!g_game.paused) return;
 
-    TrueTypeFont font = get_font();
-
-    nkF32 ww = NK_CAST(nkF32, get_window_width());
-    nkF32 wh = NK_CAST(nkF32, get_window_height());
-
-    nkF32 tx,ty,tw,th;
-
-    nkVec2 cursor_pos = get_window_mouse_pos();
-
-    // Check resume button presses.
-    set_truetype_font_size(font, PAUSE_RESUME_SIZE);
-
-    tw = get_truetype_text_width(font, PAUSE_RESUME_TEXT);
-    th = get_truetype_text_height(font, PAUSE_RESUME_TEXT);
-    tx = (ww - tw) * 0.5f;
-    ty = (wh * PAUSE_RESUME_YPOS);
-
-    if(point_vs_rect(cursor_pos, tx,ty-th,tw,th) && is_mouse_button_pressed(MouseButton_Left))
+    if(tick_menu_button(PAUSE_RESUME_TEXT, PAUSE_RESUME_YPOS, PAUSE_RESUME_SIZE))
     {
         g_game.paused = NK_FALSE;
         play_sound(g_game.pause_sound);
     }
-
-    // Check menu button presses.
-    set_truetype_font_size(font, PAUSE_MENU_SIZE);
-
-    tw = get_truetype_text_width(font, PAUSE_MENU_TEXT);
-    th = get_truetype_text_height(font, PAUSE_MENU_TEXT);
-    tx = (ww - tw) * 0.5f;
-    ty = (wh * PAUSE_MENU_YPOS);
-
-    if(point_vs_rect(cursor_pos, tx,ty-th,tw,th) && is_mouse_button_pressed(MouseButton_Left))
+    if(tick_menu_button(PAUSE_MENU_TEXT, PAUSE_MENU_YPOS, PAUSE_MENU_SIZE))
     {
         set_app_state(AppState_Menu);
         play_sound(g_game.pause_sound);
@@ -75,15 +49,8 @@ INTERNAL void pause_draw(void)
 {
     if(!g_game.paused) return;
 
-    TrueTypeFont font = get_font();
-
     nkF32 ww = NK_CAST(nkF32, get_window_width());
     nkF32 wh = NK_CAST(nkF32, get_window_height());
-
-    nkF32 tx,ty,tw,th;
-    nkVec4 color;
-
-    nkVec2 cursor_pos = get_window_mouse_pos();
 
     // Draw the background.
     nkVec4 background_color = { 0.0f,0.0f,0.0f,0.7f };
@@ -95,40 +62,10 @@ INTERNAL void pause_draw(void)
     imm_rect_filled(0.0f,0.0f,    ww,wh*0.15f, letterbox_color);
     imm_rect_filled(0.0f,wh*0.85f,ww,wh*0.15f, letterbox_color);
 
-    // Draw the pause text.
-    set_truetype_font_size(font, PAUSE_TITLE_SIZE);
-
-    tx = (ww - get_truetype_text_width(font, PAUSE_TITLE_TEXT)) * 0.5f;
-    ty = (wh * PAUSE_TITLE_YPOS);
-
-    draw_truetype_text(font, tx+5,ty+5, PAUSE_TITLE_TEXT, NK_V4_BLACK);
-    draw_truetype_text(font, tx,ty, PAUSE_TITLE_TEXT, NK_V4_WHITE);
-
-    // Draw the resume button text.
-    set_truetype_font_size(font, PAUSE_RESUME_SIZE);
-
-    tw = get_truetype_text_width(font, PAUSE_RESUME_TEXT);
-    th = get_truetype_text_height(font, PAUSE_RESUME_TEXT);
-    tx = (ww - tw) * 0.5f;
-    ty = (wh * PAUSE_RESUME_YPOS);
-
-    color = (point_vs_rect(cursor_pos, tx,ty-th,tw,th)) ? NK_V4_YELLOW : NK_V4_WHITE;
-
-    draw_truetype_text(font, tx+5,ty+5, PAUSE_RESUME_TEXT, NK_V4_BLACK);
-    draw_truetype_text(font, tx,ty, PAUSE_RESUME_TEXT, color);
-
-    // Draw the menu button text.
-    set_truetype_font_size(font, PAUSE_MENU_SIZE);
-
-    tw = get_truetype_text_width(font, PAUSE_MENU_TEXT);
-    th = get_truetype_text_height(font, PAUSE_MENU_TEXT);
-    tx = (ww - tw) * 0.5f;
-    ty = (wh * PAUSE_MENU_YPOS);
-
-    color = (point_vs_rect(cursor_pos, tx,ty-th,tw,th)) ? NK_V4_YELLOW : NK_V4_WHITE;
-
-    draw_truetype_text(font, tx+5,ty+5, PAUSE_MENU_TEXT, NK_V4_BLACK);
-    draw_truetype_text(font, tx,ty, PAUSE_MENU_TEXT, color);
+    // Draw the text and buttons.
+    draw_menu_button(PAUSE_TITLE_TEXT, PAUSE_TITLE_YPOS, PAUSE_TITLE_SIZE, NK_FALSE);
+    draw_menu_button(PAUSE_RESUME_TEXT, PAUSE_RESUME_YPOS, PAUSE_RESUME_SIZE);
+    draw_menu_button(PAUSE_MENU_TEXT, PAUSE_MENU_YPOS, PAUSE_MENU_SIZE);
 }
 
 GLOBAL void game_start(void)
