@@ -233,6 +233,20 @@ GLOBAL void world_draw_below(void)
 
 GLOBAL void world_draw_above(void)
 {
+    // Draw some large rectangles to cover up anything rendering outside of the world area.
+    const nkF32 BORDER_DEPTH = 2048.0f;
+
+    nkF32 wx = 0.0f;
+    nkF32 wy = 0.0f;
+    nkF32 ww = g_world.width * TILE_WIDTH;
+    nkF32 wh = g_world.height * TILE_HEIGHT;
+
+    imm_rect_filled(wx-BORDER_DEPTH,wy,ww+(BORDER_DEPTH*2),-BORDER_DEPTH,    g_world.border_color); // Top
+    imm_rect_filled(wx-BORDER_DEPTH,wy+wh,ww+(BORDER_DEPTH*2),+BORDER_DEPTH, g_world.border_color); // Bottom
+    imm_rect_filled(wx+ww,wy-BORDER_DEPTH,+BORDER_DEPTH,wh+(BORDER_DEPTH*2), g_world.border_color); // Right
+    imm_rect_filled(wx,wy-BORDER_DEPTH,-BORDER_DEPTH,wh+(BORDER_DEPTH*2),    g_world.border_color); // Left
+
+    // Then add some border graphics to make things look nice.
     imm_begin_texture_batch(g_world.border);
     // Top
     {
