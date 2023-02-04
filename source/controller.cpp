@@ -545,7 +545,42 @@ GLOBAL void controller_draw(void)
         th += padding * 2.0f;
 
         // Draw the background.
-        imm_rect_filled(tx,ty,tw,th, { 0.0f,0.0f,0.0f,0.8f });
+        nkF32 bg_scale = img_scale * 0.5f;
+
+        nkVec4 bg_color = { 0.0f,0.0f,0.0f,0.8f };
+
+        nkF32 iw = HUD_ICON_WIDTH * bg_scale;
+        nkF32 ih = HUD_ICON_HEIGHT * bg_scale;
+
+        tw -= iw * 2.0f;
+        th -= ih * 2.0f;
+
+        if(tw < 0.0f) tw = 0.0f;
+        if(th < 0.0f) th = 0.0f;
+
+        nkF32 x1 = tx + (iw * 0.5f);
+        nkF32 y1 = ty + (ih * 0.5f);
+        nkF32 x2 = x1 + (iw * 0.5f) + (tw * 0.5f);
+        nkF32 y2 = y1 + (ih * 0.5f) + (th * 0.5f);
+        nkF32 x3 = x1 + iw + tw;
+        nkF32 y3 = y1 + ih + th;
+
+        nkF32 w_scale = (tw / bg_scale) / (HUD_ICON_WIDTH) * bg_scale;
+        nkF32 h_scale = (th / bg_scale) / (HUD_ICON_HEIGHT) * bg_scale;
+
+        imm_texture_ex(texture, x1,y1, bg_scale,bg_scale, 0.0f, NULL, &HUD_CLIP_TOOLTIP_TL, bg_color);
+        imm_texture_ex(texture, x2,y1, w_scale, bg_scale, 0.0f, NULL, &HUD_CLIP_TOOLTIP_T,  bg_color);
+        imm_texture_ex(texture, x3,y1, bg_scale,bg_scale, 0.0f, NULL, &HUD_CLIP_TOOLTIP_TR, bg_color);
+        imm_texture_ex(texture, x1,y2, bg_scale,h_scale,  0.0f, NULL, &HUD_CLIP_TOOLTIP_L,  bg_color);
+        imm_texture_ex(texture, x3,y2, bg_scale,h_scale,  0.0f, NULL, &HUD_CLIP_TOOLTIP_R,  bg_color);
+        imm_texture_ex(texture, x1,y3, bg_scale,bg_scale, 0.0f, NULL, &HUD_CLIP_TOOLTIP_BL, bg_color);
+        imm_texture_ex(texture, x2,y3, w_scale, bg_scale, 0.0f, NULL, &HUD_CLIP_TOOLTIP_B,  bg_color);
+        imm_texture_ex(texture, x3,y3, bg_scale,bg_scale, 0.0f, NULL, &HUD_CLIP_TOOLTIP_BR, bg_color);
+
+        if(tw > 0.0f && th > 0.0f)
+        {
+            imm_rect_filled(tx+iw,ty+ih,tw,th, bg_color);
+        }
 
         // Draw the text.
         text_x = tx + padding;
