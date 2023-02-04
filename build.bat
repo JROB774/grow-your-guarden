@@ -39,7 +39,7 @@ depends\makeicon\binaries\win32\makeicon -platform:win32 -sizes:256,128,96,64,48
 
 pushd binary\win32
 rc -i ../../redist/win32/res ../../redist/win32/res/icon.rc
-call ../../timer.bat "cl ../../source/application.cpp %cflg% %defs% %idir% -Fe:plant.exe -link %lflg% %ldir% %libs% ../../redist/win32/res/icon.res"
+call ../../timer.bat "cl ../../source/application.cpp %cflg% %defs% %idir% -Fe:GROW.exe -link %lflg% %ldir% %libs% ../../redist/win32/res/icon.res"
 popd
 
 echo ----------------------------------------
@@ -70,7 +70,7 @@ if "%~2"=="release" (
 if not exist binary\web mkdir binary\web
 
 pushd binary\web
-call ../../timer.bat "emcc %libs% %idir% %cflg% %lflg% %defs% ../../source/application.cpp -o plant.html"
+call ../../timer.bat "emcc %libs% %idir% %cflg% %lflg% %defs% ../../source/application.cpp -o grow.html"
 popd
 
 echo ----------------------------------------

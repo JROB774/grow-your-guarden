@@ -143,8 +143,8 @@ INTERNAL void end_frame_draw(void)
 
 GLOBAL void app_main(AppDesc* desc)
 {
-    desc->title       = "PLANT";
-    desc->name        = "PLANT";
+    desc->title       = "GROW YOUR GUARDEN";
+    desc->name        = "GROW";
     desc->window_size = { 1280,720 };
     desc->window_min  = { 1280,720 };
 }
