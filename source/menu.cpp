@@ -44,32 +44,57 @@ GLOBAL void menu_quit(void)
 
 GLOBAL void menu_tick(nkF32 dt)
 {
-    if(tick_menu_button(MENU_PLAY_TEXT, MENU_PLAY_YPOS, MENU_PLAY_SIZE))
+    if(tick_menu_text_button(MENU_PLAY_TEXT, MENU_PLAY_YPOS, MENU_PLAY_SIZE))
     {
         game_start();
     }
-
     // We don't need/want an exit button in the web build.
     #if !defined(BUILD_WEB)
-    if(tick_menu_button(MENU_EXIT_TEXT, MENU_EXIT_YPOS, MENU_EXIT_SIZE))
+    if(tick_menu_text_button(MENU_EXIT_TEXT, MENU_EXIT_YPOS, MENU_EXIT_SIZE))
     {
         terminate_app();
     }
     #endif // BUILD_WEB
+
+    // Do the options buttons.
+    nkF32 img_scale = get_hud_scale() / 4.0f;
+
+    nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
+    nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
+
+    nkF32 bx = NK_CAST(nkF32, get_window_width()) - (btn_width * 0.5f);
+    nkF32 by = NK_CAST(nkF32, get_window_height()) - (btn_height * 0.5f);
+
+    if(tick_menu_toggle_button(HUD_CLIP_MUSIC,      bx-(btn_width*0.0f),by, is_music_on  ())) set_music_volume((is_music_on()) ? 0.0f : 0.7f);
+    if(tick_menu_toggle_button(HUD_CLIP_SOUND,      bx-(btn_width*1.1f),by, is_sound_on  ())) set_sound_volume((is_sound_on()) ? 0.0f : 0.8f);
+    if(tick_menu_toggle_button(HUD_CLIP_FULLSCREEN, bx-(btn_width*2.2f),by, is_fullscreen())) set_fullscreen(!is_fullscreen());
 }
 
 GLOBAL void menu_draw(void)
 {
-    draw_menu_button(MENU_TITLE_TEXT, MENU_TITLE_YPOS, MENU_TITLE_SIZE, NK_FALSE);
-    draw_menu_button(MENU_PLAY_TEXT, MENU_PLAY_YPOS, MENU_PLAY_SIZE);
-
+    // Do the title and main buttons.
+    draw_menu_text_button(MENU_TITLE_TEXT, MENU_TITLE_YPOS, MENU_TITLE_SIZE, NK_FALSE);
+    draw_menu_text_button(MENU_PLAY_TEXT, MENU_PLAY_YPOS, MENU_PLAY_SIZE);
     // We don't need/want an exit button in the web build.
     #if !defined(BUILD_WEB)
-    draw_menu_button(MENU_EXIT_TEXT, MENU_EXIT_YPOS, MENU_EXIT_SIZE);
+    draw_menu_text_button(MENU_EXIT_TEXT, MENU_EXIT_YPOS, MENU_EXIT_SIZE);
     #endif // BUILD_WEB
+
+    // Do the options buttons.
+    nkF32 img_scale = (get_hud_scale() / 4.0f);
+
+    nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
+    nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
+
+    nkF32 bx = NK_CAST(nkF32, get_window_width()) - (btn_width * 0.6f);
+    nkF32 by = NK_CAST(nkF32, get_window_height()) - (btn_height * 0.6f);
+
+    draw_menu_toggle_button(HUD_CLIP_MUSIC,      bx-(btn_width*0.0f),by, is_music_on  ());
+    draw_menu_toggle_button(HUD_CLIP_SOUND,      bx-(btn_width*1.1f),by, is_sound_on  ());
+    draw_menu_toggle_button(HUD_CLIP_FULLSCREEN, bx-(btn_width*2.2f),by, is_fullscreen());
 }
 
-GLOBAL nkBool tick_menu_button(const nkChar* text, nkF32 y, nkS32 size, nkBool interactive)
+GLOBAL nkBool tick_menu_text_button(const nkChar* text, nkF32 y, nkS32 size, nkBool interactive)
 {
     PERSISTENT nkF32 previous_y = 0.0f;
 
@@ -84,7 +109,7 @@ GLOBAL nkBool tick_menu_button(const nkChar* text, nkF32 y, nkS32 size, nkBool i
     return (point_vs_rect(cursor_pos, t.x,t.y-t.h,t.w,t.h) && is_mouse_button_pressed(MouseButton_Left) && interactive);
 }
 
-GLOBAL void draw_menu_button(const nkChar* text, nkF32 y, nkS32 size, nkBool interactive)
+GLOBAL void draw_menu_text_button(const nkChar* text, nkF32 y, nkS32 size, nkBool interactive)
 {
     PERSISTENT nkF32 previous_y = 0.0f;
 
@@ -102,6 +127,28 @@ GLOBAL void draw_menu_button(const nkChar* text, nkF32 y, nkS32 size, nkBool int
     draw_truetype_text(font, t.x,t.y, text, color);
 
     previous_y = y;
+}
+
+INTERNAL nkBool tick_menu_toggle_button(ImmClip clip, nkF32 x, nkF32 y, nkBool toggle)
+{
+    nkF32 img_scale = (get_hud_scale() / 4.0f);
+
+    nkF32 bx = x - ((HUD_ICON_WIDTH * img_scale) * 0.5f);
+    nkF32 by = y - ((HUD_ICON_HEIGHT * img_scale) * 0.5f);
+    nkF32 bw = (HUD_ICON_WIDTH * img_scale);
+    nkF32 bh = (HUD_ICON_HEIGHT * img_scale);
+
+    nkVec2 cursor_pos = get_window_mouse_pos();
+
+    return (point_vs_rect(cursor_pos, bx,by,bw,bh) && is_mouse_button_pressed(MouseButton_Left));
+}
+
+INTERNAL void draw_menu_toggle_button(ImmClip clip, nkF32 x, nkF32 y, nkBool toggle)
+{
+    if(!toggle) clip.y += HUD_ICON_HEIGHT;
+    Texture texture = asset_manager_load<Texture>("hud.png");
+    nkF32 img_scale = (get_hud_scale() / 4.0f);
+    imm_texture_ex(texture, x,y, img_scale,img_scale, 0.0f, NULL, &clip);
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

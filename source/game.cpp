@@ -28,21 +28,34 @@ INTERNAL void pause_tick(nkF32 dt)
     if(is_key_pressed(KeyCode_Escape))
     {
         g_game.paused = !g_game.paused;
-        play_sound(g_game.pause_sound);
+        // play_sound(g_game.pause_sound);
     }
 
     if(!g_game.paused) return;
 
-    if(tick_menu_button(PAUSE_RESUME_TEXT, PAUSE_RESUME_YPOS, PAUSE_RESUME_SIZE))
+    if(tick_menu_text_button(PAUSE_RESUME_TEXT, PAUSE_RESUME_YPOS, PAUSE_RESUME_SIZE))
     {
         g_game.paused = NK_FALSE;
-        play_sound(g_game.pause_sound);
+        // play_sound(g_game.pause_sound);
     }
-    if(tick_menu_button(PAUSE_MENU_TEXT, PAUSE_MENU_YPOS, PAUSE_MENU_SIZE))
+    if(tick_menu_text_button(PAUSE_MENU_TEXT, PAUSE_MENU_YPOS, PAUSE_MENU_SIZE))
     {
         set_app_state(AppState_Menu);
-        play_sound(g_game.pause_sound);
+        // play_sound(g_game.pause_sound);
     }
+
+    // Do the options buttons.
+    nkF32 img_scale = get_hud_scale() / 4.0f;
+
+    nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
+    nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
+
+    nkF32 bx = NK_CAST(nkF32, get_window_width()) - (btn_width * 0.5f);
+    nkF32 by = (NK_CAST(nkF32, get_window_height()) * 0.85f) - (btn_height * 0.6f);
+
+    if(tick_menu_toggle_button(HUD_CLIP_MUSIC,      bx-(btn_width*0.0f),by, is_music_on  ())) set_music_volume((is_music_on()) ? 0.0f : 0.7f);
+    if(tick_menu_toggle_button(HUD_CLIP_SOUND,      bx-(btn_width*1.1f),by, is_sound_on  ())) set_sound_volume((is_sound_on()) ? 0.0f : 0.8f);
+    if(tick_menu_toggle_button(HUD_CLIP_FULLSCREEN, bx-(btn_width*2.2f),by, is_fullscreen())) set_fullscreen(!is_fullscreen());
 }
 
 INTERNAL void pause_draw(void)
@@ -63,9 +76,22 @@ INTERNAL void pause_draw(void)
     imm_rect_filled(0.0f,wh*0.85f,ww,wh*0.15f, letterbox_color);
 
     // Draw the text and buttons.
-    draw_menu_button(PAUSE_TITLE_TEXT, PAUSE_TITLE_YPOS, PAUSE_TITLE_SIZE, NK_FALSE);
-    draw_menu_button(PAUSE_RESUME_TEXT, PAUSE_RESUME_YPOS, PAUSE_RESUME_SIZE);
-    draw_menu_button(PAUSE_MENU_TEXT, PAUSE_MENU_YPOS, PAUSE_MENU_SIZE);
+    draw_menu_text_button(PAUSE_TITLE_TEXT, PAUSE_TITLE_YPOS, PAUSE_TITLE_SIZE, NK_FALSE);
+    draw_menu_text_button(PAUSE_RESUME_TEXT, PAUSE_RESUME_YPOS, PAUSE_RESUME_SIZE);
+    draw_menu_text_button(PAUSE_MENU_TEXT, PAUSE_MENU_YPOS, PAUSE_MENU_SIZE);
+
+    // Draw the options buttons.
+    nkF32 img_scale = (get_hud_scale() / 4.0f);
+
+    nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
+    nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
+
+    nkF32 bx = (NK_CAST(nkF32, get_window_width())) - (btn_width * 0.6f);
+    nkF32 by = (NK_CAST(nkF32, get_window_height()) * 0.85f) - (btn_height * 0.6f);
+
+    draw_menu_toggle_button(HUD_CLIP_MUSIC,      bx-(btn_width*0.0f),by, is_music_on  ());
+    draw_menu_toggle_button(HUD_CLIP_SOUND,      bx-(btn_width*1.1f),by, is_sound_on  ());
+    draw_menu_toggle_button(HUD_CLIP_FULLSCREEN, bx-(btn_width*2.2f),by, is_fullscreen());
 }
 
 GLOBAL void game_start(void)

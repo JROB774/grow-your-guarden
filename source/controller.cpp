@@ -220,6 +220,8 @@ GLOBAL void controller_init(void)
     g_controller.shovel_sfx[3] = asset_manager_load<Sound>("shovel_003.wav");
     g_controller.shovel_sfx[4] = asset_manager_load<Sound>("shovel_004.wav");
 
+    asset_manager_load<Texture>("hud.png");
+
     // Fill out the hotbar slot information.
     g_controller.hotbar[HotbarID_Daisy     ].name        = "DAISY";
     g_controller.hotbar[HotbarID_Daisy     ].description = "Fires shots at nearby enemies.";
