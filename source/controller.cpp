@@ -15,10 +15,6 @@ NK_ENUM(HotbarID, nkU32)
 {
     HotbarID_Daisy,
     HotbarID_Bramble,
-    HotbarID_None0,
-    HotbarID_None1,
-    HotbarID_None2,
-    HotbarID_None3,
     HotbarID_Fertilizer,
     HotbarID_Shovel,
     HotbarID_TOTAL
@@ -223,23 +219,23 @@ GLOBAL void controller_init(void)
     g_controller.shovel_sfx[4] = asset_manager_load<Sound>("shovel_004.wav");
 
     // Fill out the hotbar slot information.
-    g_controller.hotbar[HotbarID_Daisy     ].name        = "Daisy";
-    g_controller.hotbar[HotbarID_Daisy     ].description = "...";
+    g_controller.hotbar[HotbarID_Daisy     ].name        = "DAISY";
+    g_controller.hotbar[HotbarID_Daisy     ].description = "Fires shots at nearby enemies.";
     g_controller.hotbar[HotbarID_Daisy     ].cost        = 100;
     g_controller.hotbar[HotbarID_Daisy     ].spawn_id    = EntityID_Daisy;
 
-    g_controller.hotbar[HotbarID_Bramble   ].name        = "Bramble";
-    g_controller.hotbar[HotbarID_Bramble   ].description = "...";
+    g_controller.hotbar[HotbarID_Bramble   ].name        = "BRAMBLE";
+    g_controller.hotbar[HotbarID_Bramble   ].description = "Damages enemies that walk over it.\nDamage increases as it grows.";
     g_controller.hotbar[HotbarID_Bramble   ].cost        = 50;
     g_controller.hotbar[HotbarID_Bramble   ].spawn_id    = EntityID_Bramble;
 
-    g_controller.hotbar[HotbarID_Fertilizer].name        = "Fertilizer";
-    g_controller.hotbar[HotbarID_Fertilizer].description = "...";
+    g_controller.hotbar[HotbarID_Fertilizer].name        = "FERTILIZER";
+    g_controller.hotbar[HotbarID_Fertilizer].description = "Increase a plant's stats for a limited time.";
     g_controller.hotbar[HotbarID_Fertilizer].cost        = 350;
     g_controller.hotbar[HotbarID_Fertilizer].spawn_id    = EntityID_None;
 
     g_controller.hotbar[HotbarID_Shovel    ].name        = "Shovel";
-    g_controller.hotbar[HotbarID_Shovel    ].description = "...";
+    g_controller.hotbar[HotbarID_Shovel    ].description = "Dig up a plant and get some of your money back.";
     g_controller.hotbar[HotbarID_Shovel    ].cost        = 0;
     g_controller.hotbar[HotbarID_Shovel    ].spawn_id    = EntityID_None;
 }
@@ -273,6 +269,8 @@ GLOBAL void controller_tick(nkF32 dt)
     // Other elements like text and general positioning need to still be scaled up, so we have these two variables to do it.
     nkF32 img_scale = get_hud_scale() / 4.0f;
     nkF32 hud_scale = get_hud_scale();
+
+    NK_UNUSED(hud_scale);
 
     // Check occlusion and handle interaction with the hotbar slots.
     g_controller.occluded = NK_FALSE;

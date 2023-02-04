@@ -122,7 +122,7 @@ GLOBAL void world_load(const nkChar* level_name, nkU32 seed)
     rng_seed(seed);
 
     g_world.border = asset_manager_load<Texture>("border.png");
-    g_world.border_color = { 0.0157f, 0.2863f, 0.1412f, 1.0f }; // @Incomplete: Hard-coded to match the border image!
+    g_world.border_color = { 0.0157f, 0.2863f, 0.1412f, 1.0f };
 
     g_world.width  = lvlbmp.width;
     g_world.height = lvlbmp.height;
