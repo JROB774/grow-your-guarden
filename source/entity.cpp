@@ -224,6 +224,11 @@ GLOBAL void entity_draw(void)
             nkF32 pos_y = e->position.y + e->draw_offset.y + (e->bounds.y * 0.4f);
 
             nkF32 scale = e->bounds.x / NK_CAST(nkF32, get_texture_width(g_entity_manager.shadow_texture));
+            if(e->type == EntityType_Bullet)
+            {
+                scale *= 0.65f; // Make bullet shadows even smaller because it looks nice.
+            }
+
 
             imm_texture_batched_ex(pos_x,pos_y, scale,scale*0.75f, 0.0f, NULL, NULL, shadow_color);
         }
