@@ -14,5 +14,6 @@ GLOBAL void controller_draw        (void);
 GLOBAL void controller_reset       (void);
 GLOBAL void set_controller_camera  (void);
 GLOBAL void unset_controller_camera(void);
+GLOBAL void increment_kill_count   (void);
 
 /*////////////////////////////////////////////////////////////////////////////*/

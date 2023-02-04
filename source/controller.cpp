@@ -16,7 +16,11 @@ struct Controller
     PlantSpawn hotbar[HOTBAR_SIZE];
 
     nkU32 selected;
+
     nkS32 money;
+    nkS32 kills;
+    nkS32 waves;
+    nkS32 health;
 
     nkVec2 camera_current_pos;
     nkVec2 camera_target_pos;
@@ -173,6 +177,25 @@ INTERNAL void water_plant(nkF32 x, nkF32 y)
     // @Incomplete: Does nothing currently...
 }
 
+INTERNAL void draw_hud_stat(Texture texture, nkF32& x, nkF32& y, nkF32 icon_scale, nkF32 hud_scale, ImmClip clip, nkS32 stat)
+{
+    TrueTypeFont font = get_font();
+
+    imm_texture_ex(texture, x+(2*hud_scale),y+(2*hud_scale), icon_scale,icon_scale, 0.0f, NULL, &clip, { 0.0f,0.0f,0.0f,0.35f });
+    imm_texture_ex(texture, x,y, icon_scale,icon_scale, 0.0f, NULL, &clip);
+
+    nkF32 text_x = x + ((HUD_ICON_WIDTH * 0.65f) * icon_scale);
+    nkF32 text_y = y + (get_truetype_line_height(font) * 0.25f);
+
+    nkString string;
+    number_to_string_with_commas(&string, stat);
+
+    draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), string.cstr, NK_V4_BLACK);
+    draw_truetype_text(font, text_x,text_y, string.cstr, NK_V4_WHITE);
+
+    y += ((HUD_ICON_HEIGHT) * icon_scale);
+}
+
 GLOBAL void controller_init(void)
 {
     // Pre-load a bunch of assets.
@@ -325,6 +348,15 @@ GLOBAL void controller_tick(nkF32 dt)
             set_custom_cursor(NULL, clip);
         }
     }
+
+    // Update the health stat.
+    Entity* house = get_first_entity_with_id(EntityID_House);
+    if(!house)
+        g_controller.health = 0;
+    else
+    {
+        g_controller.health = NK_CAST(nkS32, ceilf(house->health));
+    }
 }
 
 GLOBAL void controller_draw(void)
@@ -438,6 +470,16 @@ GLOBAL void controller_draw(void)
 
     draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), string.cstr, NK_V4_BLACK);
     draw_truetype_text(font, text_x,              text_y,               string.cstr, NK_V4_WHITE);
+
+    // Draw the stats/icons.
+    nkF32 icon_scale = img_scale * 0.8f;
+
+    x = (((HUD_CLIP_SLOT.w * 0.80f) * 0.5f) * icon_scale);
+    y = (((HUD_CLIP_SLOT.h * 1.20f) * 0.5f) * icon_scale) + text_y;
+
+    draw_hud_stat(texture, x,y, icon_scale, hud_scale, HUD_CLIP_HEART, g_controller.health);
+    draw_hud_stat(texture, x,y, icon_scale, hud_scale, HUD_CLIP_FLAG, g_controller.waves);
+    draw_hud_stat(texture, x,y, icon_scale, hud_scale, HUD_CLIP_SKULL, g_controller.kills);
 }
 
 GLOBAL void controller_reset(void)
@@ -452,7 +494,10 @@ GLOBAL void controller_reset(void)
     g_controller.camera_current_zoom = CAMERA_START_ZOOM;
     g_controller.camera_target_zoom  = CAMERA_START_ZOOM;
 
-    g_controller.money = STARTING_MONEY;
+    g_controller.money  = STARTING_MONEY;
+    g_controller.kills  = 0;
+    g_controller.waves  = 0;
+    g_controller.health = NK_CAST(nkS32, ENTITY_TABLE[EntityID_House].health);
 
     // @Incomplete: Just giving some plants for testing.
     g_controller.hotbar[0] = { EntityID_Daisy,  100 };
@@ -491,6 +536,11 @@ GLOBAL void unset_controller_camera(void)
 
     imm_set_projection(nk_orthographic(0.0f,ww,wh,0.0f));
     imm_set_view(nk_m4_identity());
+}
+
+GLOBAL void increment_kill_count(void)
+{
+    g_controller.kills++;
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

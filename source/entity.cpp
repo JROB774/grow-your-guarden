@@ -345,6 +345,12 @@ GLOBAL void entity_kill(nkU64 index)
 
             decal_spawn(desc.death_decal, x,y,w,h, desc.death_decal_min, desc.death_decal_max, 15.0f,20.0f);
         }
+
+        // Increment the kill count if it's a monster.
+        if(e->type == EntityType_Monster)
+        {
+            increment_kill_count();
+        }
     }
 }
 
