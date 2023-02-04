@@ -46,6 +46,7 @@
 #include "game.hpp"
 #include "cursor.hpp"
 #include "hud_clips.hpp"
+#include "wave_manager.hpp"
 
 #include "utility.cpp"
 #include "platform.cpp"
@@ -66,6 +67,7 @@
 #include "menu.cpp"
 #include "game.cpp"
 #include "cursor.cpp"
+#include "wave_manager.cpp"
 
 struct AppContext
 {

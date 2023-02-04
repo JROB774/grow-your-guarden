@@ -73,6 +73,7 @@ GLOBAL void game_start(void)
     world_load("level00.png");
 
     // Reset the systems.
+    wave_manager_reset();
     entity_reset();
     controller_reset();
     particle_reset();
@@ -114,6 +115,7 @@ GLOBAL void game_tick(nkF32 dt)
     // If we're paused we don't want to update the game world.
     if(!g_game.paused)
     {
+        wave_manager_tick(dt);
         world_tick(dt);
         entity_tick(dt);
         particle_tick(dt);
@@ -131,6 +133,7 @@ GLOBAL void game_draw(void)
     entity_draw();
     particle_draw();
     world_draw_above();
+    wave_manager_draw();
     controller_draw(); // This internally unsets the controller camera!
     pause_draw();
 }
