@@ -52,7 +52,7 @@ INTERNAL void bake_font_glyph(TrueTypeFont font, nkS32 size, wchar_t codepoint)
     FT_Error error;
 
     FT_UInt index = FT_Get_Char_Index(font->font_face, codepoint);
-    error = FT_Load_Glyph(font->font_face, index, FT_LOAD_RENDER);
+    error = FT_Load_Glyph(font->font_face, index, FT_LOAD_RENDER|FT_LOAD_TARGET_MONO);
     if(error != 0) fatal_error("Failed to load font glyph! (%d)", error);
 
     FT_GlyphSlot slot = font->font_face->glyph;
@@ -87,9 +87,24 @@ INTERNAL void bake_font_glyph(TrueTypeFont font, nkS32 size, wchar_t codepoint)
 
     for(FT_UInt y=0; y<glyph.bounds.h; ++y)
     {
-        void* dst = font->atlas_pixels + NK_CAST(nkS32, (((glyph.bounds.y+y) * FONT_ATLAS_SIZE + glyph.bounds.x)));
-        void* src = bitmap->buffer + (y * bitmap->pitch);
-        memcpy(dst, src, bitmap->pitch);
+        nkU8* dst = font->atlas_pixels + NK_CAST(nkS32, (((glyph.bounds.y+y) * FONT_ATLAS_SIZE + glyph.bounds.x)));
+        nkU8* src = bitmap->buffer + (y * bitmap->pitch);
+
+        for(FT_Int x=0; x<bitmap->pitch; ++x)
+        {
+            // When rendering in monochrome, FreeType packs 8 pixels into a single byte.
+            // So, we need to unpack the pixels into our single channel pixel format.
+            nkU8 packed_pixels = src[x];
+
+            dst[(x*8)+7] = ((packed_pixels & 0x01) >> 0) * 0xFF;
+            dst[(x*8)+6] = ((packed_pixels & 0x02) >> 1) * 0xFF;
+            dst[(x*8)+5] = ((packed_pixels & 0x04) >> 2) * 0xFF;
+            dst[(x*8)+4] = ((packed_pixels & 0x08) >> 3) * 0xFF;
+            dst[(x*8)+3] = ((packed_pixels & 0x10) >> 4) * 0xFF;
+            dst[(x*8)+2] = ((packed_pixels & 0x20) >> 5) * 0xFF;
+            dst[(x*8)+1] = ((packed_pixels & 0x40) >> 6) * 0xFF;
+            dst[(x*8)+0] = ((packed_pixels & 0x80) >> 7) * 0xFF;
+        }
     }
 
     font->atlas_cursor.x += glyph.bounds.w + x_padding;
