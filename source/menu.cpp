@@ -1,5 +1,7 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
+// @Incomplete: The window size will effect how close together the buttons are placed, this is not very good...
+
 INTERNAL constexpr const nkChar* MENU_TITLE_TEXT = "GROW YOUR GUARDEN!";
 INTERNAL constexpr const nkChar* MENU_PLAY_TEXT  = "Start Game";
 INTERNAL constexpr const nkChar* MENU_EXIT_TEXT  = "Exit";
@@ -71,17 +73,25 @@ GLOBAL void menu_tick(nkF32 dt)
     {
         game_start();
     }
+
+    // We don't need/want an exit button in the web build.
+    #if !defined(BUILD_WEB)
     if(tick_menu_button(MENU_EXIT_TEXT, MENU_EXIT_YPOS, MENU_EXIT_SIZE))
     {
         terminate_app();
     }
+    #endif // BUILD_WEB
 }
 
 GLOBAL void menu_draw(void)
 {
     draw_menu_button(MENU_TITLE_TEXT, MENU_TITLE_YPOS, MENU_TITLE_SIZE, NK_FALSE);
     draw_menu_button(MENU_PLAY_TEXT, MENU_PLAY_YPOS, MENU_PLAY_SIZE);
+
+    // We don't need/want an exit button in the web build.
+    #if !defined(BUILD_WEB)
     draw_menu_button(MENU_EXIT_TEXT, MENU_EXIT_YPOS, MENU_EXIT_SIZE);
+    #endif // BUILD_WEB
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/
