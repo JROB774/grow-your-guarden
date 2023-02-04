@@ -593,10 +593,12 @@ GLOBAL void controller_draw(void)
 
         if(slot.cost > 0)
         {
+            nkVec4 cost_color = (g_controller.money >= slot.cost) ? NK_V4_YELLOW : NK_V4_RED;
+
             text_y += get_truetype_line_height(font) + padding;
 
             draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), cost_string.cstr, NK_V4_BLACK);
-            draw_truetype_text(font, text_x, text_y, cost_string.cstr, NK_V4_YELLOW);
+            draw_truetype_text(font, text_x, text_y, cost_string.cstr, cost_color);
         }
 
         text_y += get_truetype_line_height(font) + padding;
