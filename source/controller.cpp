@@ -4,6 +4,8 @@ INTERNAL constexpr nkU32 NO_SELECTION = NK_U32_MAX;
 
 INTERNAL constexpr nkS32 STARTING_MONEY = 20000;
 
+INTERNAL constexpr nkF32 TOOLTIP_PADDING = 5.0f;
+
 INTERNAL constexpr nkF32 CAMERA_START_ZOOM       = 0.50f;
 INTERNAL constexpr nkF32 CAMERA_MIN_ZOOM         = 0.25f;
 INTERNAL constexpr nkF32 CAMERA_MAX_ZOOM         = 1.00f;
@@ -32,6 +34,7 @@ struct Controller
 {
     HotbarSlot hotbar[HotbarID_TOTAL];
 
+    nkU32 hovered;
     nkU32 selected;
 
     nkS32 money;
@@ -47,7 +50,6 @@ struct Controller
     nkMat4 camera_view;
 
     nkBool panning;
-    nkBool occluded;
 
     Sound shovel_sfx[5];
 };
@@ -242,6 +244,11 @@ GLOBAL void controller_init(void)
 
 GLOBAL void controller_tick(nkF32 dt)
 {
+    // We always want to reset this even whilst paused in case we become unhovered.
+    g_controller.hovered = NO_SELECTION;
+
+    if(is_game_paused()) return;
+
     nkVec2 cursor_pos = get_window_mouse_pos();
 
     // Pan the camera around the world.
@@ -272,9 +279,7 @@ GLOBAL void controller_tick(nkF32 dt)
 
     NK_UNUSED(hud_scale);
 
-    // Check occlusion and handle interaction with the hotbar slots.
-    g_controller.occluded = NK_FALSE;
-
+    // Check hovering and handle interaction with the hotbar slots.
     nkF32 x = ((HUD_CLIP_SLOT.w * 0.80f) * 0.5f) * img_scale;
     nkF32 y = ((HUD_CLIP_SLOT.h * 0.80f) * 0.5f) * img_scale;
 
@@ -287,7 +292,7 @@ GLOBAL void controller_tick(nkF32 dt)
 
         if(point_vs_rect(cursor_pos, rx,ry,rw,rh))
         {
-            g_controller.occluded = NK_TRUE;
+            g_controller.hovered = i;
 
             if(is_mouse_button_pressed(MouseButton_Left))
             {
@@ -311,7 +316,7 @@ GLOBAL void controller_tick(nkF32 dt)
     }
 
     // Place current plant / perform the current tool action.
-    if(!g_controller.occluded && !g_controller.panning && is_mouse_button_pressed(MouseButton_Left))
+    if(g_controller.hovered == NO_SELECTION && !g_controller.panning && is_mouse_button_pressed(MouseButton_Left))
     {
         nkVec2 pos = screen_to_world(cursor_pos);
 
@@ -365,7 +370,9 @@ GLOBAL void controller_tick(nkF32 dt)
     {
         if(g_controller.selected == HotbarID_Fertilizer || g_controller.selected == HotbarID_Shovel)
         {
-            set_cursor(CursorType_Custom, NULL, { 256.0f + (NK_CAST(nkF32, g_controller.selected) * HUD_ICON_WIDTH), HUD_ICON_HEIGHT, HUD_ICON_WIDTH, HUD_ICON_HEIGHT });
+            ImmClip clip = HUD_CLIP_ICON;
+            clip.x = NK_CAST(nkF32, g_controller.selected) * HUD_ICON_WIDTH;
+            set_cursor(CursorType_Custom, NULL, clip);
         }
         else
         {
@@ -400,7 +407,7 @@ GLOBAL void controller_draw(void)
     nkVec2 cursor_pos = get_window_mouse_pos();
 
     // Draw the highlighted tile.
-    if(!g_controller.panning && !g_controller.occluded && g_controller.selected != NO_SELECTION)
+    if(!g_controller.panning && g_controller.hovered == NO_SELECTION && g_controller.selected != NO_SELECTION)
     {
         nkVec2 pos = screen_to_world(cursor_pos);
 
@@ -450,8 +457,10 @@ GLOBAL void controller_draw(void)
 
         nkBool cannot_afford = (g_controller.money < slot.cost);
 
-        ImmClip clip = { 256.0f + NK_CAST(nkF32, i) * HUD_ICON_WIDTH, HUD_ICON_HEIGHT, HUD_ICON_WIDTH, HUD_ICON_HEIGHT };
+        ImmClip clip = HUD_CLIP_ICON;
+        clip.x = NK_CAST(nkF32, i) * HUD_ICON_WIDTH;
         if(cannot_afford) clip.y += HUD_ICON_HEIGHT;
+
         imm_texture_ex(texture, x,y, img_scale,img_scale, 0.0f, NULL, &clip, NK_V4_WHITE);
 
         imm_texture_ex(texture, x,y, img_scale,img_scale, nk_torad(NK_CAST(nkF32, angle)), NULL, &HUD_CLIP_SLOT, frame_color);
@@ -503,6 +512,63 @@ GLOBAL void controller_draw(void)
     draw_hud_stat(texture, x,y, icon_scale, hud_scale, HUD_CLIP_HEART, g_controller.health);
     draw_hud_stat(texture, x,y, icon_scale, hud_scale, HUD_CLIP_FLAG, g_controller.waves);
     draw_hud_stat(texture, x,y, icon_scale, hud_scale, HUD_CLIP_SKULL, g_controller.kills);
+
+    // If hovered over an icon then display its tooltip.
+    if(g_controller.hovered != NO_SELECTION && g_controller.selected == NO_SELECTION)
+    {
+        set_truetype_font_size(font, NK_CAST(nkS32, 10 * hud_scale));
+
+        const HotbarSlot& slot = g_controller.hotbar[g_controller.hovered];
+
+        nkF32 padding = (TOOLTIP_PADDING * hud_scale);
+
+        nkString cost_string = "Cost: $";
+        number_to_string_with_commas(&cost_string, slot.cost);
+
+        nkF32 tx = cursor_pos.x;
+        nkF32 ty = cursor_pos.y;
+        nkF32 tw = 0.0f;
+        nkF32 th = 0.0f;
+
+        tx += ((HUD_CLIP_POINTER.w * 0.5f) * img_scale);
+        ty += ((HUD_CLIP_POINTER.h * 0.5f) * img_scale);
+
+        // Calculate the size of the tooltip box.
+        tw  = nk_max(tw, get_truetype_text_width(font, slot.name));
+        tw  = nk_max(tw, get_truetype_text_width(font, cost_string.cstr));
+        tw  = nk_max(tw, get_truetype_text_width(font, slot.description));
+        tw += padding * 2.0f;
+
+        th += (get_truetype_text_height(font, slot.name) + padding);
+        th += (get_truetype_text_height(font, cost_string.cstr) + padding) * (slot.cost != 0);
+        th += get_truetype_text_height(font, slot.description);
+        th += padding * 2.0f;
+
+        // Draw the background.
+        imm_rect_filled(tx,ty,tw,th, { 0.0f,0.0f,0.0f,0.8f });
+
+        // Draw the text.
+        text_x = tx + padding;
+        text_y = ty + (padding * 0.5f);
+
+        text_y += get_truetype_line_height(font);
+
+        draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), slot.name, NK_V4_BLACK);
+        draw_truetype_text(font, text_x,text_y, slot.name, NK_V4_WHITE);
+
+        if(slot.cost > 0)
+        {
+            text_y += get_truetype_line_height(font) + padding;
+
+            draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), cost_string.cstr, NK_V4_BLACK);
+            draw_truetype_text(font, text_x, text_y, cost_string.cstr, NK_V4_YELLOW);
+        }
+
+        text_y += get_truetype_line_height(font) + padding;
+
+        draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), slot.description, NK_V4_BLACK);
+        draw_truetype_text(font, text_x, text_y, slot.description, { 0.7f,0.7f,0.7f,1.0f });
+    }
 }
 
 GLOBAL void controller_reset(void)

@@ -74,6 +74,7 @@ struct AppContext
     Shader       screen_shader;
     TrueTypeFont font;
     AppState     state;
+    AppState     state_target;
     nkF32        hud_scale;
 };
 
@@ -171,7 +172,8 @@ GLOBAL void app_init(void)
     // Allow the HUD to scale so that it is clearly visible on large displays.
     g_app.hud_scale = 2.0f;
 
-    g_app.state = AppState_Menu;
+    g_app.state        = AppState_Menu;
+    g_app.state_target = AppState_Menu;
 
     menu_init();
     game_init();
@@ -190,6 +192,12 @@ GLOBAL void app_quit(void)
 
 GLOBAL void app_tick(nkF32 dt)
 {
+    // Defer app changes to here to make sure we never end up with a frame where we tick in one state and draw in the other.
+    if(g_app.state != g_app.state_target)
+    {
+        g_app.state = g_app.state_target;
+    }
+
     set_cursor(CursorType_Pointer); // Always reset the cursor, other systems have to set it to what they want.
 
     cursor_tick(dt);
@@ -218,7 +226,7 @@ GLOBAL void app_draw(void)
 
 GLOBAL void set_app_state(AppState state)
 {
-    g_app.state = state;
+    g_app.state_target = state;
 }
 
 GLOBAL AppState get_app_state(void)

@@ -64,4 +64,9 @@ GLOBAL void set_cursor(CursorType type, Texture texture, ImmClip clip, nkF32 anc
     g_cursor.anchor_y = anchor_y;
 }
 
+GLOBAL CursorType get_cursor(void)
+{
+    return g_cursor.type;
+}
+
 /*////////////////////////////////////////////////////////////////////////////*/

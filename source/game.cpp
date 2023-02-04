@@ -109,10 +109,11 @@ GLOBAL void game_quit(void)
 
 GLOBAL void game_tick(nkF32 dt)
 {
+    controller_tick(dt);
+
     // If we're paused we don't want to update the game world.
     if(!g_game.paused)
     {
-        controller_tick(dt);
         world_tick(dt);
         entity_tick(dt);
         particle_tick(dt);
