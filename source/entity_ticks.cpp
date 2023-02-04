@@ -27,12 +27,12 @@ INTERNAL void spawn_bullet_at_target(EntityID id, nkF32 x, nkF32 y, const Entity
 
 DEF_ETICK(daisy)
 {
-    const nkF32 COOLDOWN = 3.0f;
+    const nkF32 ATTACK_COOLDOWN = 3.0f;
 
-    nkF32& shot_cooldown = e.timer0;
+    nkF32& attack_cooldown = e.timer0;
 
     // If we are fully grown then try and shoot any enemies that are close enough (pick the closest one).
-    if(plant_is_fully_grown(e) && shot_cooldown <= 0.0f)
+    if(plant_is_fully_grown(e) && attack_cooldown <= 0.0f)
     {
         nkF32 shortest_distance = FLT_MAX;
         nkF32 distance = 0.0f;
@@ -54,29 +54,29 @@ DEF_ETICK(daisy)
         if(target)
         {
             change_entity_state(e, EntityState_Attack);
-            shot_cooldown = COOLDOWN;
+            attack_cooldown = ATTACK_COOLDOWN;
             spawn_bullet_at_target(EntityID_Pollen, e.position.x,e.position.y, *target);
         }
     }
 
-    if(shot_cooldown > 0.0f)
+    if(attack_cooldown > 0.0f)
     {
-        shot_cooldown -= dt;
+        attack_cooldown -= dt;
     }
 }
 
 DEF_ETICK(bramble)
 {
-    const nkF32 COOLDOWN = 3.0f;
+    const nkF32 ATTACK_COOLDOWN = 3.0f;
 
     nkF32& attack_cooldown = e.timer0;
 
     if(attack_cooldown <= 0.0f)
     {
         nkU64 hit_entity = check_entity_collision(e, EntityType_Monster);
-        if(hit_entity != NK_U64_MAX)
+        if(hit_entity != NO_TARGET)
         {
-            attack_cooldown = COOLDOWN;
+            attack_cooldown = ATTACK_COOLDOWN;
 
             // The amount of damage dealth depends on the growth stage of the bramble.
             switch(e.current_phase)
@@ -103,7 +103,7 @@ DEF_ETICK(bramble)
 
 DEF_ETICK(walker)
 {
-    const nkF32 COOLDOWN = 1.8f;
+    const nkF32 ATTACK_COOLDOWN = 1.8f;
 
     nkF32& attack_cooldown = e.timer0;
 
@@ -115,19 +115,22 @@ DEF_ETICK(walker)
     {
         if(attack_cooldown <= 0.0f)
         {
-            attack_cooldown = COOLDOWN;
+            attack_cooldown = ATTACK_COOLDOWN;
             entity_damage(hit_index, e.damage);
         }
     }
     else
     {
-        // @Incomplete + @Speed: Don't hunt for the house each time, just store the target...
-        Entity* target = get_first_entity_with_id(EntityID_House);
-        if(target)
+        // Hunt for the base if we aren't already.
+        if(e.target == NO_TARGET)
         {
-            // Walk towards the house.
+            e.target = get_first_entity_index_with_id(EntityID_House);
+        }
+        if(e.target != NO_TARGET)
+        {
+            // Walk towards the house if we found it.
+            Entity* target = get_entity(e.target);
             nkVec2 dir = nk_normalize(target->position - e.position);
-
             e.velocity = dir * NK_CAST(nkF32, e.speed);
             e.flip = (dir.x < 0.0f) ? -1.0f : 1.0f; // Face the walking direction.
         }

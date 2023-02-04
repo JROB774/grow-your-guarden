@@ -1,7 +1,5 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
-// @Incomplete: The window size will effect how close together the buttons are placed, this is not very good...
-
 INTERNAL constexpr const nkChar* PAUSE_TITLE_TEXT  = "PAUSED!";
 INTERNAL constexpr const nkChar* PAUSE_RESUME_TEXT = "Resume";
 INTERNAL constexpr const nkChar* PAUSE_MENU_TEXT   = "Menu";

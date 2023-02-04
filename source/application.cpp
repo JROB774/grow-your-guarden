@@ -170,7 +170,6 @@ GLOBAL void app_init(void)
     // Hide the cursor (we have a custom one).
     show_cursor(NK_FALSE);
 
-    // @Incomplete: Hook up a way to change this (or do it dynamically)?
     // Allow the HUD to scale so that it is clearly visible on large displays.
     g_app.hud_scale = 2.0f;
 

@@ -3,6 +3,8 @@
 #define DEF_ETICK(name) INTERNAL void etick__##name(Entity& e, nkF32 dt)
 #define     ETICK(name) etick__##name
 
+INTERNAL constexpr nkU64 NO_TARGET = NK_U64_MAX;
+
 typedef nkU32 EntityID;
 
 // These are implemented as flags so that some functions can take in multiple types
@@ -44,6 +46,7 @@ struct Entity
     EntityType    type;
     EntityID      id;
     EntityState   state;         // Do not set this manually! Go through change_entity_state.
+    nkU64         target;        // Store the index of an entity to track, this can be used for anything.
     nkVec2        position;
     nkVec2        spawn;
     nkVec2        velocity;

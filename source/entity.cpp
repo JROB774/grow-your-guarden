@@ -39,6 +39,19 @@ INTERNAL void fully_kill_entity(Entity& e, nkU64 index)
     {
         nk_hashset_insert(&g_entity_manager.free_entity_slots, index);
     }
+
+    // Go through and unset any references to this entity as they are no longer valid.
+    // Handling this automatically here simplifies things a lot for the entity logic.
+    for(auto& e: g_entity_manager.entities)
+    {
+        if(e.id != EntityID_None && e.active && e.target != NO_TARGET)
+        {
+            if(!g_entity_manager.entities[e.target].active)
+            {
+                e.target = NO_TARGET;
+            }
+        }
+    }
 }
 
 GLOBAL void entity_init(void)
@@ -369,6 +382,7 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
     entity.type           = desc.type;
     entity.id             = id;
     entity.state          = EntityState_None; // Properly set further down!
+    entity.target         = NO_TARGET;
     entity.position       = { x,y };
     entity.spawn          = { x,y };
     entity.velocity       = { 0,0 };
