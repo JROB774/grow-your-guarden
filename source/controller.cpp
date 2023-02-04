@@ -259,9 +259,19 @@ GLOBAL void controller_tick(nkF32 dt)
                 {
                     if(g_controller.money >= spawn.cost)
                     {
-                        g_controller.selected = i;
-                        g_controller.watering = NK_FALSE;
-                        g_controller.removing = NK_FALSE;
+                        // Toggle the selection depending on if we are already selected or not.
+                        if(g_controller.selected == i)
+                        {
+                            g_controller.selected = NO_SELECTION;
+                            g_controller.watering = NK_FALSE;
+                            g_controller.removing = NK_FALSE;
+                        }
+                        else
+                        {
+                            g_controller.selected = i;
+                            g_controller.watering = NK_FALSE;
+                            g_controller.removing = NK_FALSE;
+                        }
                     }
                 }
             }
