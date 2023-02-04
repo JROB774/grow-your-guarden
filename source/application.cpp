@@ -190,7 +190,7 @@ GLOBAL void app_quit(void)
 
 GLOBAL void app_tick(nkF32 dt)
 {
-    set_default_cursor();
+    set_cursor(CursorType_Pointer); // Always reset the cursor, other systems have to set it to what they want.
 
     cursor_tick(dt);
 

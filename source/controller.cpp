@@ -34,8 +34,7 @@ struct Controller
     nkBool watering;
     nkBool removing;
 
-    Texture highlight_tex;
-    Sound   shovel_sfx[5];
+    Sound shovel_sfx[5];
 };
 
 INTERNAL Controller g_controller;
@@ -199,7 +198,6 @@ INTERNAL void draw_hud_stat(Texture texture, nkF32& x, nkF32& y, nkF32 icon_scal
 GLOBAL void controller_init(void)
 {
     // Pre-load a bunch of assets.
-    g_controller.highlight_tex = asset_manager_load<Texture>("highlight.png");
     g_controller.shovel_sfx[0] = asset_manager_load<Sound>("shovel_000.wav");
     g_controller.shovel_sfx[1] = asset_manager_load<Sound>("shovel_001.wav");
     g_controller.shovel_sfx[2] = asset_manager_load<Sound>("shovel_002.wav");
@@ -336,16 +334,15 @@ GLOBAL void controller_tick(nkF32 dt)
     {
         if(g_controller.watering)
         {
-            set_custom_cursor(NULL, HUD_CLIP_WATER);
+            set_cursor(CursorType_Custom, NULL, HUD_CLIP_WATER);
         }
         if(g_controller.removing)
         {
-            set_custom_cursor(NULL, HUD_CLIP_SHOVEL);
+            set_cursor(CursorType_Custom, NULL, HUD_CLIP_SHOVEL);
         }
         if(g_controller.selected != NO_SELECTION)
         {
-            ImmClip clip = { 256.0f + (NK_CAST(nkF32, g_controller.selected) * HUD_ICON_WIDTH), HUD_ICON_HEIGHT, HUD_ICON_WIDTH, HUD_ICON_HEIGHT };
-            set_custom_cursor(NULL, clip);
+            set_cursor(CursorType_Arrow);
         }
     }
 
@@ -369,6 +366,8 @@ GLOBAL void controller_draw(void)
         return;
     }
 
+    Texture texture = asset_manager_load<Texture>("hud.png");
+
     TrueTypeFont font = get_font();
 
     nkVec2 cursor_pos = get_window_mouse_pos();
@@ -384,13 +383,16 @@ GLOBAL void controller_draw(void)
         tile.y = NK_CAST(nkS32, floorf(pos.y / (NK_CAST(nkF32, TILE_HEIGHT))));
 
         // Make sure we can place at the spot.
+        nkVec4 color = NK_V4_RED;
         if(can_place_plant_at_position(tile.x, tile.y) || can_remove_plant_at_position(pos.x, pos.y) || can_water_plant_at_position(pos.x, pos.y))
         {
-            nkF32 tx = NK_CAST(nkF32, tile.x * TILE_WIDTH) + (NK_CAST(nkF32,TILE_WIDTH) * 0.5f);
-            nkF32 ty = NK_CAST(nkF32, tile.y * TILE_HEIGHT) + (NK_CAST(nkF32,TILE_HEIGHT) * 0.5f);
-
-            imm_texture(g_controller.highlight_tex, tx,ty);
+            color = NK_V4_YELLOW;
         }
+
+        nkF32 tx = NK_CAST(nkF32, tile.x * TILE_WIDTH) + (NK_CAST(nkF32,TILE_WIDTH) * 0.5f);
+        nkF32 ty = NK_CAST(nkF32, tile.y * TILE_HEIGHT) + (NK_CAST(nkF32,TILE_HEIGHT) * 0.5f);
+
+        imm_texture(texture, tx,ty, &HUD_CLIP_CURSOR, color);
     }
 
     // Unset the camera so that we render in screen-space for the HUD.
@@ -400,8 +402,6 @@ GLOBAL void controller_draw(void)
     // Other elements like text and general positioning need to still be scaled up, so we have these two variables to do it.
     nkF32 img_scale = get_hud_scale() / 4.0f;
     nkF32 hud_scale = get_hud_scale();
-
-    Texture texture = asset_manager_load<Texture>("hud.png");
 
     nkF32 x = ((HUD_CLIP_SLOT.w * 0.80f) * 0.5f) * img_scale;
     nkF32 y = ((HUD_CLIP_SLOT.h * 0.80f) * 0.5f) * img_scale;
@@ -420,11 +420,13 @@ GLOBAL void controller_draw(void)
         // If the slot is occupied then draw the icon for the plant otherwise just draw an empty slot.
         if(g_controller.hotbar[i].id == EntityID_None)
         {
-            imm_texture_ex(texture, x,y, img_scale,img_scale, nk_torad(NK_CAST(nkF32, angle)), NULL, &HUD_CLIP_SLOT);
+            imm_texture_ex(texture, x,y, img_scale,img_scale, nk_torad(NK_CAST(nkF32, angle)), NULL, &HUD_CLIP_SLOT, NK_V4_BLACK);
         }
         else
         {
             const PlantSpawn& spawn = g_controller.hotbar[i];
+
+            nkVec4 frame_color = (g_controller.selected == i) ? NK_V4_YELLOW : NK_V4_BLACK;
 
             nkBool cannot_afford = (g_controller.money < spawn.cost);
 
@@ -432,7 +434,7 @@ GLOBAL void controller_draw(void)
             if(cannot_afford) clip.y += HUD_ICON_HEIGHT;
             imm_texture_ex(texture, x,y, img_scale,img_scale, 0.0f, NULL, &clip, NK_V4_WHITE);
 
-            imm_texture_ex(texture, x,y, img_scale,img_scale, nk_torad(NK_CAST(nkF32, angle)), NULL, &HUD_CLIP_SLOT);
+            imm_texture_ex(texture, x,y, img_scale,img_scale, nk_torad(NK_CAST(nkF32, angle)), NULL, &HUD_CLIP_SLOT, frame_color);
 
             // Draw the price of the plant.
             set_truetype_font_size(font, NK_CAST(nkS32, 10 * hud_scale));
@@ -447,7 +449,10 @@ GLOBAL void controller_draw(void)
 
             draw_truetype_text(font, text_x+(2*hud_scale),text_y+(1*hud_scale), string.cstr, NK_V4_BLACK);
             draw_truetype_text(font, text_x+(2*hud_scale),text_y-(1*hud_scale), string.cstr, NK_V4_BLACK);
-            draw_truetype_text(font, text_x,              text_y,               string.cstr, NK_V4_WHITE * text_color);
+            draw_truetype_text(font, text_x-(1*hud_scale),text_y+(1*hud_scale), string.cstr, NK_V4_BLACK);
+            draw_truetype_text(font, text_x-(1*hud_scale),text_y-(1*hud_scale), string.cstr, NK_V4_BLACK);
+
+            draw_truetype_text(font, text_x,text_y, string.cstr, NK_V4_WHITE * text_color);
         }
 
         angle = (angle + 90) % 360;
@@ -545,6 +550,22 @@ GLOBAL void unset_controller_camera(void)
 GLOBAL void increment_kill_count(void)
 {
     g_controller.kills++;
+}
+
+GLOBAL EntityID get_selected_plant(void)
+{
+    if(g_controller.selected == NO_SELECTION) return EntityID_None;
+
+    nkVec2 pos = screen_to_world(get_window_mouse_pos());
+
+    iPoint tile;
+
+    tile.x = NK_CAST(nkS32, floorf(pos.x / (NK_CAST(nkF32, TILE_WIDTH))));
+    tile.y = NK_CAST(nkS32, floorf(pos.y / (NK_CAST(nkF32, TILE_HEIGHT))));
+
+    if(!can_place_plant_at_position(tile.x, tile.y)) return EntityID_None;
+
+    return g_controller.hotbar[g_controller.selected].id;
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/
