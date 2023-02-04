@@ -1,8 +1,8 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
-INTERNAL constexpr nkS32 STARTING_MONEY = 20000;
+INTERNAL constexpr nkU32 NO_SELECTION = NK_U32_MAX;
 
-INTERNAL constexpr nkU32 HOTBAR_SIZE = 8;
+INTERNAL constexpr nkS32 STARTING_MONEY = 20000;
 
 INTERNAL constexpr nkF32 CAMERA_START_ZOOM       = 0.50f;
 INTERNAL constexpr nkF32 CAMERA_MIN_ZOOM         = 0.25f;
@@ -11,9 +11,30 @@ INTERNAL constexpr nkF32 CAMERA_ZOOM_SENSITIVITY = 0.15f;
 INTERNAL constexpr nkF32 CAMERA_ZOOM_SPEED       = 12.0f;
 INTERNAL constexpr nkF32 CAMERA_PAN_SPEED        = 12.0f;
 
+NK_ENUM(HotbarID, nkU32)
+{
+    HotbarID_Daisy,
+    HotbarID_Bramble,
+    HotbarID_None0,
+    HotbarID_None1,
+    HotbarID_None2,
+    HotbarID_None3,
+    HotbarID_Fertilizer,
+    HotbarID_Shovel,
+    HotbarID_TOTAL
+};
+
+struct HotbarSlot
+{
+    const nkChar* name;
+    const nkChar* description;
+    nkS32         cost;
+    EntityID      spawn_id; // Some slots will not care about this (such as the tool/item slots).
+};
+
 struct Controller
 {
-    PlantSpawn hotbar[HOTBAR_SIZE];
+    HotbarSlot hotbar[HotbarID_TOTAL];
 
     nkU32 selected;
 
@@ -31,8 +52,6 @@ struct Controller
 
     nkBool panning;
     nkBool occluded;
-    nkBool watering;
-    nkBool removing;
 
     Sound shovel_sfx[5];
 };
@@ -94,7 +113,8 @@ INTERNAL nkBool can_place_plant_at_position(nkS32 tile_x, nkS32 tile_y)
     // If nothing is selected then there's nothing to place.
     if(g_controller.selected == NO_SELECTION) return NK_FALSE;
 
-    EntityID id = g_controller.hotbar[g_controller.selected].id;
+    EntityID id = g_controller.hotbar[g_controller.selected].spawn_id;
+    if(id == EntityID_None) return NK_FALSE;
 
     const EntityDesc& desc = ENTITY_TABLE[id];
 
@@ -114,19 +134,20 @@ INTERNAL nkBool can_place_plant_at_position(nkS32 tile_x, nkS32 tile_y)
 
 INTERNAL nkBool can_remove_plant_at_position(nkF32 x, nkF32 y)
 {
-    return (g_controller.removing && (check_entity_bounds(x,y,1,1, EntityType_Plant) != NK_U64_MAX));
+    return (g_controller.selected == HotbarID_Shovel && (check_entity_bounds(x,y,1,1, EntityType_Plant) != NK_U64_MAX));
 }
 
-INTERNAL nkBool can_water_plant_at_position(nkF32 x, nkF32 y)
+INTERNAL nkBool can_fertilize_plant_at_position(nkF32 x, nkF32 y)
 {
-    return (g_controller.watering && (check_entity_bounds(x,y,1,1, EntityType_Plant) != NK_U64_MAX));
+    return (g_controller.selected == HotbarID_Fertilizer && (check_entity_bounds(x,y,1,1, EntityType_Plant) != NK_U64_MAX));
 }
 
-INTERNAL void place_plant(nkS32 tile_x, nkS32 tile_y)
+INTERNAL nkBool place_plant(nkS32 tile_x, nkS32 tile_y)
 {
-    if(!can_place_plant_at_position(tile_x, tile_y)) return;
+    if(!can_place_plant_at_position(tile_x, tile_y)) return NK_FALSE;
 
-    EntityID id = g_controller.hotbar[g_controller.selected].id;
+    EntityID id = g_controller.hotbar[g_controller.selected].spawn_id;
+    if(id == EntityID_None) return NK_FALSE;
 
     const EntityDesc& desc = ENTITY_TABLE[id];
 
@@ -138,19 +159,13 @@ INTERNAL void place_plant(nkS32 tile_x, nkS32 tile_y)
 
     entity_spawn(id, x,y);
 
-    // If we no longer have enough money to purchase another, just de-select it.
-    nkS32 cost = g_controller.hotbar[g_controller.selected].cost;
-    g_controller.money -= cost;
-    if(g_controller.money < cost)
-    {
-        g_controller.selected = NO_SELECTION;
-    }
+    return NK_TRUE;
 }
 
-INTERNAL void remove_plant(nkF32 x, nkF32 y)
+INTERNAL nkBool remove_plant(nkF32 x, nkF32 y)
 {
     nkU64 entity_index = check_entity_bounds(x,y,1,1, EntityType_Plant);
-    if(entity_index == NK_U64_MAX) return; // Nothing at the spot to remove.
+    if(entity_index == NK_U64_MAX) return NK_FALSE; // Nothing at the spot to remove.
 
     EntityID entity_id = get_entity(entity_index)->id;
 
@@ -162,18 +177,21 @@ INTERNAL void remove_plant(nkF32 x, nkF32 y)
     // Get back some of the money spent on the entity.
     for(nkU64 i=0,n=NK_ARRAY_SIZE(g_controller.hotbar); i<n; ++i)
     {
-        const PlantSpawn& spawn = g_controller.hotbar[i];
-        if(spawn.id == entity_id)
+        const HotbarSlot& slot = g_controller.hotbar[i];
+        if(slot.spawn_id == entity_id)
         {
-            g_controller.money += (spawn.cost / 2);
+            g_controller.money += (slot.cost / 2);
             break;
         }
     }
+
+    return NK_TRUE;
 }
 
-INTERNAL void water_plant(nkF32 x, nkF32 y)
+INTERNAL nkBool fertilize_plant(nkF32 x, nkF32 y)
 {
     // @Incomplete: Does nothing currently...
+    return NK_FALSE;
 }
 
 INTERNAL void draw_hud_stat(Texture texture, nkF32& x, nkF32& y, nkF32 icon_scale, nkF32 hud_scale, ImmClip clip, nkS32 stat)
@@ -203,6 +221,27 @@ GLOBAL void controller_init(void)
     g_controller.shovel_sfx[2] = asset_manager_load<Sound>("shovel_002.wav");
     g_controller.shovel_sfx[3] = asset_manager_load<Sound>("shovel_003.wav");
     g_controller.shovel_sfx[4] = asset_manager_load<Sound>("shovel_004.wav");
+
+    // Fill out the hotbar slot information.
+    g_controller.hotbar[HotbarID_Daisy     ].name        = "Daisy";
+    g_controller.hotbar[HotbarID_Daisy     ].description = "...";
+    g_controller.hotbar[HotbarID_Daisy     ].cost        = 100;
+    g_controller.hotbar[HotbarID_Daisy     ].spawn_id    = EntityID_Daisy;
+
+    g_controller.hotbar[HotbarID_Bramble   ].name        = "Bramble";
+    g_controller.hotbar[HotbarID_Bramble   ].description = "...";
+    g_controller.hotbar[HotbarID_Bramble   ].cost        = 50;
+    g_controller.hotbar[HotbarID_Bramble   ].spawn_id    = EntityID_Bramble;
+
+    g_controller.hotbar[HotbarID_Fertilizer].name        = "Fertilizer";
+    g_controller.hotbar[HotbarID_Fertilizer].description = "...";
+    g_controller.hotbar[HotbarID_Fertilizer].cost        = 350;
+    g_controller.hotbar[HotbarID_Fertilizer].spawn_id    = EntityID_None;
+
+    g_controller.hotbar[HotbarID_Shovel    ].name        = "Shovel";
+    g_controller.hotbar[HotbarID_Shovel    ].description = "...";
+    g_controller.hotbar[HotbarID_Shovel    ].cost        = 0;
+    g_controller.hotbar[HotbarID_Shovel    ].spawn_id    = EntityID_None;
 }
 
 GLOBAL void controller_tick(nkF32 dt)
@@ -241,7 +280,7 @@ GLOBAL void controller_tick(nkF32 dt)
     nkF32 x = ((HUD_CLIP_SLOT.w * 0.80f) * 0.5f) * img_scale;
     nkF32 y = ((HUD_CLIP_SLOT.h * 0.80f) * 0.5f) * img_scale;
 
-    for(nkU32 i=0; i<HOTBAR_SIZE; ++i)
+    for(HotbarID i=0; i<HotbarID_TOTAL; ++i)
     {
         nkF32 rx = x - ((HUD_ICON_WIDTH * 0.5f) * img_scale);
         nkF32 ry = y - ((HUD_ICON_HEIGHT * 0.5f) * img_scale);
@@ -254,61 +293,23 @@ GLOBAL void controller_tick(nkF32 dt)
 
             if(is_mouse_button_pressed(MouseButton_Left))
             {
-                const PlantSpawn& spawn = g_controller.hotbar[i];
-                if(spawn.id != EntityID_None)
+                const HotbarSlot& slot = g_controller.hotbar[i];
+                if(g_controller.money >= slot.cost)
                 {
-                    if(g_controller.money >= spawn.cost)
+                    // Toggle the selection depending on if we are already selected or not.
+                    if(g_controller.selected == i)
                     {
-                        // Toggle the selection depending on if we are already selected or not.
-                        if(g_controller.selected == i)
-                        {
-                            g_controller.selected = NO_SELECTION;
-                            g_controller.watering = NK_FALSE;
-                            g_controller.removing = NK_FALSE;
-                        }
-                        else
-                        {
-                            g_controller.selected = i;
-                            g_controller.watering = NK_FALSE;
-                            g_controller.removing = NK_FALSE;
-                        }
+                        g_controller.selected = NO_SELECTION;
+                    }
+                    else
+                    {
+                        g_controller.selected = i;
                     }
                 }
             }
         }
 
         x += ((HUD_CLIP_SLOT.w * 0.65f) * img_scale);
-    }
-
-    // @Incomplete: Tools...
-    /*
-    // Select the hovered plant/tool.
-    if(g_controller.occluded && is_mouse_button_pressed(MouseButton_Left))
-    {
-        ix += 8.0f * hud_scale;
-        if(point_vs_rect(cursor_pos, ix,iy,32.0f*hud_scale,32.0f*hud_scale))
-        {
-            g_controller.selected = NO_SELECTION;
-            g_controller.watering = !g_controller.watering;
-            g_controller.removing = NK_FALSE;
-        }
-
-        ix += 40.0f * hud_scale;
-        if(point_vs_rect(cursor_pos, ix,iy,32.0f*hud_scale,32.0f*hud_scale))
-        {
-            g_controller.selected = NO_SELECTION;
-            g_controller.watering = NK_FALSE;
-            g_controller.removing = !g_controller.removing;
-        }
-    }
-    */
-
-    // De-select current plant/tool.
-    if(is_mouse_button_pressed(MouseButton_Right))
-    {
-        g_controller.selected = NO_SELECTION;
-        g_controller.watering = NK_FALSE;
-        g_controller.removing = NK_FALSE;
     }
 
     // Place current plant / perform the current tool action.
@@ -318,39 +319,57 @@ GLOBAL void controller_tick(nkF32 dt)
 
         if(g_controller.selected != NO_SELECTION)
         {
-            const PlantSpawn& spawn = g_controller.hotbar[g_controller.selected];
-            if(g_controller.money >= spawn.cost)
+            const HotbarSlot& slot = g_controller.hotbar[g_controller.selected];
+            if(g_controller.money >= slot.cost)
             {
-                iPoint tile;
+                nkBool success = NK_FALSE;
 
-                tile.x = NK_CAST(nkS32, floorf(pos.x / NK_CAST(nkF32, TILE_WIDTH)));
-                tile.y = NK_CAST(nkS32, floorf(pos.y / NK_CAST(nkF32, TILE_HEIGHT)));
+                if(g_controller.selected == HotbarID_Fertilizer)
+                {
+                    success = fertilize_plant(pos.x, pos.y);
+                }
+                else if(g_controller.selected == HotbarID_Shovel)
+                {
+                    success = remove_plant(pos.x, pos.y);
+                }
+                else
+                {
+                    iPoint tile;
 
-                place_plant(tile.x, tile.y);
+                    tile.x = NK_CAST(nkS32, floorf(pos.x / NK_CAST(nkF32, TILE_WIDTH)));
+                    tile.y = NK_CAST(nkS32, floorf(pos.y / NK_CAST(nkF32, TILE_HEIGHT)));
+
+                    success = place_plant(tile.x, tile.y);
+                }
+
+                // If the action was successful then subtract the appropiate funds.
+                if(success)
+                {
+                    g_controller.money -= slot.cost;
+                    if(g_controller.money < slot.cost)
+                    {
+                        // If we no longer have enough money to purchase another of what we have selected, just de-select it.
+                        g_controller.selected = NO_SELECTION;
+                    }
+                }
             }
-        }
-        if(g_controller.watering)
-        {
-            water_plant(pos.x, pos.y);
-        }
-        if(g_controller.removing)
-        {
-            remove_plant(pos.x, pos.y);
         }
     }
 
-    // Update the cursor graphic.
-    if(!is_game_paused())
+    // De-select current plant/tool.
+    if(is_mouse_button_pressed(MouseButton_Right))
     {
-        if(g_controller.watering)
+        g_controller.selected = NO_SELECTION;
+    }
+
+    // Update the cursor graphic.
+    if(!is_game_paused() && g_controller.selected != NO_SELECTION)
+    {
+        if(g_controller.selected == HotbarID_Fertilizer || g_controller.selected == HotbarID_Shovel)
         {
-            set_cursor(CursorType_Custom, NULL, HUD_CLIP_WATER);
+            set_cursor(CursorType_Custom, NULL, { 256.0f + (NK_CAST(nkF32, g_controller.selected) * HUD_ICON_WIDTH), HUD_ICON_HEIGHT, HUD_ICON_WIDTH, HUD_ICON_HEIGHT });
         }
-        if(g_controller.removing)
-        {
-            set_cursor(CursorType_Custom, NULL, HUD_CLIP_SHOVEL);
-        }
-        if(g_controller.selected != NO_SELECTION)
+        else
         {
             set_cursor(CursorType_Arrow);
         }
@@ -383,7 +402,7 @@ GLOBAL void controller_draw(void)
     nkVec2 cursor_pos = get_window_mouse_pos();
 
     // Draw the highlighted tile.
-    if(!g_controller.panning && !g_controller.occluded && (g_controller.selected != NO_SELECTION || g_controller.watering || g_controller.removing))
+    if(!g_controller.panning && !g_controller.occluded && g_controller.selected != NO_SELECTION)
     {
         nkVec2 pos = screen_to_world(cursor_pos);
 
@@ -394,7 +413,7 @@ GLOBAL void controller_draw(void)
 
         // Make sure we can place at the spot.
         nkVec4 color = NK_V4_RED;
-        if(can_place_plant_at_position(tile.x, tile.y) || can_remove_plant_at_position(pos.x, pos.y) || can_water_plant_at_position(pos.x, pos.y))
+        if(can_place_plant_at_position(tile.x, tile.y) || can_remove_plant_at_position(pos.x, pos.y) || can_fertilize_plant_at_position(pos.x, pos.y))
         {
             color = NK_V4_YELLOW;
         }
@@ -418,7 +437,7 @@ GLOBAL void controller_draw(void)
 
     nkS32 angle = 0;
 
-    for(nkU32 i=0; i<HOTBAR_SIZE; ++i)
+    for(HotbarID i=0; i<HotbarID_TOTAL; ++i)
     {
         nkF32 rx = x - ((HUD_ICON_WIDTH * 0.5f) * img_scale);
         nkF32 ry = y - ((HUD_ICON_HEIGHT * 0.5f) * img_scale);
@@ -427,30 +446,25 @@ GLOBAL void controller_draw(void)
 
         imm_rect_filled(rx,ry,rw,rh, { 0.0f,0.0f,0.0f,0.5f });
 
-        // If the slot is occupied then draw the icon for the plant otherwise just draw an empty slot.
-        if(g_controller.hotbar[i].id == EntityID_None)
+        const HotbarSlot& slot = g_controller.hotbar[i];
+
+        nkVec4 frame_color = (g_controller.selected == i) ? NK_V4_YELLOW : NK_V4_BLACK;
+
+        nkBool cannot_afford = (g_controller.money < slot.cost);
+
+        ImmClip clip = { 256.0f + NK_CAST(nkF32, i) * HUD_ICON_WIDTH, HUD_ICON_HEIGHT, HUD_ICON_WIDTH, HUD_ICON_HEIGHT };
+        if(cannot_afford) clip.y += HUD_ICON_HEIGHT;
+        imm_texture_ex(texture, x,y, img_scale,img_scale, 0.0f, NULL, &clip, NK_V4_WHITE);
+
+        imm_texture_ex(texture, x,y, img_scale,img_scale, nk_torad(NK_CAST(nkF32, angle)), NULL, &HUD_CLIP_SLOT, frame_color);
+
+        // Draw the price of the slot if it has one.
+        if(slot.cost > 0)
         {
-            imm_texture_ex(texture, x,y, img_scale,img_scale, nk_torad(NK_CAST(nkF32, angle)), NULL, &HUD_CLIP_SLOT, NK_V4_BLACK);
-        }
-        else
-        {
-            const PlantSpawn& spawn = g_controller.hotbar[i];
-
-            nkVec4 frame_color = (g_controller.selected == i) ? NK_V4_YELLOW : NK_V4_BLACK;
-
-            nkBool cannot_afford = (g_controller.money < spawn.cost);
-
-            ImmClip clip = { 256.0f + NK_CAST(nkF32, i) * HUD_ICON_WIDTH, HUD_ICON_HEIGHT, HUD_ICON_WIDTH, HUD_ICON_HEIGHT };
-            if(cannot_afford) clip.y += HUD_ICON_HEIGHT;
-            imm_texture_ex(texture, x,y, img_scale,img_scale, 0.0f, NULL, &clip, NK_V4_WHITE);
-
-            imm_texture_ex(texture, x,y, img_scale,img_scale, nk_torad(NK_CAST(nkF32, angle)), NULL, &HUD_CLIP_SLOT, frame_color);
-
-            // Draw the price of the plant.
             set_truetype_font_size(font, NK_CAST(nkS32, 10 * hud_scale));
 
             nkString string;
-            number_to_string_with_commas(&string, spawn.cost);
+            number_to_string_with_commas(&string, slot.cost);
 
             nkVec4 text_color = (cannot_afford) ? nkVec4 { 0.5f,0.5f,0.5f,1.0f } : nkVec4 { 1.0f,1.0f,1.0f,1.0f };
 
@@ -469,14 +483,6 @@ GLOBAL void controller_draw(void)
 
         x += ((HUD_CLIP_SLOT.w * 0.65f) * img_scale);
     }
-
-    // @Incomplete: ...
-    /*
-    ix += 8.0f * hud_scale;
-    imm_texture_ex(g_controller.watercan_tex, ix,iy, img_scale,img_scale, 0.0f, NULL);
-    ix += 40.0f * hud_scale;
-    imm_texture_ex(g_controller.shovel_tex, ix,iy, img_scale,img_scale, 0.0f, NULL);
-    */
 
     // Draw the money counter.
     set_truetype_font_size(font, NK_CAST(nkS32, 15 * hud_scale));
@@ -517,10 +523,6 @@ GLOBAL void controller_reset(void)
     g_controller.kills  = 0;
     g_controller.waves  = 0;
     g_controller.health = NK_CAST(nkS32, ENTITY_TABLE[EntityID_House].health);
-
-    // @Incomplete: Just giving some plants for testing.
-    g_controller.hotbar[0] = { EntityID_Daisy,  100 };
-    g_controller.hotbar[1] = { EntityID_Bramble, 50 };
 
     g_controller.selected = NO_SELECTION;
 }
@@ -575,7 +577,7 @@ GLOBAL EntityID get_selected_plant(void)
 
     if(!can_place_plant_at_position(tile.x, tile.y)) return EntityID_None;
 
-    return g_controller.hotbar[g_controller.selected].id;
+    return g_controller.hotbar[g_controller.selected].spawn_id;
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/
