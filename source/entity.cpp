@@ -267,6 +267,21 @@ GLOBAL void entity_draw(void)
         nkVec4 color = (e->damage_timer > 0.0f) ? NK_V4_RED : NK_V4_WHITE;
 
         imm_texture_ex(texture, ex,ey - e->z_depth, e->flip, 1.0f, 0.0f, NULL, &clip, color);
+
+        // A special case is made for the home tree. We draw different mouths on top of the base image.
+        if(e->id == EntityID_HomeTree)
+        {
+            ImmClip mouth_clip = { 1280.0f, 0.0f, 420.0f, 128.0f };
+            if(e->state == EntityState_Hurt || e->state == EntityState_Dead)
+            {
+                mouth_clip.y += 128.0f;
+            }
+
+            nkF32 mx = ex - (1280 * 0.5f) +  652.0f;
+            nkF32 my = ey - (1280 * 0.5f) + 1006.0f;
+
+            imm_texture_ex(texture, mx,my - e->z_depth, e->flip, 1.0f, 0.0f, NULL, &mouth_clip, color);
+        }
     }
 
     // Draw debug colliders on top.
