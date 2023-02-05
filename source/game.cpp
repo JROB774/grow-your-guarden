@@ -192,11 +192,6 @@ GLOBAL void game_quit(void)
 
 GLOBAL void game_tick(nkF32 dt)
 {
-    if(is_key_pressed(KeyCode_F1))
-    {
-        g_game.game_over = NK_TRUE;
-    }
-
     if(!g_game.game_over)
     {
         controller_tick(dt);
