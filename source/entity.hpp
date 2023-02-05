@@ -110,6 +110,9 @@ struct EntityDesc
     const nkChar* death_decal;
     nkS32         death_decal_min;
     nkS32         death_decal_max;
+    nkS32         coin_chance;
+    nkS32         coin_min;
+    nkS32         coin_max;
 };
 
 GLOBAL void  entity_init  (void);

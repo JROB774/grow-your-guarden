@@ -49,6 +49,9 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Death Decal        */ NULL,
 /* Death Decal Min    */ 0,
 /* Death Decal Max    */ 0,
+/* Coin Drop Chance   */ 0,
+/* Coin Drop Min      */ 0,
+/* Coin Drop Max      */ 0,
 },
 
 // EntityID_Daisy
@@ -76,6 +79,9 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Death Decal        */ NULL,
 /* Death Decal Min    */ 0,
 /* Death Decal Max    */ 0,
+/* Coin Drop Chance   */ 0,
+/* Coin Drop Min      */ 0,
+/* Coin Drop Max      */ 0,
 },
 
 // EntityID_Bramble
@@ -103,6 +109,9 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Death Decal        */ NULL,
 /* Death Decal Min    */ 0,
 /* Death Decal Max    */ 0,
+/* Coin Drop Chance   */ 0,
+/* Coin Drop Min      */ 0,
+/* Coin Drop Max      */ 0,
 },
 
 // EntityID_Walker
@@ -130,6 +139,9 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Death Decal        */ "tar_splat_large",
 /* Death Decal Min    */ 8,
 /* Death Decal Max    */ 12,
+/* Coin Drop Chance   */ 20,
+/* Coin Drop Min      */ 1,
+/* Coin Drop Max      */ 4,
 },
 
 // EntityID_Pollen
@@ -157,6 +169,9 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Death Decal        */ NULL,
 /* Death Decal Min    */ 0,
 /* Death Decal Max    */ 0,
+/* Coin Drop Chance   */ 0,
+/* Coin Drop Min      */ 0,
+/* Coin Drop Max      */ 0,
 },
 
 // EntityID_HomeTree
@@ -184,6 +199,9 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Death Decal        */ NULL,
 /* Death Decal Min    */ 0,
 /* Death Decal Max    */ 0,
+/* Coin Drop Chance   */ 0,
+/* Coin Drop Min      */ 0,
+/* Coin Drop Max      */ 0,
 },
 
 // EntityID_CoinCopper
@@ -211,6 +229,9 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Death Decal        */ NULL,
 /* Death Decal Min    */ 0,
 /* Death Decal Max    */ 0,
+/* Coin Drop Chance   */ 0,
+/* Coin Drop Min      */ 0,
+/* Coin Drop Max      */ 0,
 },
 
 // EntityID_CoinSilver
@@ -238,6 +259,9 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Death Decal        */ NULL,
 /* Death Decal Min    */ 0,
 /* Death Decal Max    */ 0,
+/* Coin Drop Chance   */ 0,
+/* Coin Drop Min      */ 0,
+/* Coin Drop Max      */ 0,
 },
 
 // EntityID_CoinCopper
@@ -265,6 +289,9 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Death Decal        */ NULL,
 /* Death Decal Min    */ 0,
 /* Death Decal Max    */ 0,
+/* Coin Drop Chance   */ 0,
+/* Coin Drop Min      */ 0,
+/* Coin Drop Max      */ 0,
 },
 
 }; // ENTITY_TABLE

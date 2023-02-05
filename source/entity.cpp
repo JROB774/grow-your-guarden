@@ -428,37 +428,38 @@ GLOBAL void entity_kill(nkU64 index)
             decal_spawn(desc.death_decal, x,y,w,h, desc.death_decal_min, desc.death_decal_max, 15.0f,20.0f);
         }
 
-        // Increment the kill count if it's a monster, and potentially drop money.
+        // Increment the kill count if it's a monster.
         if(e->type == EntityType_Monster)
         {
             increment_kill_count();
+        }
 
-            if(rng_s32(0,100) <= 15)
+        // Potentially spawn some coins!
+        if(rng_s32(1,100) <= desc.coin_chance)
+        {
+            nkS32 count = rng_s32(desc.coin_min, desc.coin_max);
+            for(nkS32 i=0; i<count; ++i)
             {
-                nkS32 count = rng_s32(1,5);
-                for(nkS32 i=0; i<count; ++i)
-                {
-                    EntityID id = EntityID_None;
+                EntityID id = EntityID_None;
 
-                    nkF32 x = rng_f32(e->position.x - e->radius, e->position.x + e->radius);
-                    nkF32 y = rng_f32(e->position.y - e->radius, e->position.y + e->radius);
-                    nkF32 z = rng_f32(e->z_depth+50 - e->radius, e->z_depth+50 + e->radius);
+                nkF32 x = rng_f32(e->position.x - e->radius, e->position.x + e->radius);
+                nkF32 y = rng_f32(e->position.y - e->radius, e->position.y + e->radius);
+                nkF32 z = rng_f32(e->z_depth+50 - e->radius, e->z_depth+50 + e->radius);
 
-                    if(z < 0.0f) z = 0.0f;
+                if(z < 0.0f) z = 0.0f;
 
-                    nkS32 type = rng_s32(0,100);
+                nkS32 type = rng_s32(0,100);
 
-                    if(type >=  0) id = EntityID_CoinCopper;
-                    if(type >= 65) id = EntityID_CoinSilver;
-                    if(type >= 90) id = EntityID_CoinGold;
+                if(type >=  0) id = EntityID_CoinCopper;
+                if(type >= 65) id = EntityID_CoinSilver;
+                if(type >= 90) id = EntityID_CoinGold;
 
-                    nkU64 coin_index = entity_spawn(id, x,y,z);
-                    Entity* coin = get_entity(coin_index);
+                nkU64 coin_index = entity_spawn(id, x,y,z);
+                Entity* coin = get_entity(coin_index);
 
-                    // Apply some force to the coin to make it fly out of the monster.
-                    coin->velocity = nk_normalize(nk_rotate(NK_V2_UNIT_X, rng_f32(0.0f, NK_TAU_F32))) * rng_f32(150,400);
-                    coin->thrust   = rng_f32(1200.0f,1400.0f);
-                }
+                // Apply some force to the coin to make it fly out of the monster.
+                coin->velocity = nk_normalize(nk_rotate(NK_V2_UNIT_X, rng_f32(0.0f, NK_TAU_F32))) * rng_f32(150,400);
+                coin->thrust   = rng_f32(1200.0f,1400.0f);
             }
         }
     }
