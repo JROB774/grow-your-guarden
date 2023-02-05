@@ -172,11 +172,17 @@ GLOBAL void entity_tick(nkF32 dt)
             // Do the entity's custom update logic.
             if(desc.tick)
             {
-                desc.tick(e, dt);
+                desc.tick(e, index, dt);
             }
 
             // Apply velocity.
             e.position += e.velocity * dt;
+            e.z_depth += e.thrust * dt;
+
+            if(e.z_depth < 0.0f)
+            {
+                e.z_depth = 0.0f;
+            }
 
             // Update state and animation logic.
             update_animation(&e.anim_state, dt);
@@ -216,7 +222,7 @@ GLOBAL void entity_draw(void)
 
     for(auto& e: g_entity_manager.entities)
     {
-        if(e.id != EntityID_None && e.active)
+        if(e.id != EntityID_None && e.active && !NK_CHECK_FLAGS(e.flags, EntityFlag_Hidden))
         {
             nk_array_append(&entity_draw_list, &e);
         }
@@ -228,8 +234,8 @@ GLOBAL void entity_draw(void)
     imm_begin_texture_batch(g_entity_manager.shadow_texture);
     for(Entity* e: entity_draw_list)
     {
-        // Only bullets and monsters have shadows.
-        if((e->type == EntityType_Monster || e->type == EntityType_Bullet) && (e->state != EntityState_Dead))
+        // Only bullets, monsters, and items have shadows.
+        if((e->type == EntityType_Monster || e->type == EntityType_Bullet || e->type == EntityType_Item) && (e->state != EntityState_Dead))
         {
             nkVec4 shadow_color = { 1.0f,1.0f,1.0f,0.25f };
 
@@ -241,7 +247,6 @@ GLOBAL void entity_draw(void)
             {
                 scale *= 0.65f; // Make bullet shadows even smaller because it looks nice.
             }
-
 
             imm_texture_batched_ex(pos_x,pos_y, scale,scale*0.75f, 0.0f, NULL, NULL, shadow_color);
         }
@@ -277,7 +282,7 @@ GLOBAL void entity_draw(void)
                 case EntityType_Monster: collider_color = { 1.0f,0.0f,0.0f,0.5f }; break;
                 case EntityType_Base:    collider_color = { 0.0f,0.0f,1.0f,0.5f }; break;
                 case EntityType_Bullet:  collider_color = { 1.0f,1.0f,0.0f,0.5f }; break;
-                case EntityType_Object:  collider_color = { 0.0f,1.0f,1.0f,0.5f }; break;
+                case EntityType_Item:    collider_color = { 0.0f,1.0f,1.0f,0.5f }; break;
             }
 
             nkF32 pos_x = e->position.x;
@@ -364,15 +369,43 @@ GLOBAL void entity_kill(nkU64 index)
             decal_spawn(desc.death_decal, x,y,w,h, desc.death_decal_min, desc.death_decal_max, 15.0f,20.0f);
         }
 
-        // Increment the kill count if it's a monster.
+        // Increment the kill count if it's a monster, and potentially drop money.
         if(e->type == EntityType_Monster)
         {
             increment_kill_count();
+
+            if(rng_s32(0,100) <= 15)
+            {
+                nkS32 count = rng_s32(1,5);
+                for(nkS32 i=0; i<count; ++i)
+                {
+                    EntityID id = EntityID_None;
+
+                    nkF32 x = rng_f32(e->position.x - e->radius, e->position.x + e->radius);
+                    nkF32 y = rng_f32(e->position.y - e->radius, e->position.y + e->radius);
+                    nkF32 z = rng_f32(e->z_depth+50 - e->radius, e->z_depth+50 + e->radius);
+
+                    if(z < 0.0f) z = 0.0f;
+
+                    nkS32 type = rng_s32(0,100);
+
+                    if(type >=  0) id = EntityID_CoinCopper;
+                    if(type >= 65) id = EntityID_CoinSilver;
+                    if(type >= 90) id = EntityID_CoinGold;
+
+                    nkU64 coin_index = entity_spawn(id, x,y,z);
+                    Entity* coin = get_entity(coin_index);
+
+                    // Apply some force to the coin to make it fly out of the monster.
+                    coin->velocity = nk_normalize(nk_rotate(NK_V2_UNIT_X, rng_f32(0.0f, NK_TAU_F32))) * rng_f32(150,400);
+                    coin->thrust   = rng_f32(1200.0f,1400.0f);
+                }
+            }
         }
     }
 }
 
-GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
+GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y, nkF32 z)
 {
     NK_ASSERT(id < EntityID_TOTAL);
 
@@ -382,6 +415,7 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
     entity.type           = desc.type;
     entity.id             = id;
     entity.state          = EntityState_None; // Properly set further down!
+    entity.flags          = EntityFlag_None;
     entity.target         = NO_TARGET;
     entity.position       = { x,y };
     entity.spawn          = { x,y };
@@ -391,6 +425,7 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
     entity.speed          = desc.speed   * TILE_WIDTH;
     entity.range          = desc.range   * TILE_HEIGHT;
     entity.radius         = desc.radius  * TILE_WIDTH;
+    entity.thrust         = 0.0f;
     entity.z_depth        = desc.z_depth * TILE_HEIGHT;
     entity.flip           = 1.0f;
     entity.anim_state     = create_animation_state(desc.animation);
@@ -408,6 +443,12 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y)
     entity.active         = NK_TRUE;
 
     change_entity_state(entity, desc.default_state);
+
+    // If a custom Z-depth has been supplied use it.
+    if(z != 0.0f)
+    {
+        entity.z_depth = z;
+    }
 
     // Plants can be flipped for more visual variance.
     if(entity.type == EntityType_Plant && rng_s32(0,100) < 50)

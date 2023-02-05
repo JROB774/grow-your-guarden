@@ -155,3 +155,56 @@ DEF_ETICK(walker)
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/
+
+//
+// Items
+//
+
+DEF_ETICK(coin)
+{
+    const nkF32 WARNING_TIME = 25.0f;
+    const nkF32 DESPAWN_TIME = 30.0f;
+
+    const nkF32 WEIGHT = 3200.0f;
+
+    // Fall down and once we hit the floor stop moving outwards.
+    if(e.z_depth <= 0.0f)
+    {
+        e.velocity = NK_V2_ZERO;
+    }
+    else
+    {
+        e.thrust -= WEIGHT * dt;
+    }
+
+    // Check if we have been dragged over on and if so die and give the player money.
+    if(!is_something_selected() && is_mouse_button_down(MouseButton_Left))
+    {
+        nkVec2 cursor = get_cursor_world_pos();
+        if(point_vs_circle(cursor, e.position.x, e.position.y - e.z_depth, e.radius))
+        {
+            switch(e.id)
+            {
+                case EntityID_CoinCopper: add_money( 25); break;
+                case EntityID_CoinSilver: add_money( 50); break;
+                case EntityID_CoinGold:   add_money(100); break;
+            }
+
+            entity_kill(index);
+        }
+    }
+
+    // De-spawn after a while
+    e.timer0 += dt;
+    if(e.timer0 >= WARNING_TIME)
+    {
+        NK_TOGGLE_FLAGS(e.flags, EntityFlag_Hidden);
+        if(e.timer0 >= DESPAWN_TIME)
+        {
+            entity_kill(index);
+        }
+    }
+}
+
+/*////////////////////////////////////////////////////////////////////////////*/
+

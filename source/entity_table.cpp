@@ -3,6 +3,7 @@
 DEF_ETICK(daisy);
 DEF_ETICK(bramble);
 DEF_ETICK(walker);
+DEF_ETICK(coin);
 
 enum: nkU32
 {
@@ -13,6 +14,9 @@ EntityID_Bramble,
 EntityID_Walker,
 EntityID_Pollen,
 EntityID_House,
+EntityID_CoinCopper,
+EntityID_CoinSilver,
+EntityID_CoinGold,
 EntityID_TOTAL
 
 };
@@ -171,6 +175,87 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Collision Mask     */ EntityType_None,
 /* Draw Offset        */ { 0.0f,0.0f },
 /* Bounds             */ { 3.0f,3.0f },
+/* Growth Phases      */ { 0,0,0,0,0,0,0,0 },
+/* Death Sounds       */ { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL },
+/* Death Effect       */ NULL,
+/* Death Particle     */ NULL,
+/* Death Particle Min */ 0,
+/* Death Particle Max */ 0,
+/* Death Decal        */ NULL,
+/* Death Decal Min    */ 0,
+/* Death Decal Max    */ 0,
+},
+
+// EntityID_CoinCopper
+{
+/* Texture            */ "entity/coin_copper.png",
+/* Animation          */ "entity/coin_copper.anm",
+/* Type               */ EntityType_Item,
+/* Default State      */ EntityState_Idle,
+/* Tick               */ ETICK(coin),
+/* Health             */ 1.0f,
+/* Damage             */ 0.0f,
+/* Speed              */ 0.0f,
+/* Range              */ 0.0f,
+/* Radius             */ 0.4f,
+/* Z-Depth            */ 0.0f,
+/* Collision Mask     */ EntityType_None,
+/* Draw Offset        */ { 0.0f,0.0f },
+/* Bounds             */ { 0.3f,0.3f },
+/* Growth Phases      */ { 0,0,0,0,0,0,0,0 },
+/* Death Sounds       */ { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL },
+/* Death Effect       */ NULL,
+/* Death Particle     */ NULL,
+/* Death Particle Min */ 0,
+/* Death Particle Max */ 0,
+/* Death Decal        */ NULL,
+/* Death Decal Min    */ 0,
+/* Death Decal Max    */ 0,
+},
+
+// EntityID_CoinSilver
+{
+/* Texture            */ "entity/coin_silver.png",
+/* Animation          */ "entity/coin_silver.anm",
+/* Type               */ EntityType_Item,
+/* Default State      */ EntityState_Idle,
+/* Tick               */ ETICK(coin),
+/* Health             */ 1.0f,
+/* Damage             */ 0.0f,
+/* Speed              */ 0.0f,
+/* Range              */ 0.0f,
+/* Radius             */ 0.4f,
+/* Z-Depth            */ 0.0f,
+/* Collision Mask     */ EntityType_None,
+/* Draw Offset        */ { 0.0f,0.0f },
+/* Bounds             */ { 0.35f,0.35f },
+/* Growth Phases      */ { 0,0,0,0,0,0,0,0 },
+/* Death Sounds       */ { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL },
+/* Death Effect       */ NULL,
+/* Death Particle     */ NULL,
+/* Death Particle Min */ 0,
+/* Death Particle Max */ 0,
+/* Death Decal        */ NULL,
+/* Death Decal Min    */ 0,
+/* Death Decal Max    */ 0,
+},
+
+// EntityID_CoinCopper
+{
+/* Texture            */ "entity/coin_gold.png",
+/* Animation          */ "entity/coin_gold.anm",
+/* Type               */ EntityType_Item,
+/* Default State      */ EntityState_Idle,
+/* Tick               */ ETICK(coin),
+/* Health             */ 1.0f,
+/* Damage             */ 0.0f,
+/* Speed              */ 0.0f,
+/* Range              */ 0.0f,
+/* Radius             */ 0.4f,
+/* Z-Depth            */ 0.0f,
+/* Collision Mask     */ EntityType_None,
+/* Draw Offset        */ { 0.0f,0.0f },
+/* Bounds             */ { 0.4f,0.4f },
 /* Growth Phases      */ { 0,0,0,0,0,0,0,0 },
 /* Death Sounds       */ { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL },
 /* Death Effect       */ NULL,

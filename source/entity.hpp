@@ -1,6 +1,6 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
-#define DEF_ETICK(name) INTERNAL void etick__##name(Entity& e, nkF32 dt)
+#define DEF_ETICK(name) INTERNAL void etick__##name(Entity& e, nkU64 index, nkF32 dt)
 #define     ETICK(name) etick__##name
 
 INTERNAL constexpr nkU64 NO_TARGET = NK_U64_MAX;
@@ -17,7 +17,7 @@ NK_ENUM(EntityType, nkU32)
     EntityType_Monster = (1<<1),
     EntityType_Base    = (1<<2),
     EntityType_Bullet  = (1<<3),
-    EntityType_Object  = (1<<4),
+    EntityType_Item    = (1<<4),
     EntityType_All     = (  -1)
 };
 
@@ -41,11 +41,19 @@ NK_ENUM(EntityState, nkU32)
     EntityState_TOTAL
 };
 
+NK_ENUM(EntityFlag, nkU32)
+{
+    EntityFlag_None   = (   0),
+    EntityFlag_Hidden = (1<<0), // Do not render the entity.
+    EntityFlag_All    = (  -1)
+};
+
 struct Entity
 {
     EntityType    type;
     EntityID      id;
     EntityState   state;         // Do not set this manually! Go through change_entity_state.
+    EntityFlag    flags;
     nkU64         target;        // Store the index of an entity to track, this can be used for anything.
     nkVec2        position;
     nkVec2        spawn;
@@ -55,6 +63,7 @@ struct Entity
     nkF32         speed;
     nkF32         range;
     nkF32         radius;
+    nkF32         thrust;
     nkF32         z_depth;       // Controls how "high" the visual of the entity is compared to its shadow.
     nkF32         flip;          // Plants get this randomly set on spawn to add some visual variance.
     AnimState     anim_state;
@@ -71,7 +80,7 @@ struct Entity
     nkBool        active;
 };
 
-typedef void(*EntityTick)(Entity&, nkF32);
+typedef void(*EntityTick)(Entity&, nkU64, nkF32);
 
 struct EntityDesc
 {
@@ -107,9 +116,9 @@ GLOBAL void  entity_draw  (void);
 GLOBAL void  entity_reset (void);
 GLOBAL void  entity_damage(nkU64 index, nkF32 damage);
 GLOBAL void  entity_kill  (nkU64 index);
-GLOBAL nkU64 entity_spawn (EntityID id, nkF32 x, nkF32 y); // Returns the index in the world entity array where the entity
-                                                           // was inserted. Indicies should remain valid until an entity
-                                                           // is marked dead, in which case other entities can claim it.
+GLOBAL nkU64 entity_spawn (EntityID id, nkF32 x, nkF32 y, nkF32 z = 0.0f); // Returns the index in the world entity array where the entity
+                                                                           // was inserted. Indicies should remain valid until an entity
+                                                                           // is marked dead, in which case other entities can claim it.
 
 GLOBAL void change_entity_state(nkU64 index, EntityState state);
 GLOBAL void change_entity_state(Entity& e, EntityState state);

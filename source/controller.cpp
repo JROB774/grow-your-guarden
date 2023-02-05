@@ -124,9 +124,9 @@ INTERNAL nkBool can_place_plant_at_position(nkS32 tile_x, nkS32 tile_y)
     nkF32 w = desc.bounds.x * TILE_WIDTH;
     nkF32 h = desc.bounds.y * TILE_HEIGHT;
 
-    if(check_entity_bounds(x,y,w,h, EntityType_Plant|EntityType_Base|EntityType_Object) != NK_U64_MAX)
+    if(check_entity_bounds(x,y,w,h, EntityType_Plant|EntityType_Base) != NK_U64_MAX)
     {
-        return NK_FALSE; // A plant or object is already at this position.
+        return NK_FALSE; // A plant or the base is already at this position.
     }
 
     return NK_TRUE;
@@ -701,6 +701,21 @@ GLOBAL EntityID get_selected_plant(void)
     if(!can_place_plant_at_position(tile.x, tile.y)) return EntityID_None;
 
     return g_controller.hotbar[g_controller.selected].spawn_id;
+}
+
+GLOBAL nkVec2 get_cursor_world_pos(void)
+{
+    return screen_to_world(get_window_mouse_pos());
+}
+
+GLOBAL void add_money(nkS32 money)
+{
+    g_controller.money += money;
+}
+
+GLOBAL nkBool is_something_selected(void)
+{
+    return (g_controller.selected != NO_SELECTION);
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/
