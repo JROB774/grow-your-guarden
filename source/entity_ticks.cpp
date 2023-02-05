@@ -190,6 +190,7 @@ DEF_ETICK(coin)
                 case EntityID_CoinGold:   add_money(100); break;
             }
 
+            play_sound(asset_manager_load<Sound>("coin.wav"));
             entity_kill(index);
         }
     }
