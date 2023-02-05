@@ -12,13 +12,40 @@ INTERNAL constexpr nkF32 PAUSE_TITLE_YPOS  =  0.40f;
 INTERNAL constexpr nkF32 PAUSE_RESUME_YPOS =  0.65f;
 INTERNAL constexpr nkF32 PAUSE_MENU_YPOS   = -1.00f;
 
+INTERNAL constexpr const nkChar* GAMEOVER_TITLE_TEXT = "GAME OVER!";
+INTERNAL constexpr const nkChar* GAMEOVER_RETRY_TEXT = "Retry";
+INTERNAL constexpr const nkChar* GAMEOVER_MENU_TEXT  = "Menu";
+
+INTERNAL constexpr nkS32 GAMEOVER_TITLE_SIZE = 100;
+INTERNAL constexpr nkS32 GAMEOVER_RETRY_SIZE =  40;
+INTERNAL constexpr nkS32 GAMEOVER_MENU_SIZE  =  35;
+
+INTERNAL constexpr nkF32 GAMEOVER_TITLE_YPOS =  0.40f;
+INTERNAL constexpr nkF32 GAMEOVER_STAT_YPOS  =  0.52f;
+INTERNAL constexpr nkF32 GAMEOVER_RETRY_YPOS =  0.70f;
+INTERNAL constexpr nkF32 GAMEOVER_MENU_YPOS  = -1.00f;
+
 struct GameState
 {
     Sound  pause_sound;
     nkBool paused;
+    nkBool game_over;
 };
 
 INTERNAL GameState g_game;
+
+INTERNAL void draw_letterbox_background(void)
+{
+    nkF32 ww = NK_CAST(nkF32, get_window_width());
+    nkF32 wh = NK_CAST(nkF32, get_window_height());
+
+    nkVec4 back_color = { 0.0f,0.0f,0.0f,0.7f };
+    nkVec4 lbox_color = { 0.0f,0.0f,0.0f,1.0f };
+
+    imm_rect_filled(0.0f,0.0f,    ww,wh,       back_color);
+    imm_rect_filled(0.0f,0.0f,    ww,wh*0.15f, lbox_color);
+    imm_rect_filled(0.0f,wh*0.85f,ww,wh*0.15f, lbox_color);
+}
 
 INTERNAL void pause_tick(nkF32 dt)
 {
@@ -60,18 +87,7 @@ INTERNAL void pause_draw(void)
 {
     if(!g_game.paused) return;
 
-    nkF32 ww = NK_CAST(nkF32, get_window_width());
-    nkF32 wh = NK_CAST(nkF32, get_window_height());
-
-    // Draw the background.
-    nkVec4 background_color = { 0.0f,0.0f,0.0f,0.7f };
-    imm_rect_filled(0.0f,0.0f,ww,wh, background_color);
-
-    // Draw the letterbox.
-    nkVec4 letterbox_color = { 0.0f,0.0f,0.0f,1.0f };
-
-    imm_rect_filled(0.0f,0.0f,    ww,wh*0.15f, letterbox_color);
-    imm_rect_filled(0.0f,wh*0.85f,ww,wh*0.15f, letterbox_color);
+    draw_letterbox_background();
 
     // Draw the text and buttons.
     draw_menu_text_button(PAUSE_TITLE_TEXT, PAUSE_TITLE_YPOS, PAUSE_TITLE_SIZE, NK_FALSE);
@@ -92,6 +108,47 @@ INTERNAL void pause_draw(void)
     draw_menu_toggle_button(HUD_CLIP_FULLSCREEN, bx-(btn_width*2.2f),by, is_fullscreen());
 }
 
+INTERNAL void game_over_tick(nkF32 dt)
+{
+    if(tick_menu_text_button(GAMEOVER_RETRY_TEXT, GAMEOVER_RETRY_YPOS, GAMEOVER_RETRY_SIZE))
+    {
+        game_start();
+    }
+    if(tick_menu_text_button(GAMEOVER_MENU_TEXT, GAMEOVER_MENU_YPOS, GAMEOVER_MENU_SIZE))
+    {
+        set_app_state(AppState_Menu);
+    }
+}
+
+INTERNAL void game_over_draw(void)
+{
+    if(!g_game.game_over) return;
+
+    draw_letterbox_background();
+
+    // Draw the text and buttons.
+    draw_menu_text_button(GAMEOVER_TITLE_TEXT, GAMEOVER_TITLE_YPOS, GAMEOVER_TITLE_SIZE, NK_FALSE);
+    draw_menu_text_button(GAMEOVER_RETRY_TEXT, GAMEOVER_RETRY_YPOS, GAMEOVER_RETRY_SIZE);
+    draw_menu_text_button(GAMEOVER_MENU_TEXT, GAMEOVER_MENU_YPOS, GAMEOVER_MENU_SIZE);
+
+    // Draw the stats.
+    nkF32 img_scale = get_hud_scale() / 4.0f;
+    nkF32 hud_scale = get_hud_scale();
+
+    nkF32 icon_scale = img_scale * 0.8f;
+
+    nkF32 ww = NK_CAST(nkF32, get_window_width());
+    nkF32 wh = NK_CAST(nkF32, get_window_height());
+
+    nkF32 sx = ww * 0.5f;
+    nkF32 sy = wh * GAMEOVER_STAT_YPOS;
+
+    Texture hud = asset_manager_load<Texture>("hud.png");
+
+    draw_hud_stat(hud, sx-(96.0f*hud_scale),sy, icon_scale, hud_scale, HUD_CLIP_FLAG,  get_waves());
+    draw_hud_stat(hud, sx+(96.0f*hud_scale),sy, icon_scale, hud_scale, HUD_CLIP_SKULL, get_kills());
+}
+
 GLOBAL void game_start(void)
 {
     world_load("level00.png");
@@ -108,8 +165,9 @@ GLOBAL void game_start(void)
     nkF32 hy = NK_CAST(nkF32, get_world_height() * TILE_HEIGHT) * 0.5f;
     entity_spawn(EntityID_HomeTree, hx,hy);
 
-    // Make sure we aren't paused.
+    // Make sure we aren't paused or game overed.
     g_game.paused = NK_FALSE;
+    g_game.game_over = NK_FALSE;
 
     set_app_state(AppState_Game);
 }
@@ -134,19 +192,37 @@ GLOBAL void game_quit(void)
 
 GLOBAL void game_tick(nkF32 dt)
 {
-    controller_tick(dt);
-
-    // If we're paused we don't want to update the game world.
-    if(!g_game.paused)
+    if(is_key_pressed(KeyCode_F1))
     {
-        wave_manager_tick(dt);
-        world_tick(dt);
-        entity_tick(dt);
-        particle_tick(dt);
-        decal_tick(dt);
+        g_game.game_over = NK_TRUE;
     }
 
-    pause_tick(dt); // Make sure this happens at the end so clicks don't bleed through!
+    if(!g_game.game_over)
+    {
+        controller_tick(dt);
+
+        // If we're paused we don't want to update the game world.
+        if(!g_game.paused)
+        {
+            wave_manager_tick(dt);
+            world_tick(dt);
+            entity_tick(dt);
+            particle_tick(dt);
+            decal_tick(dt);
+        }
+
+        pause_tick(dt); // Make sure this happens at the end so clicks don't bleed through!
+
+        // If the tree is dead then its game over!
+        if(get_health() <= 0)
+        {
+            g_game.game_over = NK_TRUE;
+        }
+    }
+    else
+    {
+        game_over_tick(dt);
+    }
 }
 
 GLOBAL void game_draw(void)
@@ -160,11 +236,17 @@ GLOBAL void game_draw(void)
     wave_manager_draw();
     controller_draw(); // This internally unsets the controller camera!
     pause_draw();
+    game_over_draw();
 }
 
 GLOBAL nkBool is_game_paused(void)
 {
     return g_game.paused;
+}
+
+GLOBAL nkBool is_game_over(void)
+{
+    return g_game.game_over;
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

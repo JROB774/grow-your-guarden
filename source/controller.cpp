@@ -194,25 +194,6 @@ INTERNAL nkBool fertilize_plant(nkF32 x, nkF32 y)
     return NK_FALSE;
 }
 
-INTERNAL void draw_hud_stat(Texture texture, nkF32& x, nkF32& y, nkF32 icon_scale, nkF32 hud_scale, ImmClip clip, nkS32 stat)
-{
-    TrueTypeFont font = get_font();
-
-    imm_texture_ex(texture, x+(2*hud_scale),y+(2*hud_scale), icon_scale,icon_scale, 0.0f, NULL, &clip, { 0.0f,0.0f,0.0f,0.35f });
-    imm_texture_ex(texture, x,y, icon_scale,icon_scale, 0.0f, NULL, &clip);
-
-    nkF32 text_x = x + ((HUD_ICON_WIDTH * 0.65f) * icon_scale);
-    nkF32 text_y = y + (get_truetype_line_height(font) * 0.25f);
-
-    nkString string;
-    number_to_string_with_commas(&string, stat);
-
-    draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), string.cstr, NK_V4_BLACK);
-    draw_truetype_text(font, text_x,text_y, string.cstr, NK_V4_WHITE);
-
-    y += ((HUD_ICON_HEIGHT) * icon_scale);
-}
-
 GLOBAL void controller_init(void)
 {
     // Pre-load a bunch of assets.
@@ -370,7 +351,7 @@ GLOBAL void controller_tick(nkF32 dt)
     }
 
     // Update the cursor graphic.
-    if(!is_game_paused() && g_controller.selected != NO_SELECTION)
+    if(g_controller.selected != NO_SELECTION)
     {
         if(g_controller.selected == HotbarID_Fertilizer || g_controller.selected == HotbarID_Shovel)
         {
@@ -415,7 +396,7 @@ GLOBAL void controller_draw(void)
 {
     // We don't draw the HUD if the game is paused because it looks better that way.
     // We still want to unset the controller camera transform though, so do that here.
-    if(is_game_paused())
+    if(is_game_paused() || is_game_over())
     {
         unset_controller_camera();
         return;
@@ -531,8 +512,11 @@ GLOBAL void controller_draw(void)
     y = (((HUD_CLIP_SLOT.h * 1.20f) * 0.5f) * icon_scale) + text_y;
 
     draw_hud_stat(texture, x,y, icon_scale, hud_scale, HUD_CLIP_HEART, g_controller.health);
+    y += ((HUD_ICON_HEIGHT) * icon_scale);
     draw_hud_stat(texture, x,y, icon_scale, hud_scale, HUD_CLIP_FLAG, g_controller.waves);
+    y += ((HUD_ICON_HEIGHT) * icon_scale);
     draw_hud_stat(texture, x,y, icon_scale, hud_scale, HUD_CLIP_SKULL, g_controller.kills);
+    y += ((HUD_ICON_HEIGHT) * icon_scale);
 
     // If hovered over an icon then display its tooltip.
     if(g_controller.hovered != NO_SELECTION && g_controller.selected == NO_SELECTION)
@@ -716,6 +700,40 @@ GLOBAL void add_money(nkS32 money)
 GLOBAL nkBool is_something_selected(void)
 {
     return (g_controller.selected != NO_SELECTION);
+}
+
+GLOBAL nkS32 get_health(void)
+{
+    return g_controller.health;
+}
+
+GLOBAL nkS32 get_waves(void)
+{
+    return g_controller.waves;
+}
+
+GLOBAL nkS32 get_kills(void)
+{
+    return g_controller.kills;
+}
+
+GLOBAL void draw_hud_stat(Texture texture, nkF32 x, nkF32 y, nkF32 icon_scale, nkF32 hud_scale, ImmClip clip, nkS32 stat)
+{
+    TrueTypeFont font = get_font();
+
+    set_truetype_font_size(font, NK_CAST(nkS32, 15 * hud_scale));
+
+    imm_texture_ex(texture, x+(2*hud_scale),y+(2*hud_scale), icon_scale,icon_scale, 0.0f, NULL, &clip, { 0.0f,0.0f,0.0f,0.35f });
+    imm_texture_ex(texture, x,y, icon_scale,icon_scale, 0.0f, NULL, &clip);
+
+    nkF32 text_x = x + ((HUD_ICON_WIDTH * 0.65f) * icon_scale);
+    nkF32 text_y = y + (get_truetype_line_height(font) * 0.25f);
+
+    nkString string;
+    number_to_string_with_commas(&string, stat);
+
+    draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), string.cstr, NK_V4_BLACK);
+    draw_truetype_text(font, text_x,text_y, string.cstr, NK_V4_WHITE);
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/
