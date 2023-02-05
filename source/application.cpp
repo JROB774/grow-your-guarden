@@ -86,12 +86,15 @@ INTERNAL void begin_frame_draw(void)
 {
     nkS32 ww = get_window_width();
     nkS32 wh = get_window_height();
+
+    /*
     nkS32 sw = get_texture_width(g_app.screen_target->color_target);
     nkS32 sh = get_texture_height(g_app.screen_target->color_target);
 
     if(ww != sw || wh != sh)
         resize_render_target(g_app.screen_target, ww,wh); // The screen target should always fit the window.
     bind_render_target(g_app.screen_target);
+    */
 
     clear_screen(0.2f,0.2f,0.2f);
 
@@ -110,6 +113,7 @@ INTERNAL void begin_frame_draw(void)
 
 INTERNAL void end_frame_draw(void)
 {
+    /*
     RenderTarget output = g_app.screen_target;
 
     bind_render_target(NULL);
@@ -139,6 +143,7 @@ INTERNAL void end_frame_draw(void)
 
     update_vertex_buffer(g_app.screen_buffer, vertices, sizeof(vertices), BufferType_Dynamic);
     draw_vertex_buffer(g_app.screen_buffer, DrawMode_TriangleStrip, NK_ARRAY_SIZE(vertices));
+    */
 }
 
 GLOBAL void app_main(AppDesc* desc)
