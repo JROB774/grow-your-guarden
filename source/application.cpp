@@ -169,7 +169,7 @@ GLOBAL void app_init(void)
 
     // Setup the font.
     TrueTypeFontDesc font_desc;
-    font_desc.px_sizes = { 30, 35, 40, 100 };
+    font_desc.px_sizes = { 20, 30, 35, 40, 50, 100 };
     g_app.font = asset_manager_load<TrueTypeFont>("helsinki.ttf", &font_desc);
 
     // Hide the cursor (we have a custom one).

@@ -1,15 +1,18 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
 INTERNAL constexpr const nkChar* MENU_TITLE_TEXT = "GROW YOUR GUARDEN!";
-INTERNAL constexpr const nkChar* MENU_PLAY_TEXT  = "Start Game";
+INTERNAL constexpr const nkChar* MENU_PLAY_TEXT  = "Play";
+INTERNAL constexpr const nkChar* MENU_HOWTO_TEXT  = "How to Play";
 INTERNAL constexpr const nkChar* MENU_EXIT_TEXT  = "Exit";
 
 INTERNAL constexpr nkS32 MENU_TITLE_SIZE = 100;
-INTERNAL constexpr nkS32 MENU_PLAY_SIZE  =  40;
+INTERNAL constexpr nkS32 MENU_PLAY_SIZE  =  50;
+INTERNAL constexpr nkS32 MENU_HOWTO_SIZE =  35;
 INTERNAL constexpr nkS32 MENU_EXIT_SIZE  =  35;
 
 INTERNAL constexpr nkF32 MENU_TITLE_YPOS =  0.40f;
 INTERNAL constexpr nkF32 MENU_PLAY_YPOS  =  0.65f;
+INTERNAL constexpr nkF32 MENU_HOWTO_YPOS = -1.00f;
 INTERNAL constexpr nkF32 MENU_EXIT_YPOS  = -1.00f;
 
 INTERNAL fRect calculate_menu_button_bounds(TrueTypeFont font, const nkChar* text, nkF32& prev_y, nkF32 curr_y)
@@ -48,6 +51,11 @@ GLOBAL void menu_tick(nkF32 dt)
     {
         game_start();
     }
+    if(tick_menu_text_button(MENU_HOWTO_TEXT, MENU_HOWTO_YPOS, MENU_HOWTO_SIZE))
+    {
+        // @Incomplete: How to play pages...
+    }
+
     // We don't need/want an exit button in the web build.
     #if !defined(BUILD_WEB)
     if(tick_menu_text_button(MENU_EXIT_TEXT, MENU_EXIT_YPOS, MENU_EXIT_SIZE))
@@ -75,6 +83,7 @@ GLOBAL void menu_draw(void)
     // Do the title and main buttons.
     draw_menu_text_button(MENU_TITLE_TEXT, MENU_TITLE_YPOS, MENU_TITLE_SIZE, NK_FALSE);
     draw_menu_text_button(MENU_PLAY_TEXT, MENU_PLAY_YPOS, MENU_PLAY_SIZE);
+    draw_menu_text_button(MENU_HOWTO_TEXT, MENU_HOWTO_YPOS, MENU_HOWTO_SIZE);
     // We don't need/want an exit button in the web build.
     #if !defined(BUILD_WEB)
     draw_menu_text_button(MENU_EXIT_TEXT, MENU_EXIT_YPOS, MENU_EXIT_SIZE);
@@ -125,8 +134,6 @@ GLOBAL void draw_menu_text_button(const nkChar* text, nkF32 y, nkS32 size, nkBoo
 
     draw_truetype_text(font, t.x+5,t.y+5, text, NK_V4_BLACK);
     draw_truetype_text(font, t.x,t.y, text, color);
-
-    previous_y = y;
 }
 
 INTERNAL nkBool tick_menu_toggle_button(ImmClip clip, nkF32 x, nkF32 y, nkBool toggle)
