@@ -13,7 +13,7 @@ EntityID_Daisy,
 EntityID_Bramble,
 EntityID_Walker,
 EntityID_Pollen,
-EntityID_House,
+EntityID_HomeTree,
 EntityID_CoinCopper,
 EntityID_CoinSilver,
 EntityID_CoinGold,
@@ -159,10 +159,10 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Death Decal Max    */ 0,
 },
 
-// EntityID_House
+// EntityID_HomeTree
 {
-/* Texture            */ "entity/house.png",
-/* Animation          */ "entity/house.anm",
+/* Texture            */ "entity/home_tree.png",
+/* Animation          */ "entity/home_tree.anm",
 /* Type               */ EntityType_Base,
 /* Default State      */ EntityState_Idle,
 /* Tick               */ NULL,
@@ -173,7 +173,7 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Radius             */ 1.4f,
 /* Z-Depth            */ 0.0f,
 /* Collision Mask     */ EntityType_None,
-/* Draw Offset        */ { 0.0f,0.0f },
+/* Draw Offset        */ { 0.0f,-0.8f },
 /* Bounds             */ { 3.0f,3.0f },
 /* Growth Phases      */ { 0,0,0,0,0,0,0,0 },
 /* Death Sounds       */ { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL },

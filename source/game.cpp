@@ -103,10 +103,10 @@ GLOBAL void game_start(void)
     particle_reset();
     decal_reset();
 
-    // Spawn the house.
+    // Spawn the home tree.
     nkF32 hx = NK_CAST(nkF32, get_world_width() * TILE_WIDTH) * 0.5f;
     nkF32 hy = NK_CAST(nkF32, get_world_height() * TILE_HEIGHT) * 0.5f;
-    entity_spawn(EntityID_House, hx,hy);
+    entity_spawn(EntityID_HomeTree, hx,hy);
 
     // Make sure we aren't paused.
     g_game.paused = NK_FALSE;

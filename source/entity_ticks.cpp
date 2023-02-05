@@ -109,7 +109,7 @@ DEF_ETICK(walker)
 
     e.velocity = NK_V2_ZERO;
 
-    // If we collide with a plant or the base then stop to eat it, otherwise continue walking to the house.
+    // If we collide with a plant or the base then stop to eat it, otherwise continue walking to the tree.
     nkU64 hit_index = check_entity_collision(e, EntityType_Plant|EntityType_Base);
     if(hit_index != NK_U64_MAX)
     {
@@ -121,14 +121,14 @@ DEF_ETICK(walker)
     }
     else
     {
-        // Hunt for the base if we aren't already.
+        // Hunt for the home tree if we aren't already.
         if(e.target == NO_TARGET)
         {
-            e.target = get_first_entity_index_with_id(EntityID_House);
+            e.target = get_first_entity_index_with_id(EntityID_HomeTree);
         }
         if(e.target != NO_TARGET)
         {
-            // Walk towards the house if we found it.
+            // Walk towards the tree if we found it.
             Entity* target = get_entity(e.target);
             nkVec2 dir = nk_normalize(target->position - e.position);
             e.velocity = dir * NK_CAST(nkF32, e.speed);

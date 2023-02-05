@@ -385,7 +385,7 @@ GLOBAL void controller_tick(nkF32 dt)
     }
 
     // Update the health stat.
-    Entity* house = get_first_entity_with_id(EntityID_House);
+    Entity* house = get_first_entity_with_id(EntityID_HomeTree);
     if(!house)
         g_controller.health = 0;
     else
@@ -645,7 +645,7 @@ GLOBAL void controller_reset(void)
     g_controller.money         = STARTING_MONEY;
     g_controller.kills         = 0;
     g_controller.waves         = 0;
-    g_controller.health        = NK_CAST(nkS32, ENTITY_TABLE[EntityID_House].health);
+    g_controller.health        = NK_CAST(nkS32, ENTITY_TABLE[EntityID_HomeTree].health);
 
     g_controller.selected = NO_SELECTION;
 }
