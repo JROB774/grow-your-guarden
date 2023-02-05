@@ -13,6 +13,8 @@ INTERNAL constexpr nkF32 CAMERA_ZOOM_SENSITIVITY = 0.15f;
 INTERNAL constexpr nkF32 CAMERA_ZOOM_SPEED       = 12.0f;
 INTERNAL constexpr nkF32 CAMERA_PAN_SPEED        = 12.0f;
 
+INTERNAL constexpr nkF32 FERTILIZE_TIME = 60.0f * 2.0f;
+
 NK_ENUM(HotbarID, nkU32)
 {
     HotbarID_Daisy,
@@ -139,7 +141,15 @@ INTERNAL nkBool can_remove_plant_at_position(nkF32 x, nkF32 y)
 
 INTERNAL nkBool can_fertilize_plant_at_position(nkF32 x, nkF32 y)
 {
-    return (g_controller.selected == HotbarID_Fertilizer && (check_entity_bounds(x,y,1,1, EntityType_Plant) != NK_U64_MAX));
+    if(g_controller.selected != HotbarID_Fertilizer) return NK_FALSE;
+
+    nkU64 entity_index = check_entity_bounds(x,y,1,1, EntityType_Plant);
+    if(entity_index == NK_U64_MAX) return NK_FALSE; // Nothing at the spot to fertilize.
+
+    Entity* entity = get_entity(entity_index);
+    if(!plant_is_fully_grown(*entity)) return NK_FALSE;
+
+    return NK_TRUE;
 }
 
 INTERNAL nkBool place_plant(nkS32 tile_x, nkS32 tile_y)
@@ -190,8 +200,17 @@ INTERNAL nkBool remove_plant(nkF32 x, nkF32 y)
 
 INTERNAL nkBool fertilize_plant(nkF32 x, nkF32 y)
 {
-    // @Incomplete: Does nothing currently...
-    return NK_FALSE;
+    if(!can_fertilize_plant_at_position(x,y)) return NK_FALSE;
+
+    nkU64 entity_index = check_entity_bounds(x,y,1,1, EntityType_Plant);
+    Entity* entity = get_entity(entity_index);
+
+    entity->fertilized_timer = FERTILIZE_TIME;
+    entity->bounce_timer = 0.1f;
+
+    play_sound(asset_manager_load<Sound>("fertilized.wav"));
+
+    return NK_TRUE;
 }
 
 GLOBAL void controller_init(void)
@@ -202,6 +221,8 @@ GLOBAL void controller_init(void)
     g_controller.shovel_sfx[2] = asset_manager_load<Sound>("shovel_002.wav");
     g_controller.shovel_sfx[3] = asset_manager_load<Sound>("shovel_003.wav");
     g_controller.shovel_sfx[4] = asset_manager_load<Sound>("shovel_004.wav");
+
+    asset_manager_load<Sound>("fertilized.wav");
 
     asset_manager_load<Texture>("hud.png");
 

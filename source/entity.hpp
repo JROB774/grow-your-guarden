@@ -66,13 +66,16 @@ struct Entity
     nkF32         thrust;
     nkF32         z_depth;       // Controls how "high" the visual of the entity is compared to its shadow.
     nkF32         flip;          // Plants get this randomly set on spawn to add some visual variance.
+    nkVec4        color;
     AnimState     anim_state;
     EntityType    collision_mask;
     nkVec2        draw_offset;
     nkVec2        bounds;
-    nkF32         damage_timer;  // How long to flash red for when damaged.
-    nkS32         current_phase; // Only used by plants for tracking growth stages.
-    nkF32         phase_timer;   // Only used by plants for tracking growth stages.
+    nkF32         damage_timer;     // How long to flash red for when damaged.
+    nkS32         current_phase;    // Only used by plants for tracking growth stages.
+    nkF32         phase_timer;      // Only used by plants for tracking growth stages.
+    nkF32         fertilized_timer; // Only used by plants.
+    nkF32         bounce_timer;     // Only used by plants.
     nkF32         timer0;
     nkF32         timer1;
     nkF32         timer2;

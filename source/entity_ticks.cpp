@@ -43,8 +43,14 @@ DEF_ETICK(daisy)
         {
             if(m.type == EntityType_Monster && m.active)
             {
+                nkF32 range = e.range;
+                if(e.fertilized_timer > 0.0f)
+                {
+                    range *= 1.5f; // Higher range if fertilized.
+                }
+
                 distance = distance_between_points(e.position, m.position);
-                if(distance <= e.range && distance < shortest_distance)
+                if(distance <= range && distance < shortest_distance)
                 {
                     shortest_distance = distance;
                     target = &m;
@@ -56,6 +62,12 @@ DEF_ETICK(daisy)
             change_entity_state(e, EntityState_Attack);
             attack_cooldown = ATTACK_COOLDOWN;
             spawn_bullet_at_target(EntityID_Pollen, e.position.x,e.position.y, *target);
+
+            // Shoot faster if fertilized.
+            if(e.fertilized_timer > 0.0f)
+            {
+                attack_cooldown *= 0.33f;
+            }
         }
     }
 

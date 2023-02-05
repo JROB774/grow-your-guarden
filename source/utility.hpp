@@ -83,5 +83,6 @@ GLOBAL nkVec4  str_get_vec4 (nkChar** str);
 
 // Miscellaneous
 INTERNAL NKFORCEINLINE nkF32 distance_between_points(const nkVec2& a, const nkVec2& b);
+INTERNAL NKFORCEINLINE nkF32 ease_out_elastic       (nkF32 t);
 
 /*////////////////////////////////////////////////////////////////////////////*/

@@ -345,4 +345,14 @@ INTERNAL NKFORCEINLINE nkF32 distance_between_points(const nkVec2& a, const nkVe
     return fabsf(sqrtf(dx * dx + dy * dy));
 }
 
+INTERNAL NKFORCEINLINE nkF32 ease_out_elastic(nkF32 t)
+{
+    nkF32 c4 = (2.0f * NK_PI_F32) / 3.0f;
+
+    if(t <= 0.0f) return 0.0f;
+    if(t >= 1.0f) return 1.0f;
+
+    return powf(2, -10 * t) * sinf((t * 10 - 0.75f) * c4) + 1.0f;
+}
+
 /*////////////////////////////////////////////////////////////////////////////*/

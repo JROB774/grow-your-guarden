@@ -125,6 +125,33 @@ GLOBAL void entity_tick(nkF32 dt)
                             set_animation(&e.anim_state, get_current_entity_anim_name(e).cstr);
                         }
                     }
+
+                    // If a plant is fertilized then do some extra effects.
+                    if(e.fertilized_timer > 0.0f)
+                    {
+                        const nkF32 BOUNCE_SPEED = 0.5f;
+                        const nkF32 PULSE_SPEED = 5.0f;
+
+                        e.bounce_timer += (dt * BOUNCE_SPEED);
+
+                        e.color.r = nk_sin_range(1.0f, 2.0f, e.fertilized_timer * PULSE_SPEED);
+                        e.color.g = nk_sin_range(1.0f, 2.0f, e.fertilized_timer * PULSE_SPEED);
+                        e.color.b = nk_sin_range(1.0f, 1.4f, e.fertilized_timer * PULSE_SPEED);
+
+                        if(rng_s32(0,100) < 20)
+                        {
+                            nkF32 x = e.position.x - (e.radius * 1.5f);
+                            nkF32 y = e.position.y - (e.radius * 1.5f);
+                            nkF32 w = (e.radius * 1.5f) * 2.0f;
+                            nkF32 h = (e.radius * 1.5f) * 2.0f;
+
+                            particle_spawn("sparkle", x,y,w,h, 1,1);
+                        }
+                    }
+                    else
+                    {
+                        e.color = NK_V4_WHITE;
+                    }
                 } break;
 
                 // Check if we have reached our max range and if so drop off, once we hit the floor die.
@@ -203,6 +230,12 @@ GLOBAL void entity_tick(nkF32 dt)
                 e.damage_timer -= dt;
             }
 
+            // Update fertilized timer.
+            if(e.fertilized_timer > 0.0f)
+            {
+                e.fertilized_timer -= dt;
+            }
+
             // Kill if dead.
             if(e.health <= 0.0f)
             {
@@ -264,9 +297,20 @@ GLOBAL void entity_draw(void)
         nkF32 ex = e->position.x + e->draw_offset.x;
         nkF32 ey = e->position.y + e->draw_offset.y;
 
-        nkVec4 color = (e->damage_timer > 0.0f) ? NK_V4_RED : NK_V4_WHITE;
+        nkF32 sx = e->flip;
+        nkF32 sy = 1.0f;
 
-        imm_texture_ex(texture, ex,ey - e->z_depth, e->flip, 1.0f, 0.0f, NULL, &clip, color);
+        nkVec4 color = (e->damage_timer > 0.0f) ? NK_V4_RED : e->color;
+
+        if(e->fertilized_timer > 0.0f && (e->bounce_timer < 1.0f))
+        {
+            nkF32 ease = nk_max(0.75f, ease_out_elastic(e->bounce_timer));
+
+            sx = ease * e->flip;
+            sy = ease;
+        }
+
+        imm_texture_ex(texture, ex,ey - e->z_depth, sx,sy, 0.0f, NULL, &clip, color);
 
         // A special case is made for the home tree. We draw different mouths on top of the base image.
         if(e->id == EntityID_HomeTree)
@@ -426,36 +470,39 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y, nkF32 z)
 
     const EntityDesc& desc = ENTITY_TABLE[id];
 
-    Entity entity         = NK_ZERO_MEM;
-    entity.type           = desc.type;
-    entity.id             = id;
-    entity.state          = EntityState_None; // Properly set further down!
-    entity.flags          = EntityFlag_None;
-    entity.target         = NO_TARGET;
-    entity.position       = { x,y };
-    entity.spawn          = { x,y };
-    entity.velocity       = { 0,0 };
-    entity.health         = desc.health;
-    entity.damage         = desc.damage;
-    entity.speed          = desc.speed   * TILE_WIDTH;
-    entity.range          = desc.range   * TILE_HEIGHT;
-    entity.radius         = desc.radius  * TILE_WIDTH;
-    entity.thrust         = 0.0f;
-    entity.z_depth        = desc.z_depth * TILE_HEIGHT;
-    entity.flip           = 1.0f;
-    entity.anim_state     = create_animation_state(desc.animation);
-    entity.collision_mask = desc.collision_mask;
-    entity.draw_offset.x  = desc.draw_offset.x * TILE_WIDTH;
-    entity.draw_offset.y  = desc.draw_offset.y * TILE_HEIGHT;
-    entity.bounds.x       = desc.bounds.x      * TILE_WIDTH;
-    entity.bounds.y       = desc.bounds.y      * TILE_HEIGHT;
-    entity.current_phase  = 0;
-    entity.phase_timer    = 0.0f;
-    entity.timer0         = 0.0f;
-    entity.timer1         = 0.0f;
-    entity.timer2         = 0.0f;
-    entity.timer3         = 0.0f;
-    entity.active         = NK_TRUE;
+    Entity entity           = NK_ZERO_MEM;
+    entity.type             = desc.type;
+    entity.id               = id;
+    entity.state            = EntityState_None; // Properly set further down!
+    entity.flags            = EntityFlag_None;
+    entity.target           = NO_TARGET;
+    entity.position         = { x,y };
+    entity.spawn            = { x,y };
+    entity.velocity         = { 0,0 };
+    entity.health           = desc.health;
+    entity.damage           = desc.damage;
+    entity.speed            = desc.speed   * TILE_WIDTH;
+    entity.range            = desc.range   * TILE_HEIGHT;
+    entity.radius           = desc.radius  * TILE_WIDTH;
+    entity.thrust           = 0.0f;
+    entity.z_depth          = desc.z_depth * TILE_HEIGHT;
+    entity.flip             = 1.0f;
+    entity.color            = NK_V4_WHITE;
+    entity.anim_state       = create_animation_state(desc.animation);
+    entity.collision_mask   = desc.collision_mask;
+    entity.draw_offset.x    = desc.draw_offset.x * TILE_WIDTH;
+    entity.draw_offset.y    = desc.draw_offset.y * TILE_HEIGHT;
+    entity.bounds.x         = desc.bounds.x      * TILE_WIDTH;
+    entity.bounds.y         = desc.bounds.y      * TILE_HEIGHT;
+    entity.current_phase    = 0;
+    entity.phase_timer      = 0.0f;
+    entity.fertilized_timer = 0.0f;
+    entity.bounce_timer     = 0.0f;
+    entity.timer0           = 0.0f;
+    entity.timer1           = 0.0f;
+    entity.timer2           = 0.0f;
+    entity.timer3           = 0.0f;
+    entity.active           = NK_TRUE;
 
     change_entity_state(entity, desc.default_state);
 
