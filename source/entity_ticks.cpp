@@ -180,6 +180,8 @@ DEF_ETICK(coin)
 
     const nkF32 WEIGHT = 3200.0f;
 
+    if(e.state == EntityState_Dead) return;
+
     // Fall down and once we hit the floor stop moving outwards.
     if(e.z_depth <= 0.0f)
     {
@@ -237,6 +239,14 @@ DEF_ETICK(coin)
         if(e.timer0 >= DESPAWN_TIME)
         {
             entity_kill(index);
+
+            // Spawn a little animation on de-spawn.
+            switch(e.id)
+            {
+                case EntityID_CoinCopper: particle_spawn("puff_small", e.position.x,e.position.y); break;
+                case EntityID_CoinSilver: particle_spawn("puff_medium", e.position.x,e.position.y); break;
+                case EntityID_CoinGold:   particle_spawn("puff_large", e.position.x,e.position.y); break;
+            }
         }
     }
 }
