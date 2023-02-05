@@ -239,6 +239,9 @@ INTERNAL void main_loop(void)
         last_counter = SDL_GetPerformanceCounter();
     }
 
+    // Just confirm our fullscreen state is accurate.
+    g_ctx.fullscreen = NK_CHECK_FLAGS(SDL_GetWindowFlags(g_ctx.window), SDL_WINDOW_FULLSCREEN|SDL_WINDOW_FULLSCREEN);
+
     SDL_Event event;
     while(SDL_PollEvent(&event))
     {
