@@ -30,6 +30,7 @@ GLOBAL void       free_animation_group       (AnimGroup* group);
 GLOBAL AnimState  create_animation_state     (AnimGroup* group);
 GLOBAL AnimState  create_animation_state     (const nkChar* group_name); // Goes through the asset manager directly.
 GLOBAL void       set_animation              (AnimState* state, const nkChar* anim_name, nkBool reset = NK_FALSE); // Does nothing if the animation is already playing (unless reset flag is true).
+GLOBAL void       set_animation_frame        (AnimState* state, nkS32 frame); // Jump to the specified frame in the current animation.
 GLOBAL void       update_animation           (AnimState* state, nkF32 dt);
 GLOBAL void       reset_animation            (AnimState* state);
 GLOBAL nkBool     has_animation              (AnimState* state, const nkChar* anim_name);

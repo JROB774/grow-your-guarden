@@ -190,7 +190,14 @@ DEF_ETICK(coin)
                 case EntityID_CoinGold:   add_money(100); break;
             }
 
+            // The sound and particle are not implemented in the entity desc because we don't want them to happen on de-spawn.
+            nkF32 x = e.position.x - e.radius;
+            nkF32 y = e.position.y - e.radius;
+            nkF32 w = e.radius * 2.0f;
+            nkF32 h = e.radius * 2.0f;
+
             play_sound(asset_manager_load<Sound>("coin.wav"));
+            particle_spawn("sparkle", x,y,w,h, 3, 5);
             entity_kill(index);
         }
     }

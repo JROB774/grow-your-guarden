@@ -124,6 +124,22 @@ GLOBAL void set_animation(AnimState* state, const nkChar* anim_name, nkBool rese
     state->timer   = 0.0f;
 }
 
+GLOBAL void set_animation_frame(AnimState* state, nkS32 frame)
+{
+    NK_ASSERT(state);
+    NK_ASSERT(state->current);
+
+    Anim* anim = state->current;
+
+    state->frame = nk_clamp(frame, 0, NK_CAST(nkS32,anim->frames.length)-1);
+    state->timer = 0.0f;
+
+    for(nkU64 i=0; i<state->frame; ++i)
+    {
+        state->timer += anim->frames[i].duration;
+    }
+}
+
 GLOBAL void update_animation(AnimState* state, nkF32 dt)
 {
     NK_ASSERT(state);

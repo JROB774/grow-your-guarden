@@ -16,7 +16,7 @@ DEF_PSPAWN(tar_blobs_small)
     const nkF32 MIN_SPEED = 100.0f;
     const nkF32 MAX_SPEED = 400.0f;
 
-    p.anim_state.frame = rng_s32(0,NK_CAST(nkS32,p.anim_state.current->frames.length)-1); // Pick a random frame.
+    set_animation_frame(&p.anim_state, rng_s32(0,NK_CAST(nkS32,p.anim_state.current->frames.length)-1)); // Pick a random frame.
 
     p.rotation = rng_f32(0.0f, NK_TAU_F32);
     p.scale    = rng_f32(0.75f, 1.0f);
@@ -47,6 +47,22 @@ DEF_PTICK(tar_blobs_small)
     }
 }
 
+//
+// sparkle
+//
+
+DEF_PSPAWN(sparkle)
+{
+    set_animation_frame(&p.anim_state, rng_s32(0,NK_CAST(nkS32,p.anim_state.current->frames.length)-3)); // Pick a random frame to start the animation from.
+}
+
+DEF_PTICK(sparkle)
+{
+    update_animation(&p.anim_state, dt);
+    if(is_animation_done(&p.anim_state))
+        p.active = NK_FALSE;
+}
+
 /*////////////////////////////////////////////////////////////////////////////*/
 
 INTERNAL constexpr nkU32 MAX_PARTICLES = 8192; // Hard limit on particles, if we hit this we don't spawn more until new slots are available...
@@ -72,6 +88,7 @@ GLOBAL void particle_init(void)
 
     // Register particles!
     REG_PARTICLE(tar_blobs_small);
+    REG_PARTICLE(sparkle);
 }
 
 GLOBAL void particle_quit(void)
