@@ -175,6 +175,7 @@ DEF_ETICK(walker)
 DEF_ETICK(coin)
 {
     const nkF32 WARNING_TIME = 25.0f;
+    const nkF32 DANGER_TIME = 29.0f;
     const nkF32 DESPAWN_TIME = 30.0f;
 
     const nkF32 WEIGHT = 3200.0f;
@@ -218,7 +219,21 @@ DEF_ETICK(coin)
     e.timer0 += dt;
     if(e.timer0 >= WARNING_TIME)
     {
-        NK_TOGGLE_FLAGS(e.flags, EntityFlag_Hidden);
+        if(e.timer0 >= DANGER_TIME)
+        {
+            if((get_elapsed_ticks() % 2) == 0)
+            {
+                NK_TOGGLE_FLAGS(e.flags, EntityFlag_Hidden);
+            }
+        }
+        else
+        {
+            if((get_elapsed_ticks() % 4) == 0)
+            {
+                NK_TOGGLE_FLAGS(e.flags, EntityFlag_Hidden);
+            }
+        }
+
         if(e.timer0 >= DESPAWN_TIME)
         {
             entity_kill(index);

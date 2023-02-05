@@ -39,6 +39,7 @@ struct PlatformContext
     nkS32         window_h;
     nkBool        maximized;
     nkBool        fullscreen;
+    nkU64         ticks;
 };
 
 INTERNAL PlatformContext g_ctx;
@@ -280,6 +281,7 @@ INTERNAL void main_loop(void)
         update_input_state();
         app_tick(dt);
         reset_input_state();
+        g_ctx.ticks++;
         update_timer -= dt;
     }
 
@@ -456,6 +458,11 @@ GLOBAL nkU64 get_system_time_us()
     nkF64 us = tick * ((1.0 / (freq / 1000.0)) * 1000.0);
 
     return NK_CAST(nkU64, us);
+}
+
+GLOBAL nkU64 get_elapsed_ticks(void)
+{
+    return g_ctx.ticks;
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/
