@@ -96,7 +96,7 @@ INTERNAL void begin_frame_draw(void)
     bind_render_target(g_app.screen_target);
     */
 
-    clear_screen(0.2f,0.2f,0.2f);
+    clear_screen(0.0f,0.0f,0.0f);
 
     set_blend_mode(BlendMode_Alpha);
 

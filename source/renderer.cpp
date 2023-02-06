@@ -124,6 +124,22 @@ GLOBAL void set_blend_mode(BlendMode blend_mode)
     }
 }
 
+GLOBAL void begin_scissor(nkF32 x, nkF32 y, nkF32 w, nkF32 h)
+{
+    GLint   sx = NK_CAST(GLint,   x);
+    GLint   sy = NK_CAST(GLint,   get_window_height()-(y+h));
+    GLsizei sw = NK_CAST(GLsizei, w);
+    GLsizei sh = NK_CAST(GLsizei, h);
+
+    glScissor(sx,sy,sw,sh);
+    glEnable(GL_SCISSOR_TEST);
+}
+
+GLOBAL void end_scissor(void)
+{
+    glDisable(GL_SCISSOR_TEST);
+}
+
 GLOBAL void clear_screen(nkVec4 color)
 {
     glClearColor(color.r,color.g,color.b,color.a);

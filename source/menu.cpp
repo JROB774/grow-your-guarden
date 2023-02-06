@@ -15,6 +15,30 @@ INTERNAL constexpr nkF32 MENU_PLAY_YPOS  =  0.65f;
 INTERNAL constexpr nkF32 MENU_HOWTO_YPOS = -1.00f;
 INTERNAL constexpr nkF32 MENU_EXIT_YPOS  = -1.00f;
 
+INTERNAL constexpr nkF32 MENU_SLIDE_SPEED = 2.0f;
+
+INTERNAL constexpr nkS32 MENU_LAYERS = 3;
+
+INTERNAL constexpr nkF32 MENU_WIDTH = 1280.0f;
+INTERNAL constexpr nkF32 MENU_HEIGHT = 720.0f;
+
+NK_ENUM(MenuStage, nkS32)
+{
+    MenuStage_Animation,
+    MenuStage_PressAnyButton,
+    MenuStage_Interactive,
+    MenuStage_TOTAL
+};
+
+struct MenuState
+{
+    MenuStage stage;
+    nkF32     xoffset[MENU_LAYERS];
+    nkF32     timer;
+};
+
+INTERNAL MenuState g_menu;
+
 INTERNAL fRect calculate_menu_button_bounds(TrueTypeFont font, const nkChar* text, nkF32& prev_y, nkF32 curr_y)
 {
     nkF32 ww = NK_CAST(nkF32, get_window_width());
@@ -37,7 +61,12 @@ INTERNAL fRect calculate_menu_button_bounds(TrueTypeFont font, const nkChar* tex
 
 GLOBAL void menu_init(void)
 {
-    // Does nothing...
+    asset_manager_load<Texture>("title.png");
+
+    g_menu.stage      = MenuStage_Animation;
+    g_menu.xoffset[1] = -(MENU_WIDTH);
+    g_menu.xoffset[2] = +(MENU_WIDTH);
+    g_menu.timer      = -1.0f;
 }
 
 GLOBAL void menu_quit(void)
@@ -47,60 +76,129 @@ GLOBAL void menu_quit(void)
 
 GLOBAL void menu_tick(nkF32 dt)
 {
-    if(tick_menu_text_button(MENU_PLAY_TEXT, MENU_PLAY_YPOS, MENU_PLAY_SIZE))
+    // Update the sliding animation.
+    if(g_menu.timer < 1.0f)
     {
-        game_start();
+        if(g_menu.timer > 0.0f)
+        {
+            g_menu.xoffset[1] = nk_lerp(-(MENU_WIDTH), 0.0f, g_menu.timer);
+            g_menu.xoffset[2] = nk_lerp(+(MENU_WIDTH), 0.0f, g_menu.timer);
+
+            if(g_menu.xoffset[1] > 0.0f) g_menu.xoffset[1] = 0.0f;
+            if(g_menu.xoffset[2] < 0.0f) g_menu.xoffset[2] = 0.0f;
+        }
+
+        g_menu.timer += (dt * MENU_SLIDE_SPEED);
+        if(g_menu.timer >= 1.0f)
+        {
+            g_menu.timer = 1.0f;
+            g_menu.xoffset[1] = 0.0f;
+            g_menu.xoffset[2] = 0.0f;
+            g_menu.stage++;
+        }
     }
-    if(tick_menu_text_button(MENU_HOWTO_TEXT, MENU_HOWTO_YPOS, MENU_HOWTO_SIZE))
+
+    // Do state-specific update.
+    if(g_menu.stage == MenuStage_Interactive)
     {
-        // @Incomplete: How to play pages...
-    }
+        if(tick_menu_text_button(MENU_PLAY_TEXT, MENU_PLAY_YPOS, MENU_PLAY_SIZE))
+        {
+            game_start();
+        }
+        if(tick_menu_text_button(MENU_HOWTO_TEXT, MENU_HOWTO_YPOS, MENU_HOWTO_SIZE))
+        {
+            // @Incomplete: How to play pages...
+        }
 
-    // We don't need/want an exit button in the web build.
-    #if !defined(BUILD_WEB)
-    if(tick_menu_text_button(MENU_EXIT_TEXT, MENU_EXIT_YPOS, MENU_EXIT_SIZE))
+        // We don't need/want an exit button in the web build.
+        #if !defined(BUILD_WEB)
+        if(tick_menu_text_button(MENU_EXIT_TEXT, MENU_EXIT_YPOS, MENU_EXIT_SIZE))
+        {
+            terminate_app();
+        }
+        #endif // BUILD_WEB
+
+        // Do the options buttons.
+        nkF32 img_scale = get_hud_scale() / 4.0f;
+
+        nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
+        nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
+
+        nkF32 bx = NK_CAST(nkF32, get_window_width()) - (btn_width * 0.5f);
+        nkF32 by = NK_CAST(nkF32, get_window_height()) - (btn_height * 0.5f);
+
+        if(tick_menu_toggle_button(HUD_CLIP_MUSIC,      bx-(btn_width*0.0f),by, is_music_on  ())) set_music_volume((is_music_on()) ? 0.0f : 0.7f);
+        if(tick_menu_toggle_button(HUD_CLIP_SOUND,      bx-(btn_width*1.1f),by, is_sound_on  ())) set_sound_volume((is_sound_on()) ? 0.0f : 0.8f);
+        if(tick_menu_toggle_button(HUD_CLIP_FULLSCREEN, bx-(btn_width*2.2f),by, is_fullscreen())) set_fullscreen(!is_fullscreen());
+    }
+    else
     {
-        terminate_app();
+        // If the mouse is clicked during either of these stages we skip to the next.
+        if(is_any_mouse_button_pressed() || is_any_key_pressed())
+        {
+            g_menu.timer = 1.0f;
+            g_menu.xoffset[1] = 0.0f;
+            g_menu.xoffset[2] = 0.0f;
+            g_menu.stage++;
+        }
     }
-    #endif // BUILD_WEB
-
-    // Do the options buttons.
-    nkF32 img_scale = get_hud_scale() / 4.0f;
-
-    nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
-    nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
-
-    nkF32 bx = NK_CAST(nkF32, get_window_width()) - (btn_width * 0.5f);
-    nkF32 by = NK_CAST(nkF32, get_window_height()) - (btn_height * 0.5f);
-
-    if(tick_menu_toggle_button(HUD_CLIP_MUSIC,      bx-(btn_width*0.0f),by, is_music_on  ())) set_music_volume((is_music_on()) ? 0.0f : 0.7f);
-    if(tick_menu_toggle_button(HUD_CLIP_SOUND,      bx-(btn_width*1.1f),by, is_sound_on  ())) set_sound_volume((is_sound_on()) ? 0.0f : 0.8f);
-    if(tick_menu_toggle_button(HUD_CLIP_FULLSCREEN, bx-(btn_width*2.2f),by, is_fullscreen())) set_fullscreen(!is_fullscreen());
 }
 
 GLOBAL void menu_draw(void)
 {
-    // Do the title and main buttons.
-    draw_menu_text_button(MENU_TITLE_TEXT, MENU_TITLE_YPOS, MENU_TITLE_SIZE, NK_FALSE);
-    draw_menu_text_button(MENU_PLAY_TEXT, MENU_PLAY_YPOS, MENU_PLAY_SIZE);
-    draw_menu_text_button(MENU_HOWTO_TEXT, MENU_HOWTO_YPOS, MENU_HOWTO_SIZE);
-    // We don't need/want an exit button in the web build.
-    #if !defined(BUILD_WEB)
-    draw_menu_text_button(MENU_EXIT_TEXT, MENU_EXIT_YPOS, MENU_EXIT_SIZE);
-    #endif // BUILD_WEB
+    // Draw the title screen background.
+    Texture background = asset_manager_load<Texture>("title.png");
 
-    // Do the options buttons.
-    nkF32 img_scale = (get_hud_scale() / 4.0f);
+    nkF32 ww = NK_CAST(nkF32, get_window_width());
+    nkF32 wh = NK_CAST(nkF32, get_window_height());
+    nkF32 tw = MENU_WIDTH;
+    nkF32 th = MENU_HEIGHT;
 
-    nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
-    nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
+    nkF32 sx = ww / tw;
+    nkF32 sy = wh / th;
+    nkF32 sw = tw;
+    nkF32 sh = th;
 
-    nkF32 bx = NK_CAST(nkF32, get_window_width()) - (btn_width * 0.6f);
-    nkF32 by = NK_CAST(nkF32, get_window_height()) - (btn_height * 0.6f);
+    if(fabsf(sx) < fabsf(sy)) sh = roundf((th/tw)*sw);
+    if(fabsf(sx) > fabsf(sy)) sw = roundf((tw/th)*sh);
 
-    draw_menu_toggle_button(HUD_CLIP_MUSIC,      bx-(btn_width*0.0f),by, is_music_on  ());
-    draw_menu_toggle_button(HUD_CLIP_SOUND,      bx-(btn_width*1.1f),by, is_sound_on  ());
-    draw_menu_toggle_button(HUD_CLIP_FULLSCREEN, bx-(btn_width*2.2f),by, is_fullscreen());
+    nkF32 scale = nk_min(ww / sw, wh / sh);
+
+    begin_scissor((ww-(MENU_WIDTH*scale))*0.5f, (wh-(MENU_HEIGHT*scale))*0.5f, (MENU_WIDTH*scale), (MENU_HEIGHT*scale));
+    for(nkS32 i=0; i<MENU_LAYERS; ++i) // There are multiple layers.
+    {
+        ImmClip clip = { 0.0f, MENU_HEIGHT * i, MENU_WIDTH, MENU_HEIGHT };
+        imm_texture_ex(background, (ww*0.5f) + (g_menu.xoffset[i]*scale), wh*0.5f, scale,scale, 0.0f, NULL, &clip);
+    }
+    end_scissor();
+
+    // If interactive draw the rest of the menu background.
+    if(g_menu.stage == MenuStage_Interactive)
+    {
+        imm_rect_filled(0.0f,0.0f,ww,wh, { 0.0f,0.0f,0.0f,0.7f });
+
+        // Do the title and main buttons.
+        draw_menu_text_button(MENU_TITLE_TEXT, MENU_TITLE_YPOS, MENU_TITLE_SIZE, NK_FALSE);
+        draw_menu_text_button(MENU_PLAY_TEXT, MENU_PLAY_YPOS, MENU_PLAY_SIZE);
+        draw_menu_text_button(MENU_HOWTO_TEXT, MENU_HOWTO_YPOS, MENU_HOWTO_SIZE);
+        // We don't need/want an exit button in the web build.
+        #if !defined(BUILD_WEB)
+        draw_menu_text_button(MENU_EXIT_TEXT, MENU_EXIT_YPOS, MENU_EXIT_SIZE);
+        #endif // BUILD_WEB
+
+        // Do the options buttons.
+        nkF32 img_scale = (get_hud_scale() / 4.0f);
+
+        nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
+        nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
+
+        nkF32 bx = NK_CAST(nkF32, get_window_width()) - (btn_width * 0.6f);
+        nkF32 by = NK_CAST(nkF32, get_window_height()) - (btn_height * 0.6f);
+
+        draw_menu_toggle_button(HUD_CLIP_MUSIC,      bx-(btn_width*0.0f),by, is_music_on  ());
+        draw_menu_toggle_button(HUD_CLIP_SOUND,      bx-(btn_width*1.1f),by, is_sound_on  ());
+        draw_menu_toggle_button(HUD_CLIP_FULLSCREEN, bx-(btn_width*2.2f),by, is_fullscreen());
+    }
 }
 
 GLOBAL nkBool tick_menu_text_button(const nkChar* text, nkF32 y, nkS32 size, nkBool interactive)
