@@ -35,6 +35,8 @@ struct MenuState
     MenuStage stage;
     nkF32     xoffset[MENU_LAYERS];
     nkF32     timer;
+    fRect     viewport;
+    nkF32     scale;
 };
 
 INTERNAL MenuState g_menu;
@@ -76,6 +78,27 @@ GLOBAL void menu_quit(void)
 
 GLOBAL void menu_tick(nkF32 dt)
 {
+    // Calculate the viewport region within the window.
+    nkF32 ww = NK_CAST(nkF32, get_window_width());
+    nkF32 wh = NK_CAST(nkF32, get_window_height());
+    nkF32 vw = MENU_WIDTH;
+    nkF32 vh = MENU_HEIGHT;
+
+    nkF32 sx = ww / vw;
+    nkF32 sy = wh / vh;
+    nkF32 sw = vw;
+    nkF32 sh = vh;
+
+    if(fabsf(sx) < fabsf(sy)) sh = roundf((vh/vw)*sw);
+    if(fabsf(sx) > fabsf(sy)) sw = roundf((vw/vh)*sh);
+
+    g_menu.scale = nk_min(ww / sw, wh / sh);
+
+    g_menu.viewport.w = (sw * g_menu.scale);
+    g_menu.viewport.h = (sh * g_menu.scale);
+    g_menu.viewport.x = (ww - g_menu.viewport.w) * 0.5f;
+    g_menu.viewport.y = (wh - g_menu.viewport.h) * 0.5f;
+
     // Update the sliding animation.
     if(g_menu.timer < 1.0f)
     {
@@ -124,8 +147,8 @@ GLOBAL void menu_tick(nkF32 dt)
         nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
         nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
 
-        nkF32 bx = NK_CAST(nkF32, get_window_width()) - (btn_width * 0.5f);
-        nkF32 by = NK_CAST(nkF32, get_window_height()) - (btn_height * 0.5f);
+        nkF32 bx = (g_menu.viewport.x + g_menu.viewport.w) - (btn_width * 0.6f);
+        nkF32 by = (g_menu.viewport.y) + (btn_height * 0.6f);
 
         if(tick_menu_toggle_button(HUD_CLIP_MUSIC,      bx-(btn_width*0.0f),by, is_music_on  ())) set_music_volume((is_music_on()) ? 0.0f : 0.7f);
         if(tick_menu_toggle_button(HUD_CLIP_SOUND,      bx-(btn_width*1.1f),by, is_sound_on  ())) set_sound_volume((is_sound_on()) ? 0.0f : 0.8f);
@@ -151,24 +174,12 @@ GLOBAL void menu_draw(void)
 
     nkF32 ww = NK_CAST(nkF32, get_window_width());
     nkF32 wh = NK_CAST(nkF32, get_window_height());
-    nkF32 tw = MENU_WIDTH;
-    nkF32 th = MENU_HEIGHT;
 
-    nkF32 sx = ww / tw;
-    nkF32 sy = wh / th;
-    nkF32 sw = tw;
-    nkF32 sh = th;
-
-    if(fabsf(sx) < fabsf(sy)) sh = roundf((th/tw)*sw);
-    if(fabsf(sx) > fabsf(sy)) sw = roundf((tw/th)*sh);
-
-    nkF32 scale = nk_min(ww / sw, wh / sh);
-
-    begin_scissor((ww-(MENU_WIDTH*scale))*0.5f, (wh-(MENU_HEIGHT*scale))*0.5f, (MENU_WIDTH*scale), (MENU_HEIGHT*scale));
+    begin_scissor((ww-(MENU_WIDTH*g_menu.scale))*0.5f, (wh-(MENU_HEIGHT*g_menu.scale))*0.5f, (MENU_WIDTH*g_menu.scale), (MENU_HEIGHT*g_menu.scale));
     for(nkS32 i=0; i<MENU_LAYERS; ++i) // There are multiple layers.
     {
         ImmClip clip = { 0.0f, MENU_HEIGHT * i, MENU_WIDTH, MENU_HEIGHT };
-        imm_texture_ex(background, (ww*0.5f) + (g_menu.xoffset[i]*scale), wh*0.5f, scale,scale, 0.0f, NULL, &clip);
+        imm_texture_ex(background, (ww*0.5f) + (g_menu.xoffset[i]*g_menu.scale), wh*0.5f, g_menu.scale,g_menu.scale, 0.0f, NULL, &clip);
     }
     end_scissor();
 
@@ -192,8 +203,8 @@ GLOBAL void menu_draw(void)
         nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
         nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
 
-        nkF32 bx = NK_CAST(nkF32, get_window_width()) - (btn_width * 0.6f);
-        nkF32 by = NK_CAST(nkF32, get_window_height()) - (btn_height * 0.6f);
+        nkF32 bx = (g_menu.viewport.x + g_menu.viewport.w) - (btn_width * 0.6f);
+        nkF32 by = (g_menu.viewport.y) + (btn_height * 0.6f);
 
         draw_menu_toggle_button(HUD_CLIP_MUSIC,      bx-(btn_width*0.0f),by, is_music_on  ());
         draw_menu_toggle_button(HUD_CLIP_SOUND,      bx-(btn_width*1.1f),by, is_sound_on  ());
