@@ -6,6 +6,8 @@ INTERNAL constexpr nkS32 STARTING_MONEY = 20000;
 
 INTERNAL constexpr nkF32 TOOLTIP_PADDING = 5.0f;
 
+INTERNAL constexpr nkF32 PANNING_SPEED = 10.0f * TILE_WIDTH;
+
 INTERNAL constexpr nkF32 CAMERA_START_ZOOM       = 0.50f;
 INTERNAL constexpr nkF32 CAMERA_MIN_ZOOM         = 0.25f;
 INTERNAL constexpr nkF32 CAMERA_MAX_ZOOM         = 1.00f;
@@ -257,11 +259,38 @@ GLOBAL void controller_tick(nkF32 dt)
 
     nkVec2 cursor_pos = get_window_mouse_pos();
 
-    // Pan the camera around the world.
-    g_controller.panning = is_mouse_button_down(MouseButton_Middle);
-    if(g_controller.panning)
+    // Pan the camera around the world (via mouse or keyboard).
+    g_controller.panning = NK_FALSE;
+
+    if(is_mouse_button_down(MouseButton_Middle))
     {
         g_controller.camera_target_pos -= (get_relative_mouse_pos() / g_controller.camera_current_zoom);
+        g_controller.panning = NK_TRUE;
+    }
+
+    if(is_key_down(KeyCode_W) || is_key_down(KeyCode_Up))
+    {
+        g_controller.camera_target_pos.y -= (PANNING_SPEED / g_controller.camera_current_zoom) * dt;
+        g_controller.panning = NK_TRUE;
+    }
+    if(is_key_down(KeyCode_D) || is_key_down(KeyCode_Right))
+    {
+        g_controller.camera_target_pos.x += (PANNING_SPEED / g_controller.camera_current_zoom) * dt;
+        g_controller.panning = NK_TRUE;
+    }
+    if(is_key_down(KeyCode_S) || is_key_down(KeyCode_Down))
+    {
+        g_controller.camera_target_pos.y += (PANNING_SPEED / g_controller.camera_current_zoom) * dt;
+        g_controller.panning = NK_TRUE;
+    }
+    if(is_key_down(KeyCode_A) || is_key_down(KeyCode_Left))
+    {
+        g_controller.camera_target_pos.x -= (PANNING_SPEED / g_controller.camera_current_zoom) * dt;
+        g_controller.panning = NK_TRUE;
+    }
+
+    if(g_controller.panning)
+    {
         g_controller.camera_target_pos.x = nk_clamp(g_controller.camera_target_pos.x, 0.0f, get_world_width() * TILE_WIDTH);
         g_controller.camera_target_pos.y = nk_clamp(g_controller.camera_target_pos.y, 0.0f, get_world_height() * TILE_HEIGHT);
     }
