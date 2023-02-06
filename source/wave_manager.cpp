@@ -31,6 +31,7 @@ struct WaveDesc
     nkU32     wave_number;        // What number wave this description should be used for.
     nkU32     num_phases;         // The number of phases in the wave.
     nkU32     spawn_points;       // How many spawn points should be used during the wave.
+    nkF32     prep_timer;         // How long the player has to prepare before the wave starts.
     nkS32     wave_bonus;         // The amount of money to reward upon completion.
     PhaseDesc phases[MAX_PHASES]; // Descriptions of the different phases.
 };
@@ -52,9 +53,10 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Wave Number  */ 1,
 /* Phases       */ 1,
 /* Spawn Points */ 1,
+/* Prep Timer   */ 15.0f,
 /* Wave Bonus   */ 500,
 {
-/* Phase 1      */ { 0.0f, SpawnType_Walker, 10,12 },
+/* Phase 1      */ {  0.0f, SpawnType_Walker, 10,12 },
 /* Phase 2      */ NO_PHASE,
 /* Phase 3      */ NO_PHASE,
 /* Phase 4      */ NO_PHASE,
@@ -71,6 +73,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Wave Number  */ 2,
 /* Phases       */ 1,
 /* Spawn Points */ 2,
+/* Prep Timer   */ 30.0f,
 /* Wave Bonus   */ 750,
 {
 /* Phase 1      */ { 0.0f, SpawnType_Walker, 15,17 },
@@ -89,7 +92,8 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 
 /*////////////////////////////////////////////////////////////////////////////*/
 
-INTERNAL constexpr nkF32 PREPARE_TIME = 15.0f; // @Incomplete: Change this later!
+INTERNAL constexpr nkF32 WAVE_MULTIPLICATION_RATE = 0.5f;
+
 INTERNAL constexpr nkF32 MESSAGE_TIME = 3.5f;
 
 NK_ENUM(WaveState, nkS32)
@@ -110,6 +114,7 @@ NK_ENUM(SpawnerState, nkS32)
 struct SpawnPoint
 {
     nkVec2 position;
+    fRect  region;
     nkBool active;
 };
 
@@ -141,8 +146,18 @@ struct WaveManager
 
 INTERNAL WaveManager g_wave_manager;
 
-INTERNAL void post_wave_message(const nkChar* message, nkVec3 color)
+INTERNAL nkS32 get_monster_spawn_rate(SpawnType type)
 {
+    // These should add up to 100.
+    if(NK_CHECK_FLAGS(type, SpawnType_Walker)) return 100;
+    NK_ASSERT(NK_FALSE);
+    return 0;
+}
+
+INTERNAL void post_wave_message(const nkChar* message, nkVec3 color, const nkChar* sound = NULL)
+{
+    if(sound) play_sound(asset_manager_load<Sound>(sound));
+
     g_wave_manager.message       = message;
     g_wave_manager.message_timer = MESSAGE_TIME;
     g_wave_manager.message_alpha = 1.0f;
@@ -167,7 +182,7 @@ INTERNAL void setup_next_wave(void)
     {
         // If we couldn't find a wave for the wave number just use the last wave in the list.
         nk_array_append(&possible_waves, NK_CAST(nkS32,NK_ARRAY_SIZE(WAVE_LIST)-1));
-        wm.wave_multiplier += 0.25f; // Increase the multiplier to make the wave harder!
+        wm.wave_multiplier += WAVE_MULTIPLICATION_RATE; // Increase the multiplier to make the wave harder!
     }
     else
     {
@@ -207,6 +222,9 @@ INTERNAL void setup_next_wave(void)
         wm.spawners[i].spawns_left = rng_s32(min_spawns, max_spawns);
     }
 
+    // Start the timer until the wave begins.
+    wm.timer = wm.wave_desc->prep_timer;
+
     // Debug print for making sure waves are setting up correctly.
     DEBUG_LOG("[Wave]: Setup wave %d using %d!\n", wm.current_wave+1, wave_index);
 }
@@ -223,7 +241,7 @@ INTERNAL void start_wave(void)
 
 INTERNAL void end_wave(void)
 {
-    post_wave_message("WAVE COMPLETE!", NK_V3_YELLOW);
+    post_wave_message("WAVE COMPLETE!", NK_V3_YELLOW, "trumpet_fanfare.wav");
 
     auto& wm = g_wave_manager;
 
@@ -233,7 +251,6 @@ INTERNAL void end_wave(void)
 
     wm.state = WaveState_Prepare;
     wm.waves_beaten++;
-    wm.timer = PREPARE_TIME;
     wm.wave_desc = NULL;
 
     for(nkS32 i=0,n=NK_ARRAY_SIZE(wm.spawn_points); i<n; ++i)
@@ -271,6 +288,7 @@ INTERNAL void tick_wave_fight_state(nkF32 dt)
 
         switch(spawner.state)
         {
+            // Wait until it is our time to start spawning.
             case SpawnerState_Waiting:
             {
                 if(spawner.timer <= 0.0f)
@@ -281,21 +299,23 @@ INTERNAL void tick_wave_fight_state(nkF32 dt)
                 else
                 {
                     // If the phase before us is in progress then countdown our waiting timer.
-                    // Otherwise, if the phase before us has completed then just start now.
+                    // Otherwise, if the phase before us has completed and the player has killed
+                    // all the enemies then just start now so they aren't stuck waiting around.
                     if(i > 0 && wm.spawners[i-1].state == SpawnerState_InProgress)
                     {
                         spawner.timer -= dt;
                     }
-                    if(i == 0 || wm.spawners[i-1].state == SpawnerState_Complete)
+                    if(i == 0 || (wm.spawners[i-1].state == SpawnerState_Complete && !any_entities_of_type_alive(EntityType_Monster)))
                     {
                         spawner.timer = 0.0f;
                     }
                 }
             } break;
 
+            // Spawn monsters.
             case SpawnerState_InProgress:
             {
-                // @Incomplete: Improve the spawning...
+                // @Incomplete: This could be improved to be a bit nicer for better spawn distribution...
                 if(rng_s32(0,100) < 2)
                 {
                     nkS32 spawn_index = 0;
@@ -309,21 +329,49 @@ INTERNAL void tick_wave_fight_state(nkF32 dt)
                         }
                     }
 
-                    // @Incomplete: Use the spawn region to determine where to spawn...
-                    nkVec2 pos = wm.spawn_points[spawn_index].position;
+                    // Determine what monster type to spawn based on what is available to us.
+                    const SpawnPoint& sp = wm.spawn_points[spawn_index];
 
-                    // @Incomplete: Use the spawn types to determine what to spawn...
-                    entity_spawn(EntityID_Walker, pos.x, pos.y);
+                    nkS32 max_percent = 0;
 
-                    spawner.spawns_left--;
-                    if(spawner.spawns_left == 0)
+                    if(NK_CHECK_FLAGS(spawner.spawn_types, SpawnType_Walker)) max_percent += get_monster_spawn_rate(SpawnType_Walker);
+
+                    if(max_percent > 0)
                     {
-                        spawner.state = SpawnerState_Complete;
-                        DEBUG_LOG("[Wave]: Completing phase %d!\n", i);
+                        nkF32 multiplier = 100.0f / (100.0f - NK_CAST(nkF32, max_percent));
+                        nkF32 spawn = NK_CAST(nkF32, rng_s32(1,100));
+
+                        EntityID id = EntityID_None;
+
+                        // =========================================================================
+                        // !!!IMPORTANT NOTE!!! Place these in highest to lowest spawn-rate order!!!
+                        // =========================================================================
+                        //
+                        if(spawn < (NK_CAST(nkF32, get_monster_spawn_rate(SpawnType_Walker)) * multiplier)) id = EntityID_Walker;
+
+                        if(id != EntityID_None)
+                        {
+                            nkF32 x = rng_f32(sp.region.x, sp.region.x + sp.region.w);
+                            nkF32 y = rng_f32(sp.region.y, sp.region.y + sp.region.h);
+
+                            entity_spawn(id, x,y);
+
+                            spawner.spawns_left--;
+                            if(spawner.spawns_left == 0)
+                            {
+                                spawner.state = SpawnerState_Complete;
+                                DEBUG_LOG("[Wave]: Completing phase %d!\n", i);
+                            }
+                        }
+                        else
+                        {
+                            DEBUG_LOG("[Wave]: Ended up with no spawn!\n");
+                        }
                     }
                 }
             } break;
 
+            // We are done.
             case SpawnerState_Complete:
             {
                 phases_complete++;
@@ -381,10 +429,19 @@ GLOBAL void wave_manager_draw_world(void)
         const SpawnPoint& sp = wm.spawn_points[i];
         if(sp.active)
         {
-            nkF32 x = sp.position.x;
-            nkF32 y = sp.position.y;
+            nkVec2 inc = (sp.region.w > sp.region.h) ? nkVec2 { sp.region.w * 0.33f, 0.0f } : nkVec2 { 0.0f, sp.region.h * 0.33f };
 
-            imm_texture(hud, x,y, &HUD_CLIP_MARKER);
+            nkF32 x0 = sp.position.x - inc.x;
+            nkF32 y0 = sp.position.y - inc.y;
+            nkF32 x1 = sp.position.x;
+            nkF32 y1 = sp.position.y;
+            nkF32 x2 = sp.position.x + inc.x;
+            nkF32 y2 = sp.position.y + inc.y;
+
+            // We render a couple of markers just to show that the spawning area is fairly long.
+            imm_texture(hud, x0,y0, &HUD_CLIP_MARKER);
+            imm_texture(hud, x1,y1, &HUD_CLIP_MARKER);
+            imm_texture(hud, x2,y2, &HUD_CLIP_MARKER);
         }
     }
 }
@@ -438,18 +495,18 @@ GLOBAL void wave_manager_reset(void)
     nkF32 ww = NK_CAST(nkF32, get_world_width()) * TILE_WIDTH;
     nkF32 wh = NK_CAST(nkF32, get_world_height()) * TILE_HEIGHT;
 
-    wm.spawn_points[0] = { { ww * 0.25f,       -SPAWN_INSET }, NK_FALSE };
-    wm.spawn_points[1] = { { ww * 0.75f,       -SPAWN_INSET }, NK_FALSE };
-    wm.spawn_points[2] = { {   -SPAWN_INSET, wh * 0.25f     }, NK_FALSE };
-    wm.spawn_points[3] = { {   -SPAWN_INSET, wh * 0.75f     }, NK_FALSE };
-    wm.spawn_points[4] = { { ww+SPAWN_INSET, wh * 0.25f     }, NK_FALSE };
-    wm.spawn_points[5] = { { ww+SPAWN_INSET, wh * 0.75f     }, NK_FALSE };
-    wm.spawn_points[6] = { { ww * 0.25f,     wh+SPAWN_INSET }, NK_FALSE };
-    wm.spawn_points[7] = { { ww * 0.75f,     wh+SPAWN_INSET }, NK_FALSE };
+    wm.spawn_points[0] = { { ww * 0.25f,       -SPAWN_INSET }, {      0.0f, -(SPAWN_INSET*3.0f), ww * 0.5f, +(SPAWN_INSET*2.0f) }, NK_FALSE };
+    wm.spawn_points[1] = { { ww * 0.75f,       -SPAWN_INSET }, { ww * 0.5f, -(SPAWN_INSET*3.0f), ww * 0.5f, +(SPAWN_INSET*2.0f) }, NK_FALSE };
+    wm.spawn_points[2] = { {   -SPAWN_INSET, wh * 0.25f     }, { -(SPAWN_INSET*3.0f),      0.0f, +(SPAWN_INSET*2.0f), wh * 0.5f }, NK_FALSE };
+    wm.spawn_points[3] = { {   -SPAWN_INSET, wh * 0.75f     }, { -(SPAWN_INSET*3.0f), wh * 0.5f, +(SPAWN_INSET*2.0f), wh * 0.5f }, NK_FALSE };
+    wm.spawn_points[4] = { { ww+SPAWN_INSET, wh * 0.25f     }, { ww+(SPAWN_INSET   ),      0.0f, +(SPAWN_INSET*2.0f), wh * 0.5f }, NK_FALSE };
+    wm.spawn_points[5] = { { ww+SPAWN_INSET, wh * 0.75f     }, { ww+(SPAWN_INSET   ), wh * 0.5f, +(SPAWN_INSET*2.0f), wh * 0.5f }, NK_FALSE };
+    wm.spawn_points[6] = { { ww * 0.25f,     wh+SPAWN_INSET }, {      0.0f, wh+(SPAWN_INSET   ), ww * 0.5f, +(SPAWN_INSET*2.0f) }, NK_FALSE };
+    wm.spawn_points[7] = { { ww * 0.75f,     wh+SPAWN_INSET }, { ww * 0.5f, wh+(SPAWN_INSET   ), ww * 0.5f, +(SPAWN_INSET*2.0f) }, NK_FALSE };
 
     // Reset the rest of the wave manager state.
     wm.state           = WaveState_Prepare;
-    wm.timer           = PREPARE_TIME;
+    wm.timer           = 0.0f; // Will get set inside setup_next_wave.
     wm.wave_multiplier = 1.0f;
     wm.waves_beaten    = 0;
     wm.current_wave    = 0;
