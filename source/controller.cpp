@@ -44,9 +44,8 @@ struct Controller
     nkS32 money_counter; // This is used as the visual for money (for smooth interpolation).
 
     nkS32 money;
-    nkS32 kills;
-    nkS32 waves;
     nkS32 health;
+    nkS32 kills;
 
     nkVec2 camera_current_pos;
     nkVec2 camera_target_pos;
@@ -563,7 +562,7 @@ GLOBAL void controller_draw(void)
 
     draw_hud_stat(texture, x,y, icon_scale, hud_scale, HUD_CLIP_HEART, g_controller.health);
     y += ((HUD_ICON_HEIGHT) * icon_scale);
-    draw_hud_stat(texture, x,y, icon_scale, hud_scale, HUD_CLIP_FLAG, g_controller.waves);
+    draw_hud_stat(texture, x,y, icon_scale, hud_scale, HUD_CLIP_FLAG, get_wave_counter());
     y += ((HUD_ICON_HEIGHT) * icon_scale);
     draw_hud_stat(texture, x,y, icon_scale, hud_scale, HUD_CLIP_SKULL, g_controller.kills);
     y += ((HUD_ICON_HEIGHT) * icon_scale);
@@ -678,7 +677,6 @@ GLOBAL void controller_reset(void)
     g_controller.money_counter = STARTING_MONEY;
     g_controller.money         = STARTING_MONEY;
     g_controller.kills         = 0;
-    g_controller.waves         = 0;
     g_controller.health        = NK_CAST(nkS32, ENTITY_TABLE[EntityID_HomeTree].health);
 
     g_controller.selected = NO_SELECTION;
@@ -755,11 +753,6 @@ GLOBAL nkBool is_something_selected(void)
 GLOBAL nkS32 get_health(void)
 {
     return g_controller.health;
-}
-
-GLOBAL nkS32 get_waves(void)
-{
-    return g_controller.waves;
 }
 
 GLOBAL nkS32 get_kills(void)

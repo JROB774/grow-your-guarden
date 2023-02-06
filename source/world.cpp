@@ -211,7 +211,7 @@ GLOBAL void world_draw_below(void)
 GLOBAL void world_draw_above(void)
 {
     // Draw some large rectangles to cover up anything rendering outside of the world area.
-    const nkF32 BORDER_DEPTH = 2048.0f;
+    const nkF32 BORDER_DEPTH = 4096.0f;
 
     nkF32 wx = 0.0f;
     nkF32 wy = 0.0f;

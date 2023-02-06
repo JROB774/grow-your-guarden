@@ -650,4 +650,14 @@ GLOBAL nkU64 get_first_entity_index_with_id(EntityID id)
     return NK_U64_MAX;
 }
 
+GLOBAL nkBool any_entities_of_type_alive(EntityType type)
+{
+    for(auto& e: g_entity_manager.entities)
+    {
+        if(e.active && e.state != EntityState_Dead && NK_CHECK_FLAGS(type, e.type))
+            return NK_TRUE;
+    }
+    return NK_FALSE;
+}
+
 /*////////////////////////////////////////////////////////////////////////////*/

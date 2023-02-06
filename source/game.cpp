@@ -145,7 +145,7 @@ INTERNAL void game_over_draw(void)
 
     Texture hud = asset_manager_load<Texture>("hud.png");
 
-    draw_hud_stat(hud, sx-(96.0f*hud_scale),sy, icon_scale, hud_scale, HUD_CLIP_FLAG,  get_waves());
+    draw_hud_stat(hud, sx-(96.0f*hud_scale),sy, icon_scale, hud_scale, HUD_CLIP_FLAG,  get_wave_counter());
     draw_hud_stat(hud, sx+(96.0f*hud_scale),sy, icon_scale, hud_scale, HUD_CLIP_SKULL, get_kills());
 }
 
@@ -228,8 +228,9 @@ GLOBAL void game_draw(void)
     entity_draw();
     particle_draw();
     world_draw_above();
-    wave_manager_draw();
+    wave_manager_draw_world();
     controller_draw(); // This internally unsets the controller camera!
+    wave_manager_draw_hud();
     pause_draw();
     game_over_draw();
 }

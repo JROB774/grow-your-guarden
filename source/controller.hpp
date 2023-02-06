@@ -12,7 +12,6 @@ GLOBAL nkVec2   get_cursor_world_pos   (void);
 GLOBAL void     add_money              (nkS32 money);
 GLOBAL nkBool   is_something_selected  (void);
 GLOBAL nkS32    get_health             (void);
-GLOBAL nkS32    get_waves              (void);
 GLOBAL nkS32    get_kills              (void);
 
 GLOBAL void draw_hud_stat(Texture texture, nkF32 x, nkF32 y, nkF32 icon_scale, nkF32 hud_scale, ImmClip clip, nkS32 stat);
