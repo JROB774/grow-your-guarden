@@ -259,7 +259,11 @@ INTERNAL void end_wave(void)
     setup_next_wave();
 
     nkString message = "WAVE COMPLETE!";
-    if(anything_unlocked_this_wave()) nk_string_append(&message, "\nNEW PLANT/ITEM UNLOCKED!");
+    if(anything_unlocked_this_wave())
+    {
+        nk_string_append(&message, "\nNEW PLANT/ITEM UNLOCKED!");
+        // @Incomplete: Unlock sound...
+    }
     post_wave_message(message.cstr, NK_V3_YELLOW, "trumpet_fanfare.wav");
 }
 

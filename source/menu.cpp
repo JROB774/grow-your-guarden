@@ -1,23 +1,23 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
-INTERNAL constexpr const nkChar* MENU_TITLE_TEXT = "GROW YOUR GUARDEN!";
-INTERNAL constexpr const nkChar* MENU_PLAY_TEXT  = "Play";
-INTERNAL constexpr const nkChar* MENU_HOWTO_TEXT  = "How to Play";
-INTERNAL constexpr const nkChar* MENU_EXIT_TEXT  = "Exit";
+INTERNAL constexpr const nkChar* MENU_PLAY_TEXT    = "Play";
+INTERNAL constexpr const nkChar* MENU_HOWTO_TEXT   = "How to Play";
+INTERNAL constexpr const nkChar* MENU_CREDITS_TEXT = "Credits";
+INTERNAL constexpr const nkChar* MENU_EXIT_TEXT    = "Exit";
 
-INTERNAL constexpr nkS32 MENU_TITLE_SIZE = 100;
-INTERNAL constexpr nkS32 MENU_PLAY_SIZE  =  50;
-INTERNAL constexpr nkS32 MENU_HOWTO_SIZE =  35;
-INTERNAL constexpr nkS32 MENU_EXIT_SIZE  =  35;
+INTERNAL constexpr nkS32 MENU_PLAY_SIZE    = 50;
+INTERNAL constexpr nkS32 MENU_HOWTO_SIZE   = 35;
+INTERNAL constexpr nkS32 MENU_CREDITS_SIZE = 35;
+INTERNAL constexpr nkS32 MENU_EXIT_SIZE    = 35;
 
-INTERNAL constexpr nkF32 MENU_TITLE_YPOS =  0.40f;
-INTERNAL constexpr nkF32 MENU_PLAY_YPOS  =  0.65f;
-INTERNAL constexpr nkF32 MENU_HOWTO_YPOS = -1.00f;
-INTERNAL constexpr nkF32 MENU_EXIT_YPOS  = -1.00f;
+INTERNAL constexpr nkF32 MENU_PLAY_YPOS    =  0.75f;
+INTERNAL constexpr nkF32 MENU_HOWTO_YPOS   = -1.00f;
+INTERNAL constexpr nkF32 MENU_CREDITS_YPOS = -1.00f;
+INTERNAL constexpr nkF32 MENU_EXIT_YPOS    = -1.00f;
 
 INTERNAL constexpr nkF32 MENU_SLIDE_SPEED = 2.0f;
 
-INTERNAL constexpr nkS32 MENU_LAYERS = 3;
+INTERNAL constexpr nkS32 MENU_LAYERS = 4;
 
 INTERNAL constexpr nkF32 MENU_WIDTH = 1280.0f;
 INTERNAL constexpr nkF32 MENU_HEIGHT = 720.0f;
@@ -132,6 +132,10 @@ GLOBAL void menu_tick(nkF32 dt)
         {
             // @Incomplete: How to play pages...
         }
+        if(tick_menu_text_button(MENU_CREDITS_TEXT, MENU_CREDITS_YPOS, MENU_CREDITS_SIZE))
+        {
+            // @Incomplete: Credits page...
+        }
 
         // We don't need/want an exit button in the web build.
         #if !defined(BUILD_WEB)
@@ -176,7 +180,7 @@ GLOBAL void menu_draw(void)
     nkF32 wh = NK_CAST(nkF32, get_window_height());
 
     begin_scissor((ww-(MENU_WIDTH*g_menu.scale))*0.5f, (wh-(MENU_HEIGHT*g_menu.scale))*0.5f, (MENU_WIDTH*g_menu.scale), (MENU_HEIGHT*g_menu.scale));
-    for(nkS32 i=0; i<MENU_LAYERS; ++i) // There are multiple layers.
+    for(nkS32 i=0; i<(MENU_LAYERS-1); ++i) // There are multiple layers (we don't include the title at this stage).
     {
         ImmClip clip = { 0.0f, MENU_HEIGHT * i, MENU_WIDTH, MENU_HEIGHT };
         imm_texture_ex(background, (ww*0.5f) + (g_menu.xoffset[i]*g_menu.scale), wh*0.5f, g_menu.scale,g_menu.scale, 0.0f, NULL, &clip);
@@ -186,12 +190,16 @@ GLOBAL void menu_draw(void)
     // If interactive draw the rest of the menu background.
     if(g_menu.stage == MenuStage_Interactive)
     {
-        imm_rect_filled(0.0f,0.0f,ww,wh, { 0.0f,0.0f,0.0f,0.7f });
+        imm_rect_filled(0.0f,0.0f,ww,wh, { 0.0f,0.0f,0.0f,0.6f });
 
-        // Do the title and main buttons.
-        draw_menu_text_button(MENU_TITLE_TEXT, MENU_TITLE_YPOS, MENU_TITLE_SIZE, NK_FALSE);
+        // Do the title.
+        ImmClip clip = { 0.0f, MENU_HEIGHT * 3, MENU_WIDTH, MENU_HEIGHT };
+        imm_texture_ex(background, ww*0.5f, wh*0.5f, g_menu.scale,g_menu.scale, 0.0f, NULL, &clip);
+
+        // Do the main buttons.
         draw_menu_text_button(MENU_PLAY_TEXT, MENU_PLAY_YPOS, MENU_PLAY_SIZE);
         draw_menu_text_button(MENU_HOWTO_TEXT, MENU_HOWTO_YPOS, MENU_HOWTO_SIZE);
+        draw_menu_text_button(MENU_CREDITS_TEXT, MENU_CREDITS_YPOS, MENU_CREDITS_SIZE);
         // We don't need/want an exit button in the web build.
         #if !defined(BUILD_WEB)
         draw_menu_text_button(MENU_EXIT_TEXT, MENU_EXIT_YPOS, MENU_EXIT_SIZE);
