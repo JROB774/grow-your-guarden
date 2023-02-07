@@ -74,7 +74,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Phases       */ 1,
 /* Spawn Points */ 2,
 /* Prep Timer   */ 30.0f,
-/* Wave Bonus   */ 750,
+/* Wave Bonus   */ 500,
 {
 /* Phase 1      */ { 0.0f, SpawnType_Walker, 15,17 },
 /* Phase 2      */ NO_PHASE,
@@ -95,6 +95,9 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 INTERNAL constexpr nkF32 WAVE_MULTIPLICATION_RATE = 0.5f;
 
 INTERNAL constexpr nkF32 MESSAGE_TIME = 3.5f;
+
+INTERNAL constexpr nkF32 BATTLE_MUSIC_FADE_IN_TIME  = 8.0f;
+INTERNAL constexpr nkF32 BATTLE_MUSIC_FADE_OUT_TIME = 4.0f;
 
 NK_ENUM(WaveState, nkS32)
 {
@@ -237,6 +240,12 @@ INTERNAL void start_wave(void)
 
     wm.state = WaveState_Fight;
     wm.current_wave++;
+
+    // Pick one of the battle songs to play.
+    Music music[2] = NK_ZERO_MEM;
+    music[0] = asset_manager_load<Music>("battle_01.ogg");
+    music[1] = asset_manager_load<Music>("battle_02.ogg");
+    play_music_fade_in(music[rng_s32() % 2], -1, BATTLE_MUSIC_FADE_IN_TIME);
 }
 
 INTERNAL void end_wave(void)
@@ -265,6 +274,8 @@ INTERNAL void end_wave(void)
         // @Incomplete: Unlock sound...
     }
     post_wave_message(message.cstr, NK_V3_YELLOW, "trumpet_fanfare.wav");
+
+    stop_music_fade_out(BATTLE_MUSIC_FADE_OUT_TIME);
 }
 
 INTERNAL void tick_wave_prepare_state(nkF32 dt)

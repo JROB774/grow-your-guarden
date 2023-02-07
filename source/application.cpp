@@ -202,6 +202,12 @@ GLOBAL void app_tick(nkF32 dt)
     if(g_app.state != g_app.state_target)
     {
         g_app.state = g_app.state_target;
+
+        switch(g_app.state)
+        {
+            case AppState_Menu: play_music(asset_manager_load<Music>("menu.ogg")); break;
+            case AppState_Game: stop_music(); break; // @Incomplete!!!
+        }
     }
 
     set_cursor(CursorType_Pointer); // Always reset the cursor, other systems have to set it to what they want.

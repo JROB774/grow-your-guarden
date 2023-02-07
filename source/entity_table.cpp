@@ -64,7 +64,7 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Health             */ 5.0f,
 /* Damage             */ 0.0f,
 /* Speed              */ 0.0f,
-/* Range              */ 6.0f,
+/* Range              */ 5.0f,
 /* Radius             */ 0.3f,
 /* Z-Depth            */ 0.0f,
 /* Collision Mask     */ EntityType_None,

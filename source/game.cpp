@@ -53,7 +53,9 @@ INTERNAL void pause_tick(nkF32 dt)
     if(is_key_pressed(KeyCode_Escape))
     {
         g_game.paused = !g_game.paused;
-        // play_sound(g_game.pause_sound);
+        if(g_game.paused) pause_music();
+        else resume_music();
+        play_sound(g_game.pause_sound);
     }
 
     if(!g_game.paused) return;
@@ -61,12 +63,12 @@ INTERNAL void pause_tick(nkF32 dt)
     if(tick_menu_text_button(PAUSE_RESUME_TEXT, PAUSE_RESUME_YPOS, PAUSE_RESUME_SIZE))
     {
         g_game.paused = NK_FALSE;
-        // play_sound(g_game.pause_sound);
+        resume_music();
+        play_sound(g_game.pause_sound);
     }
     if(tick_menu_text_button(PAUSE_MENU_TEXT, PAUSE_MENU_YPOS, PAUSE_MENU_SIZE))
     {
         set_app_state(AppState_Menu);
-        // play_sound(g_game.pause_sound);
     }
 
     // Do the options buttons.
@@ -113,6 +115,7 @@ INTERNAL void game_over_tick(nkF32 dt)
     if(tick_menu_text_button(GAMEOVER_RETRY_TEXT, GAMEOVER_RETRY_YPOS, GAMEOVER_RETRY_SIZE))
     {
         game_start();
+        // @Incomplete: Make sure game music gets restarted here...
     }
     if(tick_menu_text_button(GAMEOVER_MENU_TEXT, GAMEOVER_MENU_YPOS, GAMEOVER_MENU_SIZE))
     {
@@ -174,6 +177,13 @@ GLOBAL void game_start(void)
 
 GLOBAL void game_init(void)
 {
+    // Pre-load some assets.
+    asset_manager_load<Music>("battle_01.ogg");
+    asset_manager_load<Music>("battle_02.ogg");
+    asset_manager_load<Sound>("coin_collect.wav");
+    asset_manager_load<Sound>("coin_drop.wav");
+    asset_manager_load<Sound>("trumpet_fanfare.wav");
+
     g_game.pause_sound = asset_manager_load<Sound>("pause.wav");
 
     entity_init();
@@ -212,6 +222,7 @@ GLOBAL void game_tick(nkF32 dt)
         if(get_health() <= 0)
         {
             g_game.game_over = NK_TRUE;
+            stop_music();
         }
     }
     else

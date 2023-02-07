@@ -63,7 +63,11 @@ INTERNAL fRect calculate_menu_button_bounds(TrueTypeFont font, const nkChar* tex
 
 GLOBAL void menu_init(void)
 {
+    asset_manager_load<Sound>("click.wav");
+    asset_manager_load<Sound>("whoosh.wav");
+    asset_manager_load<Sound>("thud.wav");
     asset_manager_load<Texture>("title.png");
+    asset_manager_load<Music>("menu.ogg");
 
     g_menu.stage      = MenuStage_Animation;
     g_menu.xoffset[1] = -(MENU_WIDTH);
@@ -99,7 +103,9 @@ GLOBAL void menu_tick(nkF32 dt)
     g_menu.viewport.x = (ww - g_menu.viewport.w) * 0.5f;
     g_menu.viewport.y = (wh - g_menu.viewport.h) * 0.5f;
 
-    // Update the sliding animation.
+    // Update the sliding animation and sound effects.
+    PERSISTENT nkF32 prev_timer = -1.0f;
+
     if(g_menu.timer < 1.0f)
     {
         if(g_menu.timer > 0.0f)
@@ -111,7 +117,9 @@ GLOBAL void menu_tick(nkF32 dt)
             if(g_menu.xoffset[2] < 0.0f) g_menu.xoffset[2] = 0.0f;
         }
 
+        prev_timer = g_menu.timer;
         g_menu.timer += (dt * MENU_SLIDE_SPEED);
+
         if(g_menu.timer >= 1.0f)
         {
             g_menu.timer = 1.0f;
@@ -119,6 +127,24 @@ GLOBAL void menu_tick(nkF32 dt)
             g_menu.xoffset[2] = 0.0f;
             g_menu.stage++;
         }
+    }
+
+    nkBool sound_played = NK_FALSE;
+
+    if(prev_timer <= 0.0f && g_menu.timer > 0.0f)
+    {
+        play_sound(asset_manager_load<Sound>("whoosh.wav"));
+        sound_played = NK_TRUE;
+    }
+    if(prev_timer < 1.0f && g_menu.timer >= 1.0f)
+    {
+        play_sound(asset_manager_load<Sound>("thud.wav"));
+        sound_played = NK_TRUE;
+    }
+
+    if(sound_played)
+    {
+        prev_timer = g_menu.timer;
     }
 
     // Do state-specific update.
@@ -167,6 +193,11 @@ GLOBAL void menu_tick(nkF32 dt)
             g_menu.xoffset[1] = 0.0f;
             g_menu.xoffset[2] = 0.0f;
             g_menu.stage++;
+
+            if(g_menu.stage == MenuStage_Interactive)
+            {
+                play_music(asset_manager_load<Music>("menu.ogg"));
+            }
         }
     }
 }
@@ -232,7 +263,10 @@ GLOBAL nkBool tick_menu_text_button(const nkChar* text, nkF32 y, nkS32 size, nkB
 
     nkVec2 cursor_pos = get_window_mouse_pos();
 
-    return (point_vs_rect(cursor_pos, t.x,t.y-t.h,t.w,t.h) && is_mouse_button_pressed(MouseButton_Left) && interactive);
+    nkBool clicked = (point_vs_rect(cursor_pos, t.x,t.y-t.h,t.w,t.h) && is_mouse_button_pressed(MouseButton_Left) && interactive);
+    if(clicked)
+        play_sound(asset_manager_load<Sound>("click.wav"));
+    return clicked;
 }
 
 GLOBAL void draw_menu_text_button(const nkChar* text, nkF32 y, nkS32 size, nkBool interactive)

@@ -200,6 +200,14 @@ GLOBAL void play_music(Music music, nkS32 loops)
         printf("Failed to play music: %s\n", Mix_GetError());
 }
 
+GLOBAL void play_music_fade_in(Music music, nkS32 loops, nkF32 seconds)
+{
+    NK_ASSERT(music);
+    nkS32 ms = NK_CAST(nkS32, seconds * 1000.0f);
+    if(Mix_FadeInMusic(music->music, loops, ms) == -1)
+        printf("Failed to play music fade in: %s\n", Mix_GetError());
+}
+
 GLOBAL void resume_music(void)
 {
     Mix_ResumeMusic();
@@ -213,6 +221,12 @@ GLOBAL void pause_music(void)
 GLOBAL void stop_music(void)
 {
     Mix_HaltMusic();
+}
+
+GLOBAL void stop_music_fade_out(nkF32 seconds)
+{
+    nkS32 ms = NK_CAST(nkS32, seconds * 1000.0f);
+    Mix_FadeOutMusic(ms);
 }
 
 // =============================================================================

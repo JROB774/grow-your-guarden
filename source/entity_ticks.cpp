@@ -43,14 +43,8 @@ DEF_ETICK(daisy)
         {
             if(m.type == EntityType_Monster && m.active)
             {
-                nkF32 range = e.range;
-                if(e.fertilized_timer > 0.0f)
-                {
-                    range *= 1.5f; // Higher range if fertilized.
-                }
-
                 distance = distance_between_points(e.position, m.position);
-                if(distance <= range && distance < shortest_distance)
+                if(distance <= e.range && distance < shortest_distance)
                 {
                     shortest_distance = distance;
                     target = &m;
@@ -186,6 +180,11 @@ DEF_ETICK(coin)
     if(e.z_depth <= 0.0f)
     {
         e.velocity = NK_V2_ZERO;
+        if(e.thrust != 0.0f)
+        {
+            play_sound(asset_manager_load<Sound>("coin_drop.wav"));
+            e.thrust = 0.0f;
+        }
     }
     else
     {
@@ -200,9 +199,9 @@ DEF_ETICK(coin)
         {
             switch(e.id)
             {
-                case EntityID_CoinCopper: add_money( 25); break;
-                case EntityID_CoinSilver: add_money( 50); break;
-                case EntityID_CoinGold:   add_money(100); break;
+                case EntityID_CoinCopper: add_money(10); break;
+                case EntityID_CoinSilver: add_money(15); break;
+                case EntityID_CoinGold:   add_money(25); break;
             }
 
             // The sound and particle are not implemented in the entity desc because we don't want them to happen on de-spawn.
@@ -211,7 +210,7 @@ DEF_ETICK(coin)
             nkF32 w = e.radius * 2.0f;
             nkF32 h = e.radius * 2.0f;
 
-            play_sound(asset_manager_load<Sound>("coin.wav"));
+            play_sound(asset_manager_load<Sound>("coin_collect.wav"));
             particle_spawn("sparkle", x,y,w,h, 3, 5);
             entity_kill(index);
         }
