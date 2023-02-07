@@ -2,7 +2,7 @@
 
 INTERNAL constexpr nkU32 NO_SELECTION = NK_U32_MAX;
 
-INTERNAL constexpr nkS32 STARTING_MONEY = 20000;
+INTERNAL constexpr nkS32 STARTING_MONEY = 750;
 
 INTERNAL constexpr nkF32 TOOLTIP_PADDING = 5.0f;
 
@@ -327,21 +327,21 @@ GLOBAL void controller_tick(nkF32 dt)
         if(point_vs_rect(cursor_pos, rx,ry,rw,rh))
         {
             g_controller.hovered = i;
+        }
 
-            if(is_mouse_button_pressed(MouseButton_Left))
+        if((g_controller.hovered == i && is_mouse_button_pressed(MouseButton_Left)) || is_key_pressed(KeyCode_1+i))
+        {
+            const HotbarSlot& slot = g_controller.hotbar[i];
+            if(g_controller.money >= slot.cost)
             {
-                const HotbarSlot& slot = g_controller.hotbar[i];
-                if(g_controller.money >= slot.cost)
+                // Toggle the selection depending on if we are already selected or not.
+                if(g_controller.selected == i)
                 {
-                    // Toggle the selection depending on if we are already selected or not.
-                    if(g_controller.selected == i)
-                    {
-                        g_controller.selected = NO_SELECTION;
-                    }
-                    else
-                    {
-                        g_controller.selected = i;
-                    }
+                    g_controller.selected = NO_SELECTION;
+                }
+                else
+                {
+                    g_controller.selected = i;
                 }
             }
         }
@@ -350,7 +350,7 @@ GLOBAL void controller_tick(nkF32 dt)
     }
 
     // Place current plant / perform the current tool action.
-    if(g_controller.hovered == NO_SELECTION && !g_controller.panning && is_mouse_button_pressed(MouseButton_Left))
+    if(g_controller.hovered == NO_SELECTION && is_mouse_button_pressed(MouseButton_Left))
     {
         nkVec2 pos = screen_to_world(cursor_pos);
 
@@ -458,7 +458,7 @@ GLOBAL void controller_draw(void)
     nkVec2 cursor_pos = get_window_mouse_pos();
 
     // Draw the highlighted tile.
-    if(!g_controller.panning && g_controller.hovered == NO_SELECTION && g_controller.selected != NO_SELECTION)
+    if(g_controller.hovered == NO_SELECTION && g_controller.selected != NO_SELECTION)
     {
         nkVec2 pos = screen_to_world(cursor_pos);
 

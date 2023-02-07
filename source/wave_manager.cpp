@@ -56,7 +56,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Prep Timer   */ 15.0f,
 /* Wave Bonus   */ 500,
 {
-/* Phase 1      */ {  0.0f, SpawnType_Walker, 10,12 },
+/* Phase 1      */ { 0.0f, SpawnType_Walker, 8,10 },
 /* Phase 2      */ NO_PHASE,
 /* Phase 3      */ NO_PHASE,
 /* Phase 4      */ NO_PHASE,
@@ -451,7 +451,7 @@ GLOBAL void wave_manager_draw_hud(void)
     // Draw the current message if there is one.
     auto& wm = g_wave_manager;
 
-    if(!wm.message) return;
+    if(!wm.message || is_game_paused()) return;
 
     nkF32 hud_scale = get_hud_scale();
 

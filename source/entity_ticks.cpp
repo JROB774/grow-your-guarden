@@ -27,7 +27,7 @@ INTERNAL void spawn_bullet_at_target(EntityID id, nkF32 x, nkF32 y, const Entity
 
 DEF_ETICK(daisy)
 {
-    const nkF32 ATTACK_COOLDOWN = 3.0f;
+    const nkF32 ATTACK_COOLDOWN = 2.75f;
 
     nkF32& attack_cooldown = e.timer0;
 
