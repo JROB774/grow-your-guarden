@@ -138,7 +138,7 @@ struct WaveManager
     Spawner          spawners[MAX_PHASES];
 
     // Current message to display to the player.
-    const nkChar*    message;
+    nkString         message;
     nkF32            message_timer;
     nkF32            message_alpha;
     nkVec3           message_color;
@@ -241,8 +241,6 @@ INTERNAL void start_wave(void)
 
 INTERNAL void end_wave(void)
 {
-    post_wave_message("WAVE COMPLETE!", NK_V3_YELLOW, "trumpet_fanfare.wav");
-
     auto& wm = g_wave_manager;
 
     nkS32 wave_bonus = NK_CAST(nkS32, NK_CAST(nkF32, wm.wave_desc->wave_bonus) * wm.wave_multiplier);
@@ -259,6 +257,10 @@ INTERNAL void end_wave(void)
     }
 
     setup_next_wave();
+
+    nkString message = "WAVE COMPLETE!";
+    if(anything_unlocked_this_wave()) nk_string_append(&message, "\nNEW PLANT/ITEM UNLOCKED!");
+    post_wave_message(message.cstr, NK_V3_YELLOW, "trumpet_fanfare.wav");
 }
 
 INTERNAL void tick_wave_prepare_state(nkF32 dt)
@@ -402,7 +404,7 @@ GLOBAL void wave_manager_tick(nkF32 dt)
     }
 
     // Update the current message.
-    if(wm.message)
+    if(!nk_string_empty(&wm.message))
     {
         wm.message_timer -= dt;
         if(wm.message_timer <= 0.0f)
@@ -411,7 +413,7 @@ GLOBAL void wave_manager_tick(nkF32 dt)
             wm.message_alpha -= 0.5f * dt;
             if(wm.message_alpha <= 0.0f)
             {
-                wm.message = NULL;
+                nk_string_clear(&wm.message);
             }
         }
     }
@@ -451,7 +453,7 @@ GLOBAL void wave_manager_draw_hud(void)
     // Draw the current message if there is one.
     auto& wm = g_wave_manager;
 
-    if(!wm.message || is_game_paused()) return;
+    if(nk_string_empty(&wm.message) || is_game_paused()) return;
 
     nkF32 hud_scale = get_hud_scale();
 
@@ -461,7 +463,7 @@ GLOBAL void wave_manager_draw_hud(void)
 
     nkF32 ww = NK_CAST(nkF32, get_window_width());
 
-    nkF32 x = (ww - get_truetype_text_width(font, wm.message)) * 0.5f;
+    nkF32 x = (ww - get_truetype_text_width(font, wm.message.cstr)) * 0.5f;
     nkF32 y = (720.0f * 0.25f);
 
     nkVec4 bg_color = { 0.0f,0.0f,0.0f,wm.message_alpha };
@@ -472,8 +474,8 @@ GLOBAL void wave_manager_draw_hud(void)
     fg_color.b = wm.message_color.b;
     fg_color.a = wm.message_alpha;
 
-    draw_truetype_text(font, x+(2*hud_scale),y+(2*hud_scale), wm.message, bg_color);
-    draw_truetype_text(font, x,y, wm.message, fg_color);
+    draw_truetype_text(font, x+(2*hud_scale),y+(2*hud_scale), wm.message.cstr, bg_color, NK_TRUE);
+    draw_truetype_text(font, x,y, wm.message.cstr, fg_color, NK_TRUE);
 }
 
 GLOBAL void wave_manager_reset(void)
@@ -510,9 +512,10 @@ GLOBAL void wave_manager_reset(void)
     wm.wave_multiplier = 1.0f;
     wm.waves_beaten    = 0;
     wm.current_wave    = 0;
-    wm.message         = NULL;
     wm.message_timer   = 0.0f;
     wm.message_alpha   = 1.0f;
+
+    nk_string_clear(&wm.message);
 
     // Setup the first wave...
     setup_next_wave();
@@ -521,6 +524,11 @@ GLOBAL void wave_manager_reset(void)
 GLOBAL nkU32 get_wave_counter(void)
 {
     return g_wave_manager.current_wave;
+}
+
+GLOBAL nkU32 get_waves_beaten(void)
+{
+    return g_wave_manager.waves_beaten;
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

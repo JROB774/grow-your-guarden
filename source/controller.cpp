@@ -31,6 +31,7 @@ struct HotbarSlot
     const nkChar* name;
     const nkChar* description;
     nkS32         cost;
+    nkU32         unlock;   // How many waves need to be beaten for the slot to become unlocked.
     EntityID      spawn_id; // Some slots will not care about this (such as the tool/item slots).
 };
 
@@ -41,7 +42,8 @@ struct Controller
     nkU32 hovered;
     nkU32 selected;
 
-    nkS32 money_counter; // This is used as the visual for money (for smooth interpolation).
+    nkS32  money_counter; // This is used as the visual for money (for smooth interpolation).
+    nkVec4 money_color;
 
     nkS32 money;
     nkS32 health;
@@ -191,7 +193,7 @@ INTERNAL nkBool remove_plant(nkF32 x, nkF32 y)
         const HotbarSlot& slot = g_controller.hotbar[i];
         if(slot.spawn_id == entity_id)
         {
-            g_controller.money += (slot.cost / 2);
+            add_money(slot.cost / 2);
             break;
         }
     }
@@ -231,21 +233,25 @@ GLOBAL void controller_init(void)
     g_controller.hotbar[HotbarID_Daisy     ].name        = "DAISY";
     g_controller.hotbar[HotbarID_Daisy     ].description = "Fires shots at nearby enemies.";
     g_controller.hotbar[HotbarID_Daisy     ].cost        = 100;
+    g_controller.hotbar[HotbarID_Daisy     ].unlock      = 0;
     g_controller.hotbar[HotbarID_Daisy     ].spawn_id    = EntityID_Daisy;
 
     g_controller.hotbar[HotbarID_Bramble   ].name        = "BRAMBLE";
     g_controller.hotbar[HotbarID_Bramble   ].description = "Damages enemies that walk over it.\nDamage increases as it grows.";
     g_controller.hotbar[HotbarID_Bramble   ].cost        = 50;
+    g_controller.hotbar[HotbarID_Bramble   ].unlock      = 1;
     g_controller.hotbar[HotbarID_Bramble   ].spawn_id    = EntityID_Bramble;
 
     g_controller.hotbar[HotbarID_Fertilizer].name        = "FERTILIZER";
     g_controller.hotbar[HotbarID_Fertilizer].description = "Increase a plant's stats for a limited time.";
-    g_controller.hotbar[HotbarID_Fertilizer].cost        = 350;
+    g_controller.hotbar[HotbarID_Fertilizer].cost        = 450;
+    g_controller.hotbar[HotbarID_Fertilizer].unlock      = 5;
     g_controller.hotbar[HotbarID_Fertilizer].spawn_id    = EntityID_None;
 
     g_controller.hotbar[HotbarID_Shovel    ].name        = "Shovel";
     g_controller.hotbar[HotbarID_Shovel    ].description = "Dig up a plant and get some of your money back.";
     g_controller.hotbar[HotbarID_Shovel    ].cost        = 0;
+    g_controller.hotbar[HotbarID_Shovel    ].unlock      = 0;
     g_controller.hotbar[HotbarID_Shovel    ].spawn_id    = EntityID_None;
 }
 
@@ -332,7 +338,7 @@ GLOBAL void controller_tick(nkF32 dt)
         if((g_controller.hovered == i && is_mouse_button_pressed(MouseButton_Left)) || is_key_pressed(KeyCode_1+i))
         {
             const HotbarSlot& slot = g_controller.hotbar[i];
-            if(g_controller.money >= slot.cost)
+            if(g_controller.money >= slot.cost && get_waves_beaten() >= slot.unlock)
             {
                 // Toggle the selection depending on if we are already selected or not.
                 if(g_controller.selected == i)
@@ -382,7 +388,7 @@ GLOBAL void controller_tick(nkF32 dt)
                 // If the action was successful then subtract the appropiate funds.
                 if(success)
                 {
-                    g_controller.money -= slot.cost;
+                    sub_money(slot.cost);
                     if(g_controller.money < slot.cost)
                     {
                         // If we no longer have enough money to purchase another of what we have selected, just de-select it.
@@ -425,20 +431,25 @@ GLOBAL void controller_tick(nkF32 dt)
 
     // Interpolate the money counter toward the actual money. We only do this when money goes up as it feels better
     // to have it tick upwards and be set immediately when going down from purchasing stuff.
-    const nkS32 MONEY_INCREMENT = 25;
+    const nkS32 MONEY_INCREMENT = 10;
 
     if(g_controller.money_counter > g_controller.money)
     {
         g_controller.money_counter = g_controller.money;
+        g_controller.money_color = NK_V4_RED;
     }
     if(g_controller.money_counter < g_controller.money)
     {
         g_controller.money_counter += MONEY_INCREMENT;
+        g_controller.money_color = NK_V4_GREEN;
+
         if(g_controller.money_counter > g_controller.money)
         {
             g_controller.money_counter = g_controller.money;
         }
     }
+
+    g_controller.money_color = nk_lerp(g_controller.money_color, NK_V4_WHITE, dt * 1.0f);
 }
 
 GLOBAL void controller_draw(void)
@@ -507,10 +518,14 @@ GLOBAL void controller_draw(void)
         nkVec4 frame_color = (g_controller.selected == i) ? NK_V4_YELLOW : NK_V4_BLACK;
 
         nkBool cannot_afford = (g_controller.money < slot.cost);
+        nkBool is_locked = (get_waves_beaten() < slot.unlock);
 
         ImmClip clip = HUD_CLIP_ICON;
         clip.x = NK_CAST(nkF32, i) * HUD_ICON_WIDTH;
-        if(cannot_afford) clip.y += HUD_ICON_HEIGHT;
+        if(cannot_afford || is_locked)
+        {
+            clip.y += HUD_ICON_HEIGHT;
+        }
 
         imm_texture_ex(texture, x,y, img_scale,img_scale, 0.0f, NULL, &clip, NK_V4_WHITE);
 
@@ -524,7 +539,7 @@ GLOBAL void controller_draw(void)
             nkString string;
             number_to_string_with_commas(&string, slot.cost);
 
-            nkVec4 text_color = (cannot_afford) ? nkVec4 { 0.5f,0.5f,0.5f,1.0f } : nkVec4 { 1.0f,1.0f,1.0f,1.0f };
+            nkVec4 text_color = (cannot_afford || is_locked) ? nkVec4 { 0.5f,0.5f,0.5f,1.0f } : nkVec4 { 1.0f,1.0f,1.0f,1.0f };
 
             nkF32 text_x = x - (16.0f * hud_scale);
             nkF32 text_y = y + (18.0f * hud_scale);
@@ -552,7 +567,7 @@ GLOBAL void controller_draw(void)
     nkF32 text_y = ((HUD_ICON_HEIGHT * 1.4f) * img_scale) + get_truetype_line_height(font);
 
     draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), string.cstr, NK_V4_BLACK);
-    draw_truetype_text(font, text_x,              text_y,               string.cstr, NK_V4_WHITE);
+    draw_truetype_text(font, text_x,              text_y,               string.cstr, g_controller.money_color);
 
     // Draw the stats/icons.
     nkF32 icon_scale = img_scale * 0.8f;
@@ -579,6 +594,9 @@ GLOBAL void controller_draw(void)
         nkString cost_string = "Cost: $";
         number_to_string_with_commas(&cost_string, slot.cost);
 
+        nkString unlock_string = "Unlocks After Wave ";
+        number_to_string_with_commas(&unlock_string, slot.unlock);
+
         nkF32 tx = cursor_pos.x;
         nkF32 ty = cursor_pos.y;
         nkF32 tw = 0.0f;
@@ -588,15 +606,28 @@ GLOBAL void controller_draw(void)
         ty += ((HUD_CLIP_POINTER.h * 0.5f) * img_scale);
 
         // Calculate the size of the tooltip box.
-        tw  = nk_max(tw, get_truetype_text_width(font, slot.name));
-        tw  = nk_max(tw, get_truetype_text_width(font, cost_string.cstr));
-        tw  = nk_max(tw, get_truetype_text_width(font, slot.description));
-        tw += padding * 2.0f;
+        if(get_waves_beaten() >= slot.unlock)
+        {
+            tw  = nk_max(tw, get_truetype_text_width(font, slot.name));
+            tw  = nk_max(tw, get_truetype_text_width(font, cost_string.cstr));
+            tw  = nk_max(tw, get_truetype_text_width(font, slot.description));
+            tw += padding * 2.0f;
 
-        th += (get_truetype_text_height(font, slot.name) + padding);
-        th += (get_truetype_text_height(font, cost_string.cstr) + padding) * (slot.cost != 0);
-        th += get_truetype_text_height(font, slot.description);
-        th += padding * 2.0f;
+            th += (get_truetype_text_height(font, slot.name) + padding);
+            th += (get_truetype_text_height(font, cost_string.cstr) + padding) * (slot.cost != 0);
+            th += get_truetype_text_height(font, slot.description);
+            th += padding * 2.0f;
+        }
+        else
+        {
+            tw  = nk_max(tw, get_truetype_text_width(font, "??????"));
+            tw  = nk_max(tw, get_truetype_text_width(font, unlock_string.cstr));
+            tw += padding * 2.0f;
+
+            th += (get_truetype_text_height(font, "??????") + padding);
+            th += (get_truetype_text_height(font, unlock_string.cstr));
+            th += padding * 2.0f;
+        }
 
         // Draw the background.
         nkF32 bg_scale = img_scale * 0.5f;
@@ -642,23 +673,36 @@ GLOBAL void controller_draw(void)
 
         text_y += get_truetype_line_height(font);
 
-        draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), slot.name, NK_V4_BLACK);
-        draw_truetype_text(font, text_x,text_y, slot.name, NK_V4_WHITE);
-
-        if(slot.cost > 0)
+        if(get_waves_beaten() >= slot.unlock)
         {
-            nkVec4 cost_color = (g_controller.money >= slot.cost) ? NK_V4_YELLOW : NK_V4_RED;
+            draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), slot.name, NK_V4_BLACK);
+            draw_truetype_text(font, text_x,text_y, slot.name, NK_V4_WHITE);
+
+            if(slot.cost > 0)
+            {
+                nkVec4 cost_color = (g_controller.money >= slot.cost) ? NK_V4_YELLOW : NK_V4_RED;
+
+                text_y += get_truetype_line_height(font) + padding;
+
+                draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), cost_string.cstr, NK_V4_BLACK);
+                draw_truetype_text(font, text_x, text_y, cost_string.cstr, cost_color);
+            }
 
             text_y += get_truetype_line_height(font) + padding;
 
-            draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), cost_string.cstr, NK_V4_BLACK);
-            draw_truetype_text(font, text_x, text_y, cost_string.cstr, cost_color);
+            draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), slot.description, NK_V4_BLACK);
+            draw_truetype_text(font, text_x, text_y, slot.description, { 0.7f,0.7f,0.7f,1.0f });
         }
+        else
+        {
+            draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), "??????", NK_V4_BLACK);
+            draw_truetype_text(font, text_x,text_y, "??????", NK_V4_WHITE);
 
-        text_y += get_truetype_line_height(font) + padding;
+            text_y += get_truetype_line_height(font) + padding;
 
-        draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), slot.description, NK_V4_BLACK);
-        draw_truetype_text(font, text_x, text_y, slot.description, { 0.7f,0.7f,0.7f,1.0f });
+            draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), unlock_string.cstr, NK_V4_BLACK);
+            draw_truetype_text(font, text_x,text_y, unlock_string.cstr, { 0.7f,0.7f,0.7f,1.0f });
+        }
     }
 }
 
@@ -674,6 +718,7 @@ GLOBAL void controller_reset(void)
     g_controller.camera_current_zoom = CAMERA_START_ZOOM;
     g_controller.camera_target_zoom  = CAMERA_START_ZOOM;
 
+    g_controller.money_color   = NK_V4_WHITE;
     g_controller.money_counter = STARTING_MONEY;
     g_controller.money         = STARTING_MONEY;
     g_controller.kills         = 0;
@@ -745,6 +790,11 @@ GLOBAL void add_money(nkS32 money)
     g_controller.money += money;
 }
 
+GLOBAL void sub_money(nkS32 money)
+{
+    g_controller.money -= money;
+}
+
 GLOBAL nkBool is_something_selected(void)
 {
     return (g_controller.selected != NO_SELECTION);
@@ -777,6 +827,16 @@ GLOBAL void draw_hud_stat(Texture texture, nkF32 x, nkF32 y, nkF32 icon_scale, n
 
     draw_truetype_text(font, text_x+(2*hud_scale),text_y+(2*hud_scale), string.cstr, NK_V4_BLACK);
     draw_truetype_text(font, text_x,text_y, string.cstr, NK_V4_WHITE);
+}
+
+GLOBAL nkBool anything_unlocked_this_wave(void)
+{
+    for(nkS32 i=0; i<HotbarID_TOTAL; ++i)
+    {
+        if(g_controller.hotbar[i].unlock == get_waves_beaten())
+            return NK_TRUE;
+    }
+    return NK_FALSE;
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

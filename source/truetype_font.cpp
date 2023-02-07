@@ -149,6 +149,34 @@ INTERNAL void bake_font_at_size(TrueTypeFont font, nkS32 size)
     }
 }
 
+INTERNAL nkF32 get_truetype_line_width(TrueTypeFont font, const wchar_t* text)
+{
+    NK_ASSERT(font);
+    NK_ASSERT(text);
+
+    if(!text) return 0.0f;
+
+    nkF32 line_width = 0.0f;
+    nkU64 length = wcslen(text);
+
+    for(nkU64 i=0; i<length; ++i)
+    {
+        if(text[i] == L'\n')
+        {
+            break;
+        }
+        else
+        {
+            Glyph glyph = get_glyph(font, text[i]);
+            nkF32 advance = glyph.info.advance;
+            nkF32 kerning = get_kerning(font, text[i], text[i+1]);
+            line_width += advance + kerning;
+        }
+    }
+
+    return line_width;
+}
+
 GLOBAL void init_truetype_font_system(void)
 {
     g_truetype.font_shader = asset_manager_load<Shader>("text.shader");
@@ -410,7 +438,7 @@ GLOBAL nkF32 get_truetype_line_height(TrueTypeFont font)
     return (metrics.ascent - metrics.descent);
 }
 
-GLOBAL void draw_truetype_text(TrueTypeFont font, nkF32 x, nkF32 y, const wchar_t* text, nkVec4 color)
+GLOBAL void draw_truetype_text(TrueTypeFont font, nkF32 x, nkF32 y, const wchar_t* text, nkVec4 color, nkBool centered)
 {
     NK_ASSERT(font);
 
@@ -425,8 +453,16 @@ GLOBAL void draw_truetype_text(TrueTypeFont font, nkF32 x, nkF32 y, const wchar_
 
     nkF32 start_x = x;
     nkF32 start_y = y;
+
     nkF32 tx = start_x;
     nkF32 ty = start_y;
+
+    nkF32 tw = get_truetype_text_width(font, text);
+
+    if(centered)
+    {
+        tx = start_x + ((tw - get_truetype_line_width(font, text)) * 0.5f);
+    }
 
     imm_begin(DrawMode_Triangles, font->atlas_texture, g_truetype.font_shader);
 
@@ -435,7 +471,15 @@ GLOBAL void draw_truetype_text(TrueTypeFont font, nkF32 x, nkF32 y, const wchar_
         wchar_t current_char = text[i];
         if(current_char == L'\n')
         {
-            tx = start_x;
+            if(centered)
+            {
+                tx = start_x + ((tw - get_truetype_line_width(font, text+(i+1))) * 0.5f);
+            }
+            else
+            {
+                tx = start_x;
+            }
+
             ty += roundf(metrics.ascent - metrics.descent);
         }
         else
@@ -467,13 +511,13 @@ GLOBAL void draw_truetype_text(TrueTypeFont font, nkF32 x, nkF32 y, const wchar_
     imm_end();
 }
 
-GLOBAL void draw_truetype_char(TrueTypeFont font, nkF32 x, nkF32 y, wchar_t chr, nkVec4 color)
+GLOBAL void draw_truetype_char(TrueTypeFont font, nkF32 x, nkF32 y, wchar_t chr, nkVec4 color, nkBool centered)
 {
     wchar_t buffer[2] = { chr, L'\0' };
-    draw_truetype_text(font, x,y, buffer, color);
+    draw_truetype_text(font, x,y, buffer, color, centered);
 }
 
-GLOBAL void draw_truetype_text(TrueTypeFont font, nkF32 x, nkF32 y, const nkChar* text, nkVec4 color)
+GLOBAL void draw_truetype_text(TrueTypeFont font, nkF32 x, nkF32 y, const nkChar* text, nkVec4 color, nkBool centered)
 {
     NK_ASSERT(font);
 
@@ -481,13 +525,13 @@ GLOBAL void draw_truetype_text(TrueTypeFont font, nkF32 x, nkF32 y, const nkChar
 
     wchar_t* wtext = convert_string_to_wide(text);
     NK_DEFER(NK_FREE(wtext));
-    draw_truetype_text(font, x,y, wtext, color);
+    draw_truetype_text(font, x,y, wtext, color, centered);
 }
 
-GLOBAL void draw_truetype_char(TrueTypeFont font, nkF32 x, nkF32 y, nkChar chr, nkVec4 color)
+GLOBAL void draw_truetype_char(TrueTypeFont font, nkF32 x, nkF32 y, nkChar chr, nkVec4 color, nkBool centered)
 {
     nkChar buffer[2] = { chr, '\0' };
-    draw_truetype_text(font, x,y, buffer, color);
+    draw_truetype_text(font, x,y, buffer, color, centered);
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

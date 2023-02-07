@@ -68,10 +68,10 @@ GLOBAL nkF32           get_truetype_text_height (TrueTypeFont font, const wchar_
 GLOBAL nkF32           get_truetype_text_width  (TrueTypeFont font, const nkChar*  text, nkU64 length = NK_U64_MAX); // Default length value means scan the whole string.
 GLOBAL nkF32           get_truetype_text_height (TrueTypeFont font, const nkChar*  text, nkU64 length = NK_U64_MAX); // Default length value means scan the whole string.
 GLOBAL nkF32           get_truetype_line_height (TrueTypeFont font);
-GLOBAL void            draw_truetype_text       (TrueTypeFont font, nkF32 x, nkF32 y, const wchar_t* text, nkVec4 color = NK_V4_WHITE);
-GLOBAL void            draw_truetype_char       (TrueTypeFont font, nkF32 x, nkF32 y, wchar_t chr,         nkVec4 color = NK_V4_WHITE);
-GLOBAL void            draw_truetype_text       (TrueTypeFont font, nkF32 x, nkF32 y, const nkChar*  text, nkVec4 color = NK_V4_WHITE);
-GLOBAL void            draw_truetype_char       (TrueTypeFont font, nkF32 x, nkF32 y, nkChar  chr,         nkVec4 color = NK_V4_WHITE);
+GLOBAL void            draw_truetype_text       (TrueTypeFont font, nkF32 x, nkF32 y, const wchar_t* text, nkVec4 color = NK_V4_WHITE, nkBool centered = NK_FALSE); // @Todo: Better text alignment handling...
+GLOBAL void            draw_truetype_char       (TrueTypeFont font, nkF32 x, nkF32 y, wchar_t chr,         nkVec4 color = NK_V4_WHITE, nkBool centered = NK_FALSE); // @Todo: Better text alignment handling...
+GLOBAL void            draw_truetype_text       (TrueTypeFont font, nkF32 x, nkF32 y, const nkChar*  text, nkVec4 color = NK_V4_WHITE, nkBool centered = NK_FALSE); // @Todo: Better text alignment handling...
+GLOBAL void            draw_truetype_char       (TrueTypeFont font, nkF32 x, nkF32 y, nkChar  chr,         nkVec4 color = NK_V4_WHITE, nkBool centered = NK_FALSE); // @Todo: Better text alignment handling...
 
 /*////////////////////////////////////////////////////////////////////////////*/
 
