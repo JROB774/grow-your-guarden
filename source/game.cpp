@@ -28,6 +28,7 @@ INTERNAL constexpr nkF32 GAMEOVER_MENU_YPOS  = -1.00f;
 struct GameState
 {
     Sound  pause_sound;
+    Sound  munch_sounds[12];
     nkBool paused;
     nkBool game_over;
 };
@@ -115,7 +116,7 @@ INTERNAL void game_over_tick(nkF32 dt)
     if(tick_menu_text_button(GAMEOVER_RETRY_TEXT, GAMEOVER_RETRY_YPOS, GAMEOVER_RETRY_SIZE))
     {
         game_start();
-        // @Incomplete: Make sure game music gets restarted here...
+        play_music(asset_manager_load<Music>("garden.ogg"));
     }
     if(tick_menu_text_button(GAMEOVER_MENU_TEXT, GAMEOVER_MENU_YPOS, GAMEOVER_MENU_SIZE))
     {
@@ -180,9 +181,25 @@ GLOBAL void game_init(void)
     // Pre-load some assets.
     asset_manager_load<Music>("battle_01.ogg");
     asset_manager_load<Music>("battle_02.ogg");
+    asset_manager_load<Music>("garden.ogg");
     asset_manager_load<Sound>("coin_collect.wav");
     asset_manager_load<Sound>("coin_drop.wav");
-    asset_manager_load<Sound>("trumpet_fanfare.wav");
+    asset_manager_load<Sound>("fanfare_normal.wav");
+    asset_manager_load<Sound>("fanfare_unlock.wav");
+    asset_manager_load<Sound>("gulp.wav");
+
+    g_game.munch_sounds[ 0] = asset_manager_load<Sound>("munch_000.wav");
+    g_game.munch_sounds[ 1] = asset_manager_load<Sound>("munch_001.wav");
+    g_game.munch_sounds[ 2] = asset_manager_load<Sound>("munch_002.wav");
+    g_game.munch_sounds[ 3] = asset_manager_load<Sound>("munch_003.wav");
+    g_game.munch_sounds[ 4] = asset_manager_load<Sound>("munch_004.wav");
+    g_game.munch_sounds[ 5] = asset_manager_load<Sound>("munch_005.wav");
+    g_game.munch_sounds[ 6] = asset_manager_load<Sound>("munch_006.wav");
+    g_game.munch_sounds[ 7] = asset_manager_load<Sound>("munch_007.wav");
+    g_game.munch_sounds[ 8] = asset_manager_load<Sound>("munch_008.wav");
+    g_game.munch_sounds[ 9] = asset_manager_load<Sound>("munch_009.wav");
+    g_game.munch_sounds[10] = asset_manager_load<Sound>("munch_010.wav");
+    g_game.munch_sounds[11] = asset_manager_load<Sound>("munch_011.wav");
 
     g_game.pause_sound = asset_manager_load<Sound>("pause.wav");
 
@@ -254,6 +271,12 @@ GLOBAL nkBool is_game_paused(void)
 GLOBAL nkBool is_game_over(void)
 {
     return g_game.game_over;
+}
+
+GLOBAL Sound get_random_munch_sound(void)
+{
+    nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_game.munch_sounds)-1);
+    return g_game.munch_sounds[sound_index];
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

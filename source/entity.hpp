@@ -139,6 +139,8 @@ GLOBAL Entity* get_entity                    (nkU64 index);
 GLOBAL Entity* get_first_entity_with_id      (EntityID id);
 GLOBAL nkU64   get_first_entity_index_with_id(EntityID id);
 
+GLOBAL nkBool is_entity_dead(nkU64 index);
+
 GLOBAL nkBool any_entities_of_type_alive(EntityType type);
 
 /*////////////////////////////////////////////////////////////////////////////*/

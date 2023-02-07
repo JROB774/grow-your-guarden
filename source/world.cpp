@@ -278,4 +278,10 @@ GLOBAL nkS32 get_world_height(void)
     return g_world.height;
 }
 
+GLOBAL TileID get_tile_id(nkS32 x, nkS32 y)
+{
+    if(x < 0 || x >= g_world.width || y < 0 || y >= g_world.height) return TileID_None;
+    return g_world.tilemap[y * g_world.width + x].id;
+}
+
 /*////////////////////////////////////////////////////////////////////////////*/

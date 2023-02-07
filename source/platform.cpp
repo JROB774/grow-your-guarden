@@ -191,6 +191,7 @@ INTERNAL void main_init(void)
 
     init_render_system();
     init_audio_system();
+    init_asset_manager();
     init_truetype_font_system();
     init_input_system();
 
@@ -198,19 +199,16 @@ INTERNAL void main_init(void)
 
     app_init();
 
-    load_program_state();
-
     g_ctx.running = NK_TRUE;
 }
 
 INTERNAL void main_quit(void)
 {
-    save_program_state();
-
     app_quit();
 
     imm_quit();
 
+    quit_asset_manager();
     quit_input_system();
     quit_truetype_font_system();
     quit_audio_system();

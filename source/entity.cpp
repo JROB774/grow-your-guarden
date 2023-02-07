@@ -370,6 +370,10 @@ GLOBAL void entity_damage(nkU64 index, nkF32 damage)
     e->damage_timer = 0.1f;
 
     change_entity_state(index, EntityState_Hurt);
+    if(e->health <= 0.0f)
+    {
+        change_entity_state(index, EntityState_Dead);
+    }
 }
 
 GLOBAL void entity_kill(nkU64 index)
@@ -446,7 +450,7 @@ GLOBAL void entity_kill(nkU64 index)
                 nkF32 y = rng_f32(e->position.y - e->radius, e->position.y + e->radius);
                 nkF32 z = rng_f32(e->z_depth+50 - e->radius, e->z_depth+50 + e->radius);
 
-                if(z < 0.0f) z = 0.0f;
+                if(z < 0.0f) z = 0.5f; // Prevent coins spawning in the floor and not flying through the air first.
 
                 nkS32 type = rng_s32(0,100);
 
@@ -648,6 +652,13 @@ GLOBAL nkU64 get_first_entity_index_with_id(EntityID id)
         ++index;
     }
     return NK_U64_MAX;
+}
+
+GLOBAL nkBool is_entity_dead(nkU64 index)
+{
+    Entity* e = get_entity(index);
+    if(!e) return NK_FALSE;
+    return (e->state == EntityState_Dead);
 }
 
 GLOBAL nkBool any_entities_of_type_alive(EntityType type)

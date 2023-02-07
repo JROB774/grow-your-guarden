@@ -197,6 +197,7 @@ GLOBAL void menu_tick(nkF32 dt)
             if(g_menu.stage == MenuStage_Interactive)
             {
                 play_music(asset_manager_load<Music>("menu.ogg"));
+                play_sound(asset_manager_load<Sound>("click.wav"));
             }
         }
     }

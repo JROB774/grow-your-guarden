@@ -22,6 +22,8 @@ if "%~2"=="release" (
     set cflg=%cflg% -O2
     set lflg=%lflg% -release -subsystem:windows
 
+    copy redist\win32\credits.txt binary\win32\credits.txt > NUL
+
     if exist tools\packer.exe tools\packer.exe
 ) else (
     set defs=%defs% -D BUILD_DEBUG -D NK_DEBUG -D SDL_MAIN_HANDLED

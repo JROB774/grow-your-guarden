@@ -206,7 +206,7 @@ GLOBAL void app_tick(nkF32 dt)
         switch(g_app.state)
         {
             case AppState_Menu: play_music(asset_manager_load<Music>("menu.ogg")); break;
-            case AppState_Game: stop_music(); break; // @Incomplete!!!
+            case AppState_Game: play_music(asset_manager_load<Music>("garden.ogg")); break;
         }
     }
 

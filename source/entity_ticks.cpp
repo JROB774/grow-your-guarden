@@ -109,7 +109,7 @@ DEF_ETICK(bramble)
 
 DEF_ETICK(walker)
 {
-    const nkF32 ATTACK_COOLDOWN = 1.8f;
+    const nkF32 ATTACK_COOLDOWN = 1.25f;
 
     nkF32& attack_cooldown = e.timer0;
 
@@ -122,7 +122,12 @@ DEF_ETICK(walker)
         if(attack_cooldown <= 0.0f)
         {
             attack_cooldown = ATTACK_COOLDOWN;
+            play_sound(get_random_munch_sound());
             entity_damage(hit_index, e.damage);
+            if(is_entity_dead(hit_index))
+            {
+                play_sound(asset_manager_load<Sound>("gulp.wav"));
+            }
         }
     }
     else

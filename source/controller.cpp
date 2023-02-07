@@ -117,6 +117,8 @@ INTERNAL nkBool can_place_plant_at_position(nkS32 tile_x, nkS32 tile_y)
     if(tile_x < 0 || tile_x >= get_world_width() || tile_y < 0 || tile_y >= get_world_height()) return NK_FALSE;
     // If nothing is selected then there's nothing to place.
     if(g_controller.selected == NO_SELECTION) return NK_FALSE;
+    // If the tile is not grass then we cannot place a plant on it.
+    if(get_tile_id(tile_x, tile_y) != TileID_Grass) return NK_FALSE;
 
     EntityID id = g_controller.hotbar[g_controller.selected].spawn_id;
     if(id == EntityID_None) return NK_FALSE;
@@ -341,14 +343,8 @@ GLOBAL void controller_tick(nkF32 dt)
             if(g_controller.money >= slot.cost && get_waves_beaten() >= slot.unlock)
             {
                 // Toggle the selection depending on if we are already selected or not.
-                if(g_controller.selected == i)
-                {
-                    g_controller.selected = NO_SELECTION;
-                }
-                else
-                {
-                    g_controller.selected = i;
-                }
+                g_controller.selected = (g_controller.selected == i) ? NO_SELECTION : i;
+                play_sound(asset_manager_load<Sound>("click.wav"));
             }
         }
 

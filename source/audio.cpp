@@ -11,6 +11,10 @@ struct AudioContext
 {
     nkF32 sound_volume;
     nkF32 music_volume;
+
+    Music next_track;
+    nkS32 next_track_loops;
+    nkF32 next_track_fade;
 };
 
 INTERNAL AudioContext g_audio;
@@ -161,6 +165,18 @@ DEFINE_PRIVATE_TYPE(Music)
     Mix_Music* music;
 };
 
+INTERNAL void play_music_audio_hook(void)
+{
+    if(g_audio.next_track)
+    {
+        play_music_fade_in(g_audio.next_track, g_audio.next_track_loops, g_audio.next_track_fade);
+        g_audio.next_track = NULL;
+    }
+
+    // Remove the hook because we no longer need it.
+    Mix_HookMusicFinished(NULL);
+}
+
 GLOBAL Music create_music_from_file(const nkChar* file_name)
 {
     Music music = ALLOCATE_PRIVATE_TYPE(Music);
@@ -203,9 +219,25 @@ GLOBAL void play_music(Music music, nkS32 loops)
 GLOBAL void play_music_fade_in(Music music, nkS32 loops, nkF32 seconds)
 {
     NK_ASSERT(music);
-    nkS32 ms = NK_CAST(nkS32, seconds * 1000.0f);
-    if(Mix_FadeInMusic(music->music, loops, ms) == -1)
-        printf("Failed to play music fade in: %s\n", Mix_GetError());
+
+    // SDL Mixer does not handle cross-fading music-tracks. So what we need to do
+    // is check music is currently playing and if so fade it out. Then once it has
+    // finished fading out we will fade in the new music. This prevents blocking
+    // and is the best we can do.
+    if(Mix_PlayingMusic())
+    {
+        g_audio.next_track = music;
+        g_audio.next_track_fade = seconds;
+
+        stop_music_fade_out(seconds * 0.5f);
+        Mix_HookMusicFinished(play_music_audio_hook);
+    }
+    else
+    {
+        nkS32 ms = NK_CAST(nkS32, seconds * 1000.0f);
+        if(Mix_FadeInMusic(music->music, loops, ms) == -1)
+            printf("Failed to play music fade in: %s\n", Mix_GetError());
+    }
 }
 
 GLOBAL void resume_music(void)

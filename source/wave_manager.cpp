@@ -97,7 +97,7 @@ INTERNAL constexpr nkF32 WAVE_MULTIPLICATION_RATE = 0.5f;
 INTERNAL constexpr nkF32 MESSAGE_TIME = 3.5f;
 
 INTERNAL constexpr nkF32 BATTLE_MUSIC_FADE_IN_TIME  = 8.0f;
-INTERNAL constexpr nkF32 BATTLE_MUSIC_FADE_OUT_TIME = 4.0f;
+INTERNAL constexpr nkF32 BATTLE_MUSIC_FADE_OUT_TIME = 8.0f;
 
 NK_ENUM(WaveState, nkS32)
 {
@@ -267,15 +267,16 @@ INTERNAL void end_wave(void)
 
     setup_next_wave();
 
+    const nkChar* sound = "fanfare_normal.wav";
     nkString message = "WAVE COMPLETE!";
     if(anything_unlocked_this_wave())
     {
         nk_string_append(&message, "\nNEW PLANT/ITEM UNLOCKED!");
-        // @Incomplete: Unlock sound...
+        sound = "fanfare_unlock.wav";
     }
-    post_wave_message(message.cstr, NK_V3_YELLOW, "trumpet_fanfare.wav");
+    post_wave_message(message.cstr, NK_V3_YELLOW, sound);
 
-    stop_music_fade_out(BATTLE_MUSIC_FADE_OUT_TIME);
+    play_music_fade_in(asset_manager_load<Music>("garden.ogg"), -1, BATTLE_MUSIC_FADE_OUT_TIME);
 }
 
 INTERNAL void tick_wave_prepare_state(nkF32 dt)
@@ -355,7 +356,9 @@ INTERNAL void tick_wave_fight_state(nkF32 dt)
 
                     if(max_percent > 0)
                     {
-                        nkF32 multiplier = 100.0f / (100.0f - NK_CAST(nkF32, max_percent));
+                        nkF32 multiplier = 1.0f;
+                        if(max_percent != 100.0f)
+                            multiplier = 100.0f / (100.0f - NK_CAST(nkF32, max_percent));
                         nkF32 spawn = NK_CAST(nkF32, rng_s32(1,100));
 
                         EntityID id = EntityID_None;
