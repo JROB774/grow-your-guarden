@@ -555,7 +555,8 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y, nkF32 z)
 GLOBAL void change_entity_state(nkU64 index, EntityState state)
 {
     NK_ASSERT(index < g_entity_manager.entities.length);
-    change_entity_state(*get_entity(index), state);
+    Entity* e = get_entity(index);
+    if(e) change_entity_state(*e, state);
 }
 
 GLOBAL void change_entity_state(Entity& e, EntityState state)
