@@ -188,6 +188,7 @@ GLOBAL void game_init(void)
     asset_manager_load<Sound>("fanfare_normal.wav");
     asset_manager_load<Sound>("fanfare_unlock.wav");
     asset_manager_load<Sound>("gulp.wav");
+    asset_manager_load<Sound>("cough.wav");
 
     g_game.munch_sounds[ 0] = asset_manager_load<Sound>("munch_000.wav");
     g_game.munch_sounds[ 1] = asset_manager_load<Sound>("munch_001.wav");

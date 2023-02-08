@@ -1,5 +1,15 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
+INTERNAL void spawn_bullet_at_target(EntityID id, nkF32 x, nkF32 y, const Entity& target)
+{
+    nkU64 index = entity_spawn(id, x,y);
+    Entity* b = get_entity(index);
+    nkVec2 dir = nk_normalize(target.position - b->position);
+    b->velocity = dir * NK_CAST(nkF32, b->speed);
+}
+
+/*////////////////////////////////////////////////////////////////////////////*/
+
 //
 // Plants
 //
@@ -15,14 +25,6 @@ INTERNAL nkBool plant_is_fully_grown(Entity& e)
     max_phases++;
 
     return (e.current_phase >= max_phases-1);
-}
-
-INTERNAL void spawn_bullet_at_target(EntityID id, nkF32 x, nkF32 y, const Entity& target)
-{
-    nkU64 index = entity_spawn(id, x,y);
-    Entity* b = get_entity(index);
-    nkVec2 dir = nk_normalize(target.position - b->position);
-    b->velocity = dir * NK_CAST(nkF32, b->speed);
 }
 
 DEF_ETICK(daisy)
@@ -146,41 +148,81 @@ INTERNAL nkBool do_monster_bite(Entity& e, nkF32& attack_cooldown, const nkF32 A
 
 DEF_ETICK(walker)
 {
-    nkF32 ATTACK_COOLDOWN = 1.25f;
+    nkF32 BITE_COOLDOWN = 1.25f;
+    nkF32 SHOT_COOLDOWN = 2.50f;
 
     // Barbarians attack twice as fast as the other walker types.
     if(e.id == EntityID_Barbarian)
     {
-        ATTACK_COOLDOWN *= 0.5f;
+        BITE_COOLDOWN *= 0.5f;
     }
 
-    nkF32& attack_cooldown = e.timer0;
+    nkF32& bite_cooldown = e.timer0;
+    nkF32& shot_cooldown = e.timer1;
 
     e.velocity = NK_V2_ZERO;
 
     // If we collide with a plant or the base then stop to eat it, otherwise continue walking to the tree.
-    nkBool eating = do_monster_bite(e, attack_cooldown, ATTACK_COOLDOWN);
+    nkBool eating = do_monster_bite(e, bite_cooldown, BITE_COOLDOWN);
     if(!eating)
     {
         // Hunt for the home tree if we aren't already.
-        if(e.target == NO_TARGET)
+        if(e.state == EntityState_Move)
         {
-            e.target = get_first_entity_index_with_id(EntityID_HomeTree);
+            if(e.target == NO_TARGET)
+            {
+                e.target = get_first_entity_index_with_id(EntityID_HomeTree);
+            }
+            if(e.target != NO_TARGET)
+            {
+                // Walk towards the tree if we found it.
+                Entity* target = get_entity(e.target);
+                nkVec2 dir = nk_normalize(target->position - e.position);
+                e.velocity = dir * NK_CAST(nkF32, e.speed);
+                e.flip = (dir.x < 0.0f) ? -1.0f : 1.0f; // Face the walking direction.
+            }
         }
-        if(e.target != NO_TARGET)
+
+        // Soldiers can also fire bullets at plants.
+        if(e.id == EntityID_Soldier && shot_cooldown <= 0.0f)
         {
-            // Walk towards the tree if we found it.
-            Entity* target = get_entity(e.target);
-            nkVec2 dir = nk_normalize(target->position - e.position);
-            e.velocity = dir * NK_CAST(nkF32, e.speed);
-            e.flip = (dir.x < 0.0f) ? -1.0f : 1.0f; // Face the walking direction.
+            nkF32 shortest_distance = FLT_MAX;
+            nkF32 distance = 0.0f;
+
+            Entity* target = NULL;
+
+            for(auto& p: g_entity_manager.entities)
+            {
+                if(p.type == EntityType_Plant && p.active)
+                {
+                    distance = distance_between_points(e.position, p.position);
+                    if(distance <= e.range && distance < shortest_distance)
+                    {
+                        shortest_distance = distance;
+                        target = &p;
+                    }
+                }
+            }
+            if(target)
+            {
+                change_entity_state(e, EntityState_Attack);
+                shot_cooldown = SHOT_COOLDOWN;
+                spawn_bullet_at_target(EntityID_Tarball, e.position.x,e.position.y, *target);
+                e.velocity = NK_V2_ZERO; // Stop moving whilst shooting.
+                play_sound(asset_manager_load<Sound>("cough.wav"));
+                particle_spawn("tar_explosion", e.position.x + e.draw_offset.x, e.position.y + e.draw_offset.y);
+            }
         }
     }
 
-    // Cooldown our attack.
-    if(attack_cooldown > 0.0f)
+    // Cooldown our attacks.
+    if(bite_cooldown > 0.0f)
     {
-        attack_cooldown -= dt;
+        bite_cooldown -= dt;
+    }
+    if(shot_cooldown > 0.0f)
+    {
+        shot_cooldown -= dt;
     }
 
     // Randomly spawn splats under us.

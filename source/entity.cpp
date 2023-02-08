@@ -562,8 +562,20 @@ GLOBAL void change_entity_state(nkU64 index, EntityState state)
 GLOBAL void change_entity_state(Entity& e, EntityState state)
 {
     if(e.state == state) return;
+
+    EntityState old_state = e.state;
     e.state = state;
-    set_animation(&e.anim_state, get_current_entity_anim_name(e).cstr);
+
+    nkString anim_name = get_current_entity_anim_name(e);
+
+    if(!has_animation(&e.anim_state, anim_name.cstr) && state != EntityState_Dead)
+    {
+        e.state = old_state; // If we don't have an animation for that state and it's not the death state just set us back.
+    }
+    else
+    {
+        set_animation(&e.anim_state, anim_name.cstr);
+    }
 }
 
 GLOBAL nkU64 check_entity_bounds(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityType collision_mask)
