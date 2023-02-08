@@ -29,6 +29,7 @@ struct GameState
 {
     Sound  pause_sound;
     Sound  munch_sounds[12];
+    Sound  splat_sounds[3];
     nkBool paused;
     nkBool game_over;
 };
@@ -201,6 +202,10 @@ GLOBAL void game_init(void)
     g_game.munch_sounds[10] = asset_manager_load<Sound>("munch_010.wav");
     g_game.munch_sounds[11] = asset_manager_load<Sound>("munch_011.wav");
 
+    g_game.splat_sounds[0] = asset_manager_load<Sound>("splat_000.wav");
+    g_game.splat_sounds[1] = asset_manager_load<Sound>("splat_001.wav");
+    g_game.splat_sounds[2] = asset_manager_load<Sound>("splat_002.wav");
+
     g_game.pause_sound = asset_manager_load<Sound>("pause.wav");
 
     entity_init();
@@ -277,6 +282,12 @@ GLOBAL Sound get_random_munch_sound(void)
 {
     nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_game.munch_sounds)-1);
     return g_game.munch_sounds[sound_index];
+}
+
+GLOBAL Sound get_random_splat_sound(void)
+{
+    nkS32 sound_index = rng_s32(0,NK_ARRAY_SIZE(g_game.splat_sounds)-1);
+    return g_game.splat_sounds[sound_index];
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

@@ -185,28 +185,25 @@ GLOBAL void entity_tick(nkF32 dt)
                         }
                     }
                 } break;
+            }
 
-                // Check if we have collided with any plant bullets.
-                case EntityType_Monster:
+            // Check if we have collided with any bullets.
+            if(e.state != EntityState_Dead && !NK_CHECK_FLAGS(e.flags, EntityFlag_NotShootable))
+            {
+                nkU64 sub_index = 0;
+                for(auto& b: g_entity_manager.entities)
                 {
-                    if(e.state != EntityState_Dead)
+                    if(b.type == EntityType_Bullet && b.state != EntityState_Dead && b.active && NK_CHECK_FLAGS(b.collision_mask, e.type))
                     {
-                        nkU64 sub_index = 0;
-                        for(auto& b: g_entity_manager.entities)
+                        if(check_entity_collision(e, b))
                         {
-                            if(b.type == EntityType_Bullet && b.state != EntityState_Dead && b.active && NK_CHECK_FLAGS(b.collision_mask, EntityType_Monster))
-                            {
-                                if(check_entity_collision(e, b))
-                                {
-                                    entity_damage(index, b.damage);
-                                    entity_kill(sub_index);
-                                    b.velocity = NK_V2_ZERO;
-                                }
-                            }
-                            ++sub_index;
+                            entity_damage(index, b.damage);
+                            entity_kill(sub_index);
+                            b.velocity = NK_V2_ZERO;
                         }
                     }
-                } break;
+                    ++sub_index;
+                }
             }
 
             // Do the entity's custom update logic.
@@ -326,12 +323,16 @@ GLOBAL void entity_draw(void)
         imm_texture_ex(texture, ex,ey - e->z_depth, sx,sy, 0.0f, NULL, &clip, color);
 
         // A special case is made for the home tree. We draw different mouths on top of the base image.
+        PERSISTENT const ImmClip TREE_FACE_HAPPY = { 1280.0f,   0.0f, 420.0f, 128.0f };
+        PERSISTENT const ImmClip TREE_FACE_SAD   = { 1280.0f, 128.0f, 420.0f, 128.0f };
+        PERSISTENT const ImmClip TREE_FACE_HURT  = { 1280.0f, 256.0f, 420.0f, 128.0f };
+
         if(e->id == EntityID_HomeTree)
         {
-            ImmClip mouth_clip = { 1280.0f, 0.0f, 420.0f, 128.0f };
+            ImmClip mouth_clip = (e->health > 50.0f) ? TREE_FACE_HAPPY : TREE_FACE_SAD;
             if(e->state == EntityState_Hurt || e->state == EntityState_Dead)
             {
-                mouth_clip.y += 128.0f;
+                mouth_clip = TREE_FACE_HURT;
             }
 
             nkF32 mx = ex - (1280 * 0.5f) +  652.0f;

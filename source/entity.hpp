@@ -43,11 +43,12 @@ NK_ENUM(EntityState, nkU32)
 
 NK_ENUM(EntityFlag, nkU32)
 {
-    EntityFlag_None      = (   0),
-    EntityFlag_Hidden    = (1<<0), // Do not render the entity.
-    EntityFlag_NotEdible = (1<<1), // Cannot be eaten by monsters.
-    EntityFlag_DrawFirst = (1<<2), // Always draw entities with this flag before others.
-    EntityFlag_All       = (  -1)
+    EntityFlag_None         = (   0),
+    EntityFlag_Hidden       = (1<<0), // Do not render the entity.
+    EntityFlag_NotEdible    = (1<<1), // Cannot be eaten by monsters.
+    EntityFlag_NotShootable = (1<<2), // Cannot be shot by bullets.
+    EntityFlag_DrawFirst    = (1<<3), // Always draw entities with this flag before others.
+    EntityFlag_All          = (  -1)
 };
 
 struct Entity

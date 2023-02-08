@@ -13,9 +13,10 @@ INTERNAL constexpr nkU32 MAX_SPAWNS = 8;
 
 NK_ENUM(SpawnType, nkU32)
 {
-    SpawnType_None  = (   0),
-    SpawnType_Grunt = (1<<0),
-    SpawnType_All   = (  -1)
+    SpawnType_None      = (   0),
+    SpawnType_Grunt     = (1<<0),
+    SpawnType_Barbarian = (1<<1),
+    SpawnType_All       = (  -1)
 };
 
 struct PhaseDesc
@@ -123,10 +124,10 @@ struct SpawnPoint
 
 struct Spawner
 {
-    SpawnerState state;
-    nkF32        timer;
-    EntityID     spawn_types;
-    nkU32        spawns_left;
+    SpawnerState      state;
+    nkF32             timer;
+    nkU32             spawns_left;
+    nkArray<EntityID> spawns;
 };
 
 struct WaveManager
@@ -149,11 +150,24 @@ struct WaveManager
 
 INTERNAL WaveManager g_wave_manager;
 
-INTERNAL nkS32 get_monster_spawn_rate(SpawnType type)
+INTERNAL EntityID get_entity_id_from_spawn_type(SpawnType type)
 {
-    // These should add up to 100.
-    if(NK_CHECK_FLAGS(type, SpawnType_Grunt)) return 100;
-    NK_ASSERT(NK_FALSE);
+    switch(type)
+    {
+        case SpawnType_Grunt:     return EntityID_Grunt;
+        case SpawnType_Barbarian: return EntityID_Barbarian;
+    }
+    NK_ASSERT(NK_FALSE); // Shouldn't get down here!
+    return EntityID_None;
+}
+
+INTERNAL nkS32 get_entity_spawn_rate(EntityID id)
+{
+    switch(id)
+    {
+        case EntityID_Grunt:     return 75;
+        case EntityID_Barbarian: return 25;
+    }
     return 0;
 }
 
@@ -210,6 +224,8 @@ INTERNAL void setup_next_wave(void)
     }
 
     // Setup the phase spawners and set them all to wait.
+    for(nkS32 i=0,n=NK_ARRAY_SIZE(wm.spawners); i<n; ++i)
+        nk_array_free(&wm.spawners[i].spawns);
     memset(wm.spawners, 0, sizeof(wm.spawners));
 
     for(nkU32 i=0; i<wm.wave_desc->num_phases; ++i)
@@ -221,8 +237,28 @@ INTERNAL void setup_next_wave(void)
 
         wm.spawners[i].state       = SpawnerState_Waiting;
         wm.spawners[i].timer       = phase.start_time;
-        wm.spawners[i].spawn_types = phase.spawn_types;
         wm.spawners[i].spawns_left = rng_s32(min_spawns, max_spawns);
+
+        // Build an array for handling the probabilities of spawning different entity types.
+        // We simply insert the entities ID into the array X amount of times, where X is the
+        // probability of spawning that entity. Then when it comes time to spawn we simple
+        // randomly pick an index in the array and that is the entity ID we will use to spawn.
+        nk_array_reserve(&wm.spawners[i].spawns, 100);
+        for(SpawnType type=1; type<(1<<31); type<<=1)
+        {
+            if(NK_CHECK_FLAGS(phase.spawn_types, type))
+            {
+                EntityID id = get_entity_id_from_spawn_type(type);
+                if(id != EntityID_None)
+                {
+                    nkS32 spawn_rate = get_entity_spawn_rate(id);
+                    for(nkS32 j=0; j<spawn_rate; ++j)
+                    {
+                        nk_array_append(&wm.spawners[i].spawns, id);
+                    }
+                }
+            }
+        }
     }
 
     // Start the timer until the wave begins.
@@ -347,46 +383,24 @@ INTERNAL void tick_wave_fight_state(nkF32 dt)
                         }
                     }
 
-                    // Determine what monster type to spawn based on what is available to us.
+                    // Determine what entity to spawn and spawn it.
                     const SpawnPoint& sp = wm.spawn_points[spawn_index];
 
-                    nkS32 max_percent = 0;
+                    nkS32 min = 0;
+                    nkS32 max = NK_CAST(nkS32, spawner.spawns.length)-1;
 
-                    if(NK_CHECK_FLAGS(spawner.spawn_types, SpawnType_Grunt)) max_percent += get_monster_spawn_rate(SpawnType_Grunt);
+                    EntityID id = spawner.spawns[rng_s32(min,max)];
 
-                    if(max_percent > 0)
+                    nkF32 x = rng_f32(sp.region.x, sp.region.x + sp.region.w);
+                    nkF32 y = rng_f32(sp.region.y, sp.region.y + sp.region.h);
+
+                    entity_spawn(id, x,y);
+
+                    spawner.spawns_left--;
+                    if(spawner.spawns_left == 0)
                     {
-                        nkF32 multiplier = 1.0f;
-                        if(max_percent != 100.0f)
-                            multiplier = 100.0f / (100.0f - NK_CAST(nkF32, max_percent));
-                        nkF32 spawn = NK_CAST(nkF32, rng_s32(1,100));
-
-                        EntityID id = EntityID_None;
-
-                        // =========================================================================
-                        // !!!IMPORTANT NOTE!!! Place these in highest to lowest spawn-rate order!!!
-                        // =========================================================================
-                        //
-                        if(spawn < (NK_CAST(nkF32, get_monster_spawn_rate(SpawnType_Grunt)) * multiplier)) id = EntityID_Grunt;
-
-                        if(id != EntityID_None)
-                        {
-                            nkF32 x = rng_f32(sp.region.x, sp.region.x + sp.region.w);
-                            nkF32 y = rng_f32(sp.region.y, sp.region.y + sp.region.h);
-
-                            entity_spawn(id, x,y);
-
-                            spawner.spawns_left--;
-                            if(spawner.spawns_left == 0)
-                            {
-                                spawner.state = SpawnerState_Complete;
-                                DEBUG_LOG("[Wave]: Completing phase %d!\n", i);
-                            }
-                        }
-                        else
-                        {
-                            DEBUG_LOG("[Wave]: Ended up with no spawn!\n");
-                        }
+                        spawner.state = SpawnerState_Complete;
+                        DEBUG_LOG("[Wave]: Completing phase %d!\n", i);
                     }
                 }
             } break;

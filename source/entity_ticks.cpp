@@ -80,6 +80,8 @@ DEF_ETICK(bramble)
     if(attack_cooldown <= 0.0f)
     {
         // Brambles will hit all enemies standing on them.
+        nkF32 multiplier = (e.fertilized_timer > 0.0f) ? 2.0f : 1.0f; // Deal more damage if fertilized.
+
         for(nkU64 i=0; i<get_entity_count(); ++i)
         {
             Entity* m = get_entity(i);
@@ -89,13 +91,15 @@ DEF_ETICK(bramble)
                 {
                     attack_cooldown = ATTACK_COOLDOWN;
 
+                    play_sound(get_random_splat_sound());
+
                     // The amount of damage dealth depends on the growth stage of the bramble.
                     switch(e.current_phase)
                     {
-                        case 0: entity_damage(i, 0.5f); break;
-                        case 1: entity_damage(i, 1.0f); break;
-                        case 2: entity_damage(i, 1.5f); break;
-                        case 3: entity_damage(i, 2.0f); break;
+                        case 0: entity_damage(i, 0.25f * multiplier); break;
+                        case 1: entity_damage(i, 0.50f * multiplier); break;
+                        case 2: entity_damage(i, 1.00f * multiplier); break;
+                        case 3: entity_damage(i, 2.00f * multiplier); break;
                     }
                 }
             }
@@ -140,9 +144,15 @@ INTERNAL nkBool do_monster_bite(Entity& e, nkF32& attack_cooldown, const nkF32 A
     return NK_FALSE;
 }
 
-DEF_ETICK(grunt)
+DEF_ETICK(walker)
 {
-    const nkF32 ATTACK_COOLDOWN = 1.25f;
+    nkF32 ATTACK_COOLDOWN = 1.25f;
+
+    // Barbarians attack twice as fast as the other walker types.
+    if(e.id == EntityID_Barbarian)
+    {
+        ATTACK_COOLDOWN *= 0.5f;
+    }
 
     nkF32& attack_cooldown = e.timer0;
 
