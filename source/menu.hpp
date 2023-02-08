@@ -9,6 +9,9 @@ GLOBAL void menu_draw(void);
 INTERNAL nkBool tick_menu_text_button(const nkChar* text, nkF32 y, nkS32 size, nkBool interactive = NK_TRUE);
 INTERNAL void   draw_menu_text_button(const nkChar* text, nkF32 y, nkS32 size, nkBool interactive = NK_TRUE);
 
+INTERNAL nkBool tick_menu_image_button(ImmClip clip, nkF32 x, nkF32 y);
+INTERNAL void   draw_menu_image_button(ImmClip clip, nkF32 x, nkF32 y);
+
 INTERNAL nkBool tick_menu_toggle_button(ImmClip clip, nkF32 x, nkF32 y, nkBool toggle);
 INTERNAL void   draw_menu_toggle_button(ImmClip clip, nkF32 x, nkF32 y, nkBool toggle);
 

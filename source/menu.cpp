@@ -22,6 +22,13 @@ INTERNAL constexpr nkS32 MENU_LAYERS = 4;
 INTERNAL constexpr nkF32 MENU_WIDTH = 1280.0f;
 INTERNAL constexpr nkF32 MENU_HEIGHT = 720.0f;
 
+NK_ENUM(MenuScreen, nkS32)
+{
+    MenuScreen_Main,
+    MenuScreen_Tutorial,
+    MenuScreen_Credits
+};
+
 NK_ENUM(MenuStage, nkS32)
 {
     MenuStage_Animation,
@@ -32,77 +39,64 @@ NK_ENUM(MenuStage, nkS32)
 
 struct MenuState
 {
-    MenuStage stage;
-    nkF32     xoffset[MENU_LAYERS];
-    nkF32     timer;
-    fRect     viewport;
-    nkF32     scale;
+    MenuScreen screen;
+    MenuStage  stage;
+    nkF32      xoffset[MENU_LAYERS];
+    nkF32      timer;
+    fRect      viewport;
+    nkF32      scale;
 };
 
 INTERNAL MenuState g_menu;
 
 INTERNAL fRect calculate_menu_button_bounds(TrueTypeFont font, const nkChar* text, nkF32& prev_y, nkF32 curr_y)
 {
-    nkF32 ww = NK_CAST(nkF32, get_window_width());
-    nkF32 wh = NK_CAST(nkF32, get_window_height());
-
     // We multiply by a percentage because it gives just a bit of a gap between the buttons which is nice.
-    if(curr_y <= -1.0f) curr_y = ((wh * prev_y) + (get_truetype_line_height(font) * 1.3f)) / wh; // Increment from the previous y-position.
+    if(curr_y <= -1.0f) curr_y = ((g_menu.viewport.h * prev_y) + (get_truetype_line_height(font) * 1.3f)) / g_menu.viewport.h; // Increment from the previous y-position.
 
     fRect bounds;
 
     bounds.w = get_truetype_text_width(font, text);
     bounds.h = get_truetype_text_height(font, text);
-    bounds.x = (ww - bounds.w) * 0.5f;
-    bounds.y = (wh * curr_y);
+    bounds.x = g_menu.viewport.x + ((g_menu.viewport.w - bounds.w) * 0.5f);
+    bounds.y = g_menu.viewport.y + (g_menu.viewport.h * curr_y);
 
     prev_y = curr_y;
 
     return bounds;
 }
 
-GLOBAL void menu_init(void)
+INTERNAL void tick_back_button(void)
 {
-    asset_manager_load<Sound>("click.wav");
-    asset_manager_load<Sound>("whoosh.wav");
-    asset_manager_load<Sound>("thud.wav");
-    asset_manager_load<Texture>("title.png");
-    asset_manager_load<Music>("menu.ogg");
+    nkF32 img_scale = (get_hud_scale() / 4.0f);
 
-    g_menu.stage      = MenuStage_Animation;
-    g_menu.xoffset[1] = -(MENU_WIDTH);
-    g_menu.xoffset[2] = +(MENU_WIDTH);
-    g_menu.timer      = -1.0f;
+    nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
+    nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
+
+    nkF32 bx = (g_menu.viewport.x) + (btn_width * 0.6f);
+    nkF32 by = (g_menu.viewport.y) + (btn_height * 0.6f);
+
+    if(tick_menu_image_button(HUD_CLIP_BACK, bx,by) || is_key_pressed(KeyCode_Escape))
+    {
+        g_menu.screen = MenuScreen_Main;
+    }
 }
 
-GLOBAL void menu_quit(void)
+INTERNAL void draw_back_button(void)
 {
-    // Does nothing...
+    nkF32 img_scale = (get_hud_scale() / 4.0f);
+
+    nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
+    nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
+
+    nkF32 bx = (g_menu.viewport.x) + (btn_width * 0.6f);
+    nkF32 by = (g_menu.viewport.y) + (btn_height * 0.6f);
+
+    draw_menu_image_button(HUD_CLIP_BACK, bx,by);
 }
 
-GLOBAL void menu_tick(nkF32 dt)
+INTERNAL void menu_tick_main(nkF32 dt)
 {
-    // Calculate the viewport region within the window.
-    nkF32 ww = NK_CAST(nkF32, get_window_width());
-    nkF32 wh = NK_CAST(nkF32, get_window_height());
-    nkF32 vw = MENU_WIDTH;
-    nkF32 vh = MENU_HEIGHT;
-
-    nkF32 sx = ww / vw;
-    nkF32 sy = wh / vh;
-    nkF32 sw = vw;
-    nkF32 sh = vh;
-
-    if(fabsf(sx) < fabsf(sy)) sh = roundf((vh/vw)*sw);
-    if(fabsf(sx) > fabsf(sy)) sw = roundf((vw/vh)*sh);
-
-    g_menu.scale = nk_min(ww / sw, wh / sh);
-
-    g_menu.viewport.w = (sw * g_menu.scale);
-    g_menu.viewport.h = (sh * g_menu.scale);
-    g_menu.viewport.x = (ww - g_menu.viewport.w) * 0.5f;
-    g_menu.viewport.y = (wh - g_menu.viewport.h) * 0.5f;
-
     // Update the sliding animation and sound effects.
     PERSISTENT nkF32 prev_timer = -1.0f;
 
@@ -147,7 +141,7 @@ GLOBAL void menu_tick(nkF32 dt)
         prev_timer = g_menu.timer;
     }
 
-    // Do state-specific update.
+    // Do stage-specific update.
     if(g_menu.stage == MenuStage_Interactive)
     {
         if(tick_menu_text_button(MENU_PLAY_TEXT, MENU_PLAY_YPOS, MENU_PLAY_SIZE))
@@ -156,16 +150,16 @@ GLOBAL void menu_tick(nkF32 dt)
         }
         if(tick_menu_text_button(MENU_HOWTO_TEXT, MENU_HOWTO_YPOS, MENU_HOWTO_SIZE))
         {
-            // @Incomplete: How to play pages...
+            g_menu.screen = MenuScreen_Tutorial;
         }
         if(tick_menu_text_button(MENU_CREDITS_TEXT, MENU_CREDITS_YPOS, MENU_CREDITS_SIZE))
         {
-            // @Incomplete: Credits page...
+            g_menu.screen = MenuScreen_Credits;
         }
 
         // We don't need/want an exit button in the web build.
         #if !defined(BUILD_WEB)
-        if(tick_menu_text_button(MENU_EXIT_TEXT, MENU_EXIT_YPOS, MENU_EXIT_SIZE))
+        if(tick_menu_text_button(MENU_EXIT_TEXT, MENU_EXIT_YPOS, MENU_EXIT_SIZE) || is_key_pressed(KeyCode_Escape))
         {
             terminate_app();
         }
@@ -203,6 +197,127 @@ GLOBAL void menu_tick(nkF32 dt)
     }
 }
 
+INTERNAL void menu_draw_main(void)
+{
+    // If interactive draw the rest of the main menu.
+    if(g_menu.stage != MenuStage_Interactive) return;
+
+    Texture background = asset_manager_load<Texture>("title.png");
+
+    nkF32 ww = NK_CAST(nkF32, get_window_width());
+    nkF32 wh = NK_CAST(nkF32, get_window_height());
+
+    // Do the title.
+    ImmClip clip = { 0.0f, MENU_HEIGHT * 3, MENU_WIDTH, MENU_HEIGHT };
+    imm_texture_ex(background, ww*0.5f, wh*0.5f, g_menu.scale,g_menu.scale, 0.0f, NULL, &clip);
+
+    // Do the main buttons.
+    draw_menu_text_button(MENU_PLAY_TEXT, MENU_PLAY_YPOS, MENU_PLAY_SIZE);
+    draw_menu_text_button(MENU_HOWTO_TEXT, MENU_HOWTO_YPOS, MENU_HOWTO_SIZE);
+    draw_menu_text_button(MENU_CREDITS_TEXT, MENU_CREDITS_YPOS, MENU_CREDITS_SIZE);
+    // We don't need/want an exit button in the web build.
+    #if !defined(BUILD_WEB)
+    draw_menu_text_button(MENU_EXIT_TEXT, MENU_EXIT_YPOS, MENU_EXIT_SIZE);
+    #endif // BUILD_WEB
+
+    // Do the options buttons.
+    nkF32 img_scale = (get_hud_scale() / 4.0f);
+
+    nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
+    nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
+
+    nkF32 bx = (g_menu.viewport.x + g_menu.viewport.w) - (btn_width * 0.6f);
+    nkF32 by = (g_menu.viewport.y) + (btn_height * 0.6f);
+
+    draw_menu_toggle_button(HUD_CLIP_MUSIC,      bx-(btn_width*0.0f),by, is_music_on  ());
+    draw_menu_toggle_button(HUD_CLIP_SOUND,      bx-(btn_width*1.1f),by, is_sound_on  ());
+    draw_menu_toggle_button(HUD_CLIP_FULLSCREEN, bx-(btn_width*2.2f),by, is_fullscreen());
+}
+
+INTERNAL void menu_tick_tutorial(nkF32 dt)
+{
+    tick_back_button();
+
+    // @Incomplete: ...
+}
+
+INTERNAL void menu_draw_tutorial(void)
+{
+    draw_back_button();
+
+    // @Incomplete: ...
+}
+
+INTERNAL void menu_tick_credits(nkF32 dt)
+{
+    tick_back_button();
+}
+
+INTERNAL void menu_draw_credits(void)
+{
+    Texture credits = asset_manager_load<Texture>("credits.png");
+
+    nkF32 ww = NK_CAST(nkF32, get_window_width());
+    nkF32 wh = NK_CAST(nkF32, get_window_height());
+
+    imm_texture_ex(credits, ww*0.5f, wh*0.5f, g_menu.scale,g_menu.scale, 0.0f, NULL);
+
+    draw_back_button();
+}
+
+GLOBAL void menu_init(void)
+{
+    asset_manager_load<Sound>("click.wav");
+    asset_manager_load<Sound>("whoosh.wav");
+    asset_manager_load<Sound>("thud.wav");
+    asset_manager_load<Texture>("title.png");
+    asset_manager_load<Texture>("credits.png");
+    asset_manager_load<Music>("menu.ogg");
+
+    g_menu.screen     = MenuScreen_Main;
+    g_menu.stage      = MenuStage_Animation;
+    g_menu.xoffset[1] = -(MENU_WIDTH);
+    g_menu.xoffset[2] = +(MENU_WIDTH);
+    g_menu.timer      = -1.0f;
+}
+
+GLOBAL void menu_quit(void)
+{
+    // Does nothing...
+}
+
+GLOBAL void menu_tick(nkF32 dt)
+{
+    // Calculate the viewport region within the window.
+    nkF32 ww = NK_CAST(nkF32, get_window_width());
+    nkF32 wh = NK_CAST(nkF32, get_window_height());
+    nkF32 vw = MENU_WIDTH;
+    nkF32 vh = MENU_HEIGHT;
+
+    nkF32 sx = ww / vw;
+    nkF32 sy = wh / vh;
+    nkF32 sw = vw;
+    nkF32 sh = vh;
+
+    if(fabsf(sx) < fabsf(sy)) sh = roundf((vh/vw)*sw);
+    if(fabsf(sx) > fabsf(sy)) sw = roundf((vw/vh)*sh);
+
+    g_menu.scale = nk_min(ww / sw, wh / sh);
+
+    g_menu.viewport.w = (sw * g_menu.scale);
+    g_menu.viewport.h = (sh * g_menu.scale);
+    g_menu.viewport.x = (ww - g_menu.viewport.w) * 0.5f;
+    g_menu.viewport.y = (wh - g_menu.viewport.h) * 0.5f;
+
+    // Do state-specific menu update.
+    switch(g_menu.screen)
+    {
+        case MenuScreen_Main: menu_tick_main(dt); break;
+        case MenuScreen_Tutorial: menu_tick_tutorial(dt); break;
+        case MenuScreen_Credits: menu_tick_credits(dt); break;
+    }
+}
+
 GLOBAL void menu_draw(void)
 {
     // Draw the title screen background.
@@ -219,36 +334,17 @@ GLOBAL void menu_draw(void)
     }
     end_scissor();
 
-    // If interactive draw the rest of the menu background.
     if(g_menu.stage == MenuStage_Interactive)
     {
         imm_rect_filled(0.0f,0.0f,ww,wh, { 0.0f,0.0f,0.0f,0.6f });
+    }
 
-        // Do the title.
-        ImmClip clip = { 0.0f, MENU_HEIGHT * 3, MENU_WIDTH, MENU_HEIGHT };
-        imm_texture_ex(background, ww*0.5f, wh*0.5f, g_menu.scale,g_menu.scale, 0.0f, NULL, &clip);
-
-        // Do the main buttons.
-        draw_menu_text_button(MENU_PLAY_TEXT, MENU_PLAY_YPOS, MENU_PLAY_SIZE);
-        draw_menu_text_button(MENU_HOWTO_TEXT, MENU_HOWTO_YPOS, MENU_HOWTO_SIZE);
-        draw_menu_text_button(MENU_CREDITS_TEXT, MENU_CREDITS_YPOS, MENU_CREDITS_SIZE);
-        // We don't need/want an exit button in the web build.
-        #if !defined(BUILD_WEB)
-        draw_menu_text_button(MENU_EXIT_TEXT, MENU_EXIT_YPOS, MENU_EXIT_SIZE);
-        #endif // BUILD_WEB
-
-        // Do the options buttons.
-        nkF32 img_scale = (get_hud_scale() / 4.0f);
-
-        nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
-        nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
-
-        nkF32 bx = (g_menu.viewport.x + g_menu.viewport.w) - (btn_width * 0.6f);
-        nkF32 by = (g_menu.viewport.y) + (btn_height * 0.6f);
-
-        draw_menu_toggle_button(HUD_CLIP_MUSIC,      bx-(btn_width*0.0f),by, is_music_on  ());
-        draw_menu_toggle_button(HUD_CLIP_SOUND,      bx-(btn_width*1.1f),by, is_sound_on  ());
-        draw_menu_toggle_button(HUD_CLIP_FULLSCREEN, bx-(btn_width*2.2f),by, is_fullscreen());
+    // Do state-specific menu draw.
+    switch(g_menu.screen)
+    {
+        case MenuScreen_Main: menu_draw_main(); break;
+        case MenuScreen_Tutorial: menu_draw_tutorial(); break;
+        case MenuScreen_Credits: menu_draw_credits(); break;
     }
 }
 
@@ -286,6 +382,40 @@ GLOBAL void draw_menu_text_button(const nkChar* text, nkF32 y, nkS32 size, nkBoo
 
     draw_truetype_text(font, t.x+5,t.y+5, text, NK_V4_BLACK);
     draw_truetype_text(font, t.x,t.y, text, color);
+}
+
+INTERNAL nkBool tick_menu_image_button(ImmClip clip, nkF32 x, nkF32 y)
+{
+    nkF32 img_scale = (get_hud_scale() / 4.0f);
+
+    nkF32 bx = x - ((HUD_ICON_WIDTH * img_scale) * 0.5f);
+    nkF32 by = y - ((HUD_ICON_HEIGHT * img_scale) * 0.5f);
+    nkF32 bw = (HUD_ICON_WIDTH * img_scale);
+    nkF32 bh = (HUD_ICON_HEIGHT * img_scale);
+
+    nkVec2 cursor_pos = get_window_mouse_pos();
+
+    nkBool clicked = (point_vs_rect(cursor_pos, bx,by,bw,bh) && is_mouse_button_pressed(MouseButton_Left));
+    if(clicked)
+        play_sound(asset_manager_load<Sound>("click.wav"));
+    return clicked;
+}
+
+INTERNAL void draw_menu_image_button(ImmClip clip, nkF32 x, nkF32 y)
+{
+    nkF32 img_scale = (get_hud_scale() / 4.0f);
+
+    nkF32 bx = x - ((HUD_ICON_WIDTH * img_scale) * 0.5f);
+    nkF32 by = y - ((HUD_ICON_HEIGHT * img_scale) * 0.5f);
+    nkF32 bw = (HUD_ICON_WIDTH * img_scale);
+    nkF32 bh = (HUD_ICON_HEIGHT * img_scale);
+
+    nkVec2 cursor_pos = get_window_mouse_pos();
+
+    if(point_vs_rect(cursor_pos, bx,by,bw,bh)) clip.y += HUD_ICON_HEIGHT;
+
+    Texture texture = asset_manager_load<Texture>("hud.png");
+    imm_texture_ex(texture, x,y, img_scale,img_scale, 0.0f, NULL, &clip);
 }
 
 INTERNAL nkBool tick_menu_toggle_button(ImmClip clip, nkF32 x, nkF32 y, nkBool toggle)
