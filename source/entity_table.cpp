@@ -2,7 +2,7 @@
 
 DEF_ETICK(daisy);
 DEF_ETICK(bramble);
-DEF_ETICK(walker);
+DEF_ETICK(grunt);
 DEF_ETICK(coin);
 
 enum: nkU32
@@ -11,7 +11,7 @@ enum: nkU32
 EntityID_None,
 EntityID_Daisy,
 EntityID_Bramble,
-EntityID_Walker,
+EntityID_Grunt,
 EntityID_Pollen,
 EntityID_HomeTree,
 EntityID_CoinCopper,
@@ -117,14 +117,14 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Coin Drop Max      */ 0,
 },
 
-// EntityID_Walker
+// EntityID_Grunt
 {
-/* Texture            */ "entity/walker.png",
-/* Animation          */ "entity/walker.anm",
+/* Texture            */ "entity/grunt.png",
+/* Animation          */ "entity/grunt.anm",
 /* Type               */ EntityType_Monster,
 /* Default State      */ EntityState_Move,
 /* Flags              */ EntityFlag_None,
-/* Tick               */ ETICK(walker),
+/* Tick               */ ETICK(grunt),
 /* Health             */ 6.0f,
 /* Damage             */ 1.0f,
 /* Speed              */ 0.5f,

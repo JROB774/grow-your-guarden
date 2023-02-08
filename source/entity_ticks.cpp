@@ -140,7 +140,7 @@ INTERNAL nkBool do_monster_bite(Entity& e, nkF32& attack_cooldown, const nkF32 A
     return NK_FALSE;
 }
 
-DEF_ETICK(walker)
+DEF_ETICK(grunt)
 {
     const nkF32 ATTACK_COOLDOWN = 1.25f;
 

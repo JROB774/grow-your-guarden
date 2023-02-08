@@ -13,9 +13,9 @@ INTERNAL constexpr nkU32 MAX_SPAWNS = 8;
 
 NK_ENUM(SpawnType, nkU32)
 {
-    SpawnType_None   = (   0),
-    SpawnType_Walker = (1<<0),
-    SpawnType_All    = (  -1)
+    SpawnType_None  = (   0),
+    SpawnType_Grunt = (1<<0),
+    SpawnType_All   = (  -1)
 };
 
 struct PhaseDesc
@@ -56,7 +56,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Prep Timer   */ 15.0f,
 /* Wave Bonus   */ 500,
 {
-/* Phase 1      */ { 0.0f, SpawnType_Walker, 8,10 },
+/* Phase 1      */ { 0.0f, SpawnType_Grunt, 8,10 },
 /* Phase 2      */ NO_PHASE,
 /* Phase 3      */ NO_PHASE,
 /* Phase 4      */ NO_PHASE,
@@ -76,7 +76,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Prep Timer   */ 30.0f,
 /* Wave Bonus   */ 500,
 {
-/* Phase 1      */ { 0.0f, SpawnType_Walker, 15,17 },
+/* Phase 1      */ { 0.0f, SpawnType_Grunt, 15,17 },
 /* Phase 2      */ NO_PHASE,
 /* Phase 3      */ NO_PHASE,
 /* Phase 4      */ NO_PHASE,
@@ -152,7 +152,7 @@ INTERNAL WaveManager g_wave_manager;
 INTERNAL nkS32 get_monster_spawn_rate(SpawnType type)
 {
     // These should add up to 100.
-    if(NK_CHECK_FLAGS(type, SpawnType_Walker)) return 100;
+    if(NK_CHECK_FLAGS(type, SpawnType_Grunt)) return 100;
     NK_ASSERT(NK_FALSE);
     return 0;
 }
@@ -352,7 +352,7 @@ INTERNAL void tick_wave_fight_state(nkF32 dt)
 
                     nkS32 max_percent = 0;
 
-                    if(NK_CHECK_FLAGS(spawner.spawn_types, SpawnType_Walker)) max_percent += get_monster_spawn_rate(SpawnType_Walker);
+                    if(NK_CHECK_FLAGS(spawner.spawn_types, SpawnType_Grunt)) max_percent += get_monster_spawn_rate(SpawnType_Grunt);
 
                     if(max_percent > 0)
                     {
@@ -367,7 +367,7 @@ INTERNAL void tick_wave_fight_state(nkF32 dt)
                         // !!!IMPORTANT NOTE!!! Place these in highest to lowest spawn-rate order!!!
                         // =========================================================================
                         //
-                        if(spawn < (NK_CAST(nkF32, get_monster_spawn_rate(SpawnType_Walker)) * multiplier)) id = EntityID_Walker;
+                        if(spawn < (NK_CAST(nkF32, get_monster_spawn_rate(SpawnType_Grunt)) * multiplier)) id = EntityID_Grunt;
 
                         if(id != EntityID_None)
                         {
