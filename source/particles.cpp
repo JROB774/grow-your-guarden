@@ -65,7 +65,7 @@ DEF_PTICK(sparkle)
 
 /*////////////////////////////////////////////////////////////////////////////*/
 
-INTERNAL constexpr nkU32 MAX_PARTICLES = 8192; // Hard limit on particles, if we hit this we don't spawn more until new slots are available...
+INTERNAL constexpr nkU32 MAX_PARTICLES = 16384; // Hard limit on particles, if we hit this we don't spawn more until new slots are available...
 
 struct ParticleManager
 {

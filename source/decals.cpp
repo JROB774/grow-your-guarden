@@ -2,7 +2,7 @@
 
 INTERNAL constexpr nkF32 DECAL_FADE_SPEED = 1.0f;
 
-INTERNAL constexpr nkU32 MAX_DECALS = 8192; // Hard limit on decals, if we hit this we don't spawn more until new slots are available...
+INTERNAL constexpr nkU32 MAX_DECALS = 16384; // Hard limit on decals, if we hit this we don't spawn more until new slots are available...
 
 struct Decal
 {
