@@ -23,6 +23,7 @@ NK_ENUM(HotbarID, nkU32)
     HotbarID_Bramble,
     HotbarID_Fertilizer,
     HotbarID_Shovel,
+    HotbarID_Bell,
     HotbarID_TOTAL
 };
 
@@ -228,6 +229,7 @@ GLOBAL void controller_init(void)
     g_controller.shovel_sfx[4] = asset_manager_load<Sound>("shovel_004.wav");
 
     asset_manager_load<Sound>("fertilized.wav");
+    asset_manager_load<Sound>("bell.wav");
 
     asset_manager_load<Texture>("hud.png");
 
@@ -255,6 +257,12 @@ GLOBAL void controller_init(void)
     g_controller.hotbar[HotbarID_Shovel    ].cost        = 0;
     g_controller.hotbar[HotbarID_Shovel    ].unlock      = 0;
     g_controller.hotbar[HotbarID_Shovel    ].spawn_id    = EntityID_None;
+
+    g_controller.hotbar[HotbarID_Bell      ].name        = "Summoning Bell";
+    g_controller.hotbar[HotbarID_Bell      ].description = "Spawn the forces of evil straight away.";
+    g_controller.hotbar[HotbarID_Bell      ].cost        = 0;
+    g_controller.hotbar[HotbarID_Bell      ].unlock      = 0;
+    g_controller.hotbar[HotbarID_Bell      ].spawn_id    = EntityID_None;
 }
 
 GLOBAL void controller_tick(nkF32 dt)
@@ -342,9 +350,13 @@ GLOBAL void controller_tick(nkF32 dt)
             const HotbarSlot& slot = g_controller.hotbar[i];
             if(g_controller.money >= slot.cost && get_waves_beaten() >= slot.unlock)
             {
-                // Toggle the selection depending on if we are already selected or not.
-                g_controller.selected = (g_controller.selected == i) ? NO_SELECTION : i;
-                play_sound(asset_manager_load<Sound>("click.wav"));
+                // Special case for the bell where it can only be used during preparation phase.
+                if(i != HotbarID_Bell || (i == HotbarID_Bell && get_wave_state() == WaveState_Prepare))
+                {
+                    // Toggle the selection depending on if we are already selected or not.
+                    g_controller.selected = (g_controller.selected == i) ? NO_SELECTION : i;
+                    play_sound(asset_manager_load<Sound>("click.wav"));
+                }
             }
         }
 
@@ -370,6 +382,11 @@ GLOBAL void controller_tick(nkF32 dt)
                 else if(g_controller.selected == HotbarID_Shovel)
                 {
                     success = remove_plant(pos.x, pos.y);
+                }
+                else if(g_controller.selected == HotbarID_Bell)
+                {
+                    play_sound(asset_manager_load<Sound>("bell.wav"));
+                    begin_next_wave_now();
                 }
                 else
                 {
@@ -404,7 +421,7 @@ GLOBAL void controller_tick(nkF32 dt)
     // Update the cursor graphic.
     if(g_controller.selected != NO_SELECTION)
     {
-        if(g_controller.selected == HotbarID_Fertilizer || g_controller.selected == HotbarID_Shovel)
+        if(g_controller.selected == HotbarID_Fertilizer || g_controller.selected == HotbarID_Shovel || g_controller.selected == HotbarID_Bell)
         {
             ImmClip clip = HUD_CLIP_ICON;
             clip.x += NK_CAST(nkF32, g_controller.selected) * HUD_ICON_WIDTH;
@@ -446,6 +463,12 @@ GLOBAL void controller_tick(nkF32 dt)
     }
 
     g_controller.money_color = nk_lerp(g_controller.money_color, NK_V4_WHITE, dt * 1.0f);
+
+    // Check if we are holding the bell when the fighting begins, if so deselect.
+    if(g_controller.selected == HotbarID_Bell && get_wave_state() == WaveState_Fight)
+    {
+        g_controller.selected = NO_SELECTION;
+    }
 }
 
 GLOBAL void controller_draw(void)
@@ -465,7 +488,7 @@ GLOBAL void controller_draw(void)
     nkVec2 cursor_pos = get_window_mouse_pos();
 
     // Draw the highlighted tile.
-    if(g_controller.hovered == NO_SELECTION && g_controller.selected != NO_SELECTION)
+    if(g_controller.hovered == NO_SELECTION && g_controller.selected != NO_SELECTION && g_controller.selected != HotbarID_Bell)
     {
         nkVec2 pos = screen_to_world(cursor_pos);
 
@@ -519,7 +542,7 @@ GLOBAL void controller_draw(void)
 
         ImmClip clip = HUD_CLIP_ICON;
         clip.x += NK_CAST(nkF32, i) * HUD_ICON_WIDTH;
-        if(cannot_afford)
+        if(cannot_afford || (i == HotbarID_Bell && get_wave_state() == WaveState_Fight)) // Special case for the bell.
             clip.y += HUD_ICON_HEIGHT;
         if(is_locked)
             clip = HUD_CLIP_PADLOCK;

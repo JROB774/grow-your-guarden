@@ -100,13 +100,6 @@ INTERNAL constexpr nkF32 MESSAGE_TIME = 3.5f;
 INTERNAL constexpr nkF32 BATTLE_MUSIC_FADE_IN_TIME  = 8.0f;
 INTERNAL constexpr nkF32 BATTLE_MUSIC_FADE_OUT_TIME = 8.0f;
 
-NK_ENUM(WaveState, nkS32)
-{
-    WaveState_Prepare,
-    WaveState_Fight,
-    WaveState_TOTAL
-};
-
 NK_ENUM(SpawnerState, nkS32)
 {
     SpawnerState_Waiting,
@@ -553,6 +546,14 @@ GLOBAL void wave_manager_reset(void)
     setup_next_wave();
 }
 
+GLOBAL void begin_next_wave_now(void)
+{
+    if(g_wave_manager.state == WaveState_Prepare)
+    {
+        g_wave_manager.timer = 0.0f;
+    }
+}
+
 GLOBAL nkU32 get_wave_counter(void)
 {
     return g_wave_manager.current_wave;
@@ -561,6 +562,11 @@ GLOBAL nkU32 get_wave_counter(void)
 GLOBAL nkU32 get_waves_beaten(void)
 {
     return g_wave_manager.waves_beaten;
+}
+
+GLOBAL WaveState get_wave_state(void)
+{
+    return g_wave_manager.state;
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/
