@@ -269,6 +269,7 @@ INTERNAL void main_loop(void)
             } break;
             case(SDL_QUIT):
             {
+                stop_music();
                 g_ctx.running = NK_FALSE;
             } break;
         }

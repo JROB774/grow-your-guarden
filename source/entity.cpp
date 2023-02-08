@@ -18,16 +18,11 @@ INTERNAL nkS32 entity_sort_op(const void* a, const void* b)
     Entity* aa = *NK_CAST(Entity**, a);
     Entity* bb = *NK_CAST(Entity**, b);
 
-    if(NK_CHECK_FLAGS(aa->flags, EntityFlag_DrawFirst) && NK_CHECK_FLAGS(bb->flags, EntityFlag_DrawFirst))
-    {
-        if((aa->position.x + aa->draw_offset.x + (aa->bounds.x * 0.5f)) < (bb->position.x + bb->draw_offset.x + (bb->bounds.x * 0.5f))) return -1;
-        if((aa->position.x + aa->draw_offset.x + (aa->bounds.x * 0.5f)) > (bb->position.x + bb->draw_offset.x + (bb->bounds.x * 0.5f))) return +1;
-    }
-    else if(NK_CHECK_FLAGS(aa->flags, EntityFlag_DrawFirst))
+    if(NK_CHECK_FLAGS(aa->flags, EntityFlag_DrawFirst) && !NK_CHECK_FLAGS(bb->flags, EntityFlag_DrawFirst))
     {
         return -1;
     }
-    else if(NK_CHECK_FLAGS(bb->flags, EntityFlag_DrawFirst))
+    if(!NK_CHECK_FLAGS(aa->flags, EntityFlag_DrawFirst) && NK_CHECK_FLAGS(bb->flags, EntityFlag_DrawFirst))
     {
         return +1;
     }

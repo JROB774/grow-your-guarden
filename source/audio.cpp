@@ -252,6 +252,7 @@ GLOBAL void pause_music(void)
 
 GLOBAL void stop_music(void)
 {
+    g_audio.next_track = NULL;
     Mix_HaltMusic();
 }
 
