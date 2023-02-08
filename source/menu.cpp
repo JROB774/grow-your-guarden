@@ -22,6 +22,8 @@ INTERNAL constexpr nkS32 MENU_LAYERS = 4;
 INTERNAL constexpr nkF32 MENU_WIDTH = 1280.0f;
 INTERNAL constexpr nkF32 MENU_HEIGHT = 720.0f;
 
+INTERNAL constexpr nkS32 MENU_TUTORIAL_PAGE_COUNT = 3;
+
 NK_ENUM(MenuScreen, nkS32)
 {
     MenuScreen_Main,
@@ -45,6 +47,8 @@ struct MenuState
     nkF32      timer;
     fRect      viewport;
     nkF32      scale;
+    nkS32      current_tutorial_page;
+    Sound      page_flip_sound[11];
 };
 
 INTERNAL MenuState g_menu;
@@ -151,6 +155,7 @@ INTERNAL void menu_tick_main(nkF32 dt)
         if(tick_menu_text_button(MENU_HOWTO_TEXT, MENU_HOWTO_YPOS, MENU_HOWTO_SIZE))
         {
             g_menu.screen = MenuScreen_Tutorial;
+            g_menu.current_tutorial_page = 0;
         }
         if(tick_menu_text_button(MENU_CREDITS_TEXT, MENU_CREDITS_YPOS, MENU_CREDITS_SIZE))
         {
@@ -236,16 +241,85 @@ INTERNAL void menu_draw_main(void)
 
 INTERNAL void menu_tick_tutorial(nkF32 dt)
 {
-    tick_back_button();
+    // Handle the increment and decrement page buttons.
+    nkF32 img_scale = (get_hud_scale() / 4.0f);
 
-    // @Incomplete: ...
+    nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
+    nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
+
+    nkF32 bx = (g_menu.viewport.x + (g_menu.viewport.w * 0.5f));
+    nkF32 by = (g_menu.viewport.y + g_menu.viewport.h) - (btn_height * 0.6f);
+
+    if(g_menu.current_tutorial_page > 0)
+    {
+        if(tick_menu_image_button(HUD_CLIP_PAGE_L, bx-(btn_width*1.0f),by))
+        {
+            play_sound(g_menu.page_flip_sound[rng_s32(0,NK_ARRAY_SIZE(g_menu.page_flip_sound)-1)]);
+            g_menu.current_tutorial_page--;
+        }
+    }
+    if(g_menu.current_tutorial_page < (MENU_TUTORIAL_PAGE_COUNT-1))
+    {
+        if(tick_menu_image_button(HUD_CLIP_PAGE_R, bx+(btn_width*1.0f),by))
+        {
+            play_sound(g_menu.page_flip_sound[rng_s32(0,NK_ARRAY_SIZE(g_menu.page_flip_sound)-1)]);
+            g_menu.current_tutorial_page++;
+        }
+    }
+
+    // Handle the back button.
+    tick_back_button();
 }
 
 INTERNAL void menu_draw_tutorial(void)
 {
-    draw_back_button();
+    // Draw the current page of the tutorial.
+    nkString page_number = format_string("%02d", g_menu.current_tutorial_page);
+    nkString texture_file;
+    nk_string_assign(&texture_file, "tutorial/");
+    nk_string_append(&texture_file, &page_number);
+    nk_string_append(&texture_file, ".png");
 
-    // @Incomplete: ...
+    Texture texture = asset_manager_load<Texture>(texture_file.cstr);
+    if(texture)
+    {
+        nkF32 ww = NK_CAST(nkF32, get_window_width());
+        nkF32 wh = NK_CAST(nkF32, get_window_height());
+
+        imm_texture_ex(texture, ww*0.5f, wh*0.5f, g_menu.scale,g_menu.scale, 0.0f, NULL);
+    }
+
+    // Draw the current page number.
+    TrueTypeFont font = get_font();
+
+    set_truetype_font_size(font, 40);
+
+    nkF32 img_scale = (get_hud_scale() / 4.0f);
+
+    nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
+    nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
+
+    nkF32 bx = (g_menu.viewport.x + (g_menu.viewport.w * 0.5f));
+    nkF32 by = (g_menu.viewport.y + g_menu.viewport.h) - (btn_height * 0.6f);
+
+    nkF32 tx = bx - (get_truetype_text_width(font, page_number.cstr) * 0.5f);
+    nkF32 ty = by + (get_truetype_text_height(font, page_number.cstr) * 0.25f);
+
+    draw_truetype_text(font, tx+4,ty+4, page_number.cstr, NK_V4_BLACK);
+    draw_truetype_text(font, tx,ty, page_number.cstr, NK_V4_WHITE);
+
+    // Draw the increment and decrement page buttons.
+    if(g_menu.current_tutorial_page > 0)
+    {
+        draw_menu_image_button(HUD_CLIP_PAGE_L, bx-(btn_width*1.0f),by);
+    }
+    if(g_menu.current_tutorial_page < (MENU_TUTORIAL_PAGE_COUNT-1))
+    {
+        draw_menu_image_button(HUD_CLIP_PAGE_R, bx+(btn_width*1.0f),by);
+    }
+
+    // Draw the back button.
+    draw_back_button();
 }
 
 INTERNAL void menu_tick_credits(nkF32 dt)
@@ -273,6 +347,18 @@ GLOBAL void menu_init(void)
     asset_manager_load<Texture>("title.png");
     asset_manager_load<Texture>("credits.png");
     asset_manager_load<Music>("menu.ogg");
+
+    g_menu.page_flip_sound[ 0] = asset_manager_load<Sound>("page_flip_000.wav");
+    g_menu.page_flip_sound[ 1] = asset_manager_load<Sound>("page_flip_001.wav");
+    g_menu.page_flip_sound[ 2] = asset_manager_load<Sound>("page_flip_002.wav");
+    g_menu.page_flip_sound[ 3] = asset_manager_load<Sound>("page_flip_003.wav");
+    g_menu.page_flip_sound[ 4] = asset_manager_load<Sound>("page_flip_004.wav");
+    g_menu.page_flip_sound[ 5] = asset_manager_load<Sound>("page_flip_005.wav");
+    g_menu.page_flip_sound[ 6] = asset_manager_load<Sound>("page_flip_006.wav");
+    g_menu.page_flip_sound[ 7] = asset_manager_load<Sound>("page_flip_007.wav");
+    g_menu.page_flip_sound[ 8] = asset_manager_load<Sound>("page_flip_008.wav");
+    g_menu.page_flip_sound[ 9] = asset_manager_load<Sound>("page_flip_009.wav");
+    g_menu.page_flip_sound[10] = asset_manager_load<Sound>("page_flip_010.wav");
 
     g_menu.screen     = MenuScreen_Main;
     g_menu.stage      = MenuStage_Animation;
