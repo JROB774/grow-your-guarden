@@ -43,9 +43,11 @@ NK_ENUM(EntityState, nkU32)
 
 NK_ENUM(EntityFlag, nkU32)
 {
-    EntityFlag_None   = (   0),
-    EntityFlag_Hidden = (1<<0), // Do not render the entity.
-    EntityFlag_All    = (  -1)
+    EntityFlag_None      = (   0),
+    EntityFlag_Hidden    = (1<<0), // Do not render the entity.
+    EntityFlag_NotEdible = (1<<1), // Cannot be eaten by monsters.
+    EntityFlag_DrawFirst = (1<<2), // Always draw entities with this flag before others.
+    EntityFlag_All       = (  -1)
 };
 
 struct Entity
@@ -91,6 +93,7 @@ struct EntityDesc
     const nkChar* animation;
     EntityType    type;
     EntityState   default_state;
+    EntityFlag    flags;
     EntityTick    tick;
     nkF32         health;
     nkF32         damage;
@@ -130,9 +133,11 @@ GLOBAL void change_entity_state(nkU64 index, EntityState state);
 GLOBAL void change_entity_state(Entity& e, EntityState state);
 
 // Return the index of the entity collided with or NK_U64_MAX if there was no collision.
-GLOBAL nkU64  check_entity_bounds   (nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityType collision_mask = EntityType_All);
-GLOBAL nkU64  check_entity_collision(const Entity& e, EntityType collision_mask = EntityType_All);
-GLOBAL nkBool check_entity_collision(const Entity& a, const Entity& b);
+GLOBAL nkU64  check_entity_bounds                    (nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityType collision_mask = EntityType_All);
+GLOBAL nkU64  check_entity_bounds_vs_radius_collision(const Entity& e, EntityType collision_mask = EntityType_All);
+GLOBAL nkBool check_entity_bounds_vs_radius_collision(const Entity& a, const Entity& b);
+GLOBAL nkU64  check_entity_collision                 (const Entity& e, EntityType collision_mask = EntityType_All);
+GLOBAL nkBool check_entity_collision                 (const Entity& a, const Entity& b);
 
 GLOBAL nkU64   get_entity_count              (void);
 GLOBAL Entity* get_entity                    (nkU64 index);

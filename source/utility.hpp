@@ -55,6 +55,7 @@ GLOBAL NKFORCEINLINE nkBool point_vs_rect   (const nkVec2& p, nkF32 rx, nkF32 ry
 GLOBAL NKFORCEINLINE nkBool point_vs_circle (nkF32 px, nkF32 py, nkF32 cx, nkF32 cy, nkF32 cr);
 GLOBAL NKFORCEINLINE nkBool point_vs_circle (const nkVec2& p, nkF32 cx, nkF32 cy, nkF32 cr);
 GLOBAL NKFORCEINLINE nkBool rect_vs_rect    (const fRect& r1, const fRect& r2);
+GLOBAL NKFORCEINLINE nkBool rect_vs_cirlce  (const fRect& r, nkF32 cx, nkF32 cy, nkF32 cr);
 GLOBAL NKFORCEINLINE nkBool circle_vs_circle(nkF32 ax, nkF32 ay, nkF32 ar, nkF32 bx, nkF32 by, nkF32 br);
 
 // Random number generation.

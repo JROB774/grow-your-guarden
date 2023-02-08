@@ -17,8 +17,26 @@ INTERNAL nkS32 entity_sort_op(const void* a, const void* b)
 {
     Entity* aa = *NK_CAST(Entity**, a);
     Entity* bb = *NK_CAST(Entity**, b);
-    if((aa->position.y + (aa->bounds.y * 0.5f)) < (bb->position.y + (bb->bounds.y * 0.5f))) return -1;
-    if((aa->position.y + (aa->bounds.y * 0.5f)) > (bb->position.y + (bb->bounds.y * 0.5f))) return +1;
+
+    if(NK_CHECK_FLAGS(aa->flags, EntityFlag_DrawFirst) && NK_CHECK_FLAGS(bb->flags, EntityFlag_DrawFirst))
+    {
+        if((aa->position.x + aa->draw_offset.x + (aa->bounds.x * 0.5f)) < (bb->position.x + bb->draw_offset.x + (bb->bounds.x * 0.5f))) return -1;
+        if((aa->position.x + aa->draw_offset.x + (aa->bounds.x * 0.5f)) > (bb->position.x + bb->draw_offset.x + (bb->bounds.x * 0.5f))) return +1;
+    }
+    else if(NK_CHECK_FLAGS(aa->flags, EntityFlag_DrawFirst))
+    {
+        return -1;
+    }
+    else if(NK_CHECK_FLAGS(bb->flags, EntityFlag_DrawFirst))
+    {
+        return +1;
+    }
+
+    if((aa->position.y + aa->draw_offset.y + (aa->bounds.y * 0.5f)) < (bb->position.y + bb->draw_offset.y + (bb->bounds.y * 0.5f))) return -1;
+    if((aa->position.y + aa->draw_offset.y + (aa->bounds.y * 0.5f)) > (bb->position.y + bb->draw_offset.y + (bb->bounds.y * 0.5f))) return +1;
+    if((aa->position.x + aa->draw_offset.x + (aa->bounds.x * 0.5f)) < (bb->position.x + bb->draw_offset.x + (bb->bounds.x * 0.5f))) return -1;
+    if((aa->position.x + aa->draw_offset.x + (aa->bounds.x * 0.5f)) > (bb->position.x + bb->draw_offset.x + (bb->bounds.x * 0.5f))) return +1;
+
     return 0;
 }
 
@@ -479,7 +497,7 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y, nkF32 z)
     entity.type             = desc.type;
     entity.id               = id;
     entity.state            = EntityState_None; // Properly set further down!
-    entity.flags            = EntityFlag_None;
+    entity.flags            = desc.flags;
     entity.target           = NO_TARGET;
     entity.position         = { x,y };
     entity.spawn            = { x,y };
@@ -576,6 +594,48 @@ GLOBAL nkU64 check_entity_bounds(nkF32 x, nkF32 y, nkF32 w, nkF32 h, EntityType 
     return NK_U64_MAX;
 }
 
+GLOBAL nkU64 check_entity_bounds_vs_radius_collision(const Entity& e, EntityType collision_mask)
+{
+    if(e.active && e.state != EntityState_Dead)
+    {
+        nkU64 index = 0;
+
+        for(auto& o: g_entity_manager.entities)
+        {
+            if(o.id != EntityType_None && o.active && o.state != EntityState_Dead && NK_CHECK_FLAGS(collision_mask, o.type))
+            {
+                if(check_entity_bounds_vs_radius_collision(e, o))
+                {
+                    return index;
+                }
+            }
+
+            ++index;
+        }
+    }
+
+    return NK_U64_MAX;
+}
+
+GLOBAL nkBool check_entity_bounds_vs_radius_collision(const Entity& a, const Entity& b)
+{
+    if(!a.active || !b.active) return NK_FALSE;
+
+    if(a.state == EntityState_Dead) return NK_FALSE;
+    if(b.state == EntityState_Dead) return NK_FALSE;
+
+    nkF32 ax = a.position.x - (a.bounds.x * 0.5f);
+    nkF32 ay = a.position.y - (a.bounds.y * 0.5f);
+    nkF32 aw = a.bounds.x;
+    nkF32 ah = a.bounds.y;
+
+    nkF32 bx = b.position.x;
+    nkF32 by = b.position.y;
+    nkF32 br = b.radius;
+
+    return rect_vs_circle({ ax,ay,aw,ah }, bx,by,br);
+}
+
 GLOBAL nkU64 check_entity_collision(const Entity& e, EntityType collision_mask)
 {
     if(e.active && e.state != EntityState_Dead)
@@ -586,15 +646,7 @@ GLOBAL nkU64 check_entity_collision(const Entity& e, EntityType collision_mask)
         {
             if(o.id != EntityType_None && o.active && o.state != EntityState_Dead && NK_CHECK_FLAGS(collision_mask, o.type))
             {
-                nkF32 ax = e.position.x;
-                nkF32 ay = e.position.y;
-                nkF32 ar = e.radius;
-
-                nkF32 bx = o.position.x;
-                nkF32 by = o.position.y;
-                nkF32 br = o.radius;
-
-                if(circle_vs_circle(ax,ay,ar, bx,by,br))
+                if(check_entity_collision(e, o))
                 {
                     return index;
                 }

@@ -73,24 +73,31 @@ DEF_ETICK(daisy)
 
 DEF_ETICK(bramble)
 {
-    const nkF32 ATTACK_COOLDOWN = 3.0f;
+    const nkF32 ATTACK_COOLDOWN = 2.0f;
 
     nkF32& attack_cooldown = e.timer0;
 
     if(attack_cooldown <= 0.0f)
     {
-        nkU64 hit_entity = check_entity_collision(e, EntityType_Monster);
-        if(hit_entity != NO_TARGET)
+        // Brambles will hit all enemies standing on them.
+        for(nkU64 i=0; i<get_entity_count(); ++i)
         {
-            attack_cooldown = ATTACK_COOLDOWN;
-
-            // The amount of damage dealth depends on the growth stage of the bramble.
-            switch(e.current_phase)
+            Entity* m = get_entity(i);
+            if(m && m->id != EntityType_None && m->active && m->state != EntityState_Dead && NK_CHECK_FLAGS(m->type, EntityType_Monster))
             {
-                case 0: entity_damage(hit_entity, 1); break;
-                case 1: entity_damage(hit_entity, 1); break;
-                case 2: entity_damage(hit_entity, 2); break;
-                case 3: entity_damage(hit_entity, 3); break;
+                if(check_entity_bounds_vs_radius_collision(e, *m))
+                {
+                    attack_cooldown = ATTACK_COOLDOWN;
+
+                    // The amount of damage dealth depends on the growth stage of the bramble.
+                    switch(e.current_phase)
+                    {
+                        case 0: entity_damage(i, 0.5f); break;
+                        case 1: entity_damage(i, 1.0f); break;
+                        case 2: entity_damage(i, 1.5f); break;
+                        case 3: entity_damage(i, 2.0f); break;
+                    }
+                }
             }
         }
     }
@@ -107,6 +114,32 @@ DEF_ETICK(bramble)
 // Monsters
 //
 
+INTERNAL nkBool do_monster_bite(Entity& e, nkF32& attack_cooldown, const nkF32 ATTACK_COOLDOWN)
+{
+    nkU64 hit_index = check_entity_collision(e, EntityType_Plant|EntityType_Base);
+    if(hit_index != NK_U64_MAX)
+    {
+        Entity* target = get_entity(hit_index);
+        if(target && !NK_CHECK_FLAGS(target->flags, EntityFlag_NotEdible))
+        {
+            if(attack_cooldown <= 0.0f)
+            {
+                attack_cooldown = ATTACK_COOLDOWN;
+                play_sound(get_random_munch_sound());
+                entity_damage(hit_index, e.damage);
+                if(is_entity_dead(hit_index))
+                {
+                    play_sound(asset_manager_load<Sound>("gulp.wav"));
+                }
+            }
+
+            return NK_TRUE;
+        }
+    }
+
+    return NK_FALSE;
+}
+
 DEF_ETICK(walker)
 {
     const nkF32 ATTACK_COOLDOWN = 1.25f;
@@ -116,21 +149,8 @@ DEF_ETICK(walker)
     e.velocity = NK_V2_ZERO;
 
     // If we collide with a plant or the base then stop to eat it, otherwise continue walking to the tree.
-    nkU64 hit_index = check_entity_collision(e, EntityType_Plant|EntityType_Base);
-    if(hit_index != NK_U64_MAX)
-    {
-        if(attack_cooldown <= 0.0f)
-        {
-            attack_cooldown = ATTACK_COOLDOWN;
-            play_sound(get_random_munch_sound());
-            entity_damage(hit_index, e.damage);
-            if(is_entity_dead(hit_index))
-            {
-                play_sound(asset_manager_load<Sound>("gulp.wav"));
-            }
-        }
-    }
-    else
+    nkBool eating = do_monster_bite(e, attack_cooldown, ATTACK_COOLDOWN);
+    if(!eating)
     {
         // Hunt for the home tree if we aren't already.
         if(e.target == NO_TARGET)
