@@ -24,6 +24,7 @@ GLOBAL constexpr ImmClip HUD_CLIP_FLAG       = {  128.0f, 256.0f, 128.0f, 128.0f
 GLOBAL constexpr ImmClip HUD_CLIP_HEART      = {  256.0f, 256.0f, 128.0f, 128.0f };
 GLOBAL constexpr ImmClip HUD_CLIP_POINTER    = {  384.0f, 256.0f, 128.0f, 128.0f };
 GLOBAL constexpr ImmClip HUD_CLIP_ARROW      = {  512.0f, 256.0f, 128.0f, 128.0f };
-GLOBAL constexpr ImmClip HUD_CLIP_ICON       = {    0.0f, 384.0f, 128.0f, 128.0f };
+GLOBAL constexpr ImmClip HUD_CLIP_PADLOCK    = {    0.0f, 384.0f, 128.0f, 128.0f };
+GLOBAL constexpr ImmClip HUD_CLIP_ICON       = {  128.0f, 384.0f, 128.0f, 128.0f };
 
 /*////////////////////////////////////////////////////////////////////////////*/

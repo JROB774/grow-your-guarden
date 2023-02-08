@@ -407,7 +407,7 @@ GLOBAL void controller_tick(nkF32 dt)
         if(g_controller.selected == HotbarID_Fertilizer || g_controller.selected == HotbarID_Shovel)
         {
             ImmClip clip = HUD_CLIP_ICON;
-            clip.x = NK_CAST(nkF32, g_controller.selected) * HUD_ICON_WIDTH;
+            clip.x += NK_CAST(nkF32, g_controller.selected) * HUD_ICON_WIDTH;
             set_cursor(CursorType_Custom, NULL, clip);
         }
         else
@@ -495,6 +495,7 @@ GLOBAL void controller_draw(void)
     nkF32 img_scale = get_hud_scale() / 4.0f;
     nkF32 hud_scale = get_hud_scale();
 
+    // Draw the hotbar.
     nkF32 x = ((HUD_CLIP_SLOT.w * 0.80f) * 0.5f) * img_scale;
     nkF32 y = ((HUD_CLIP_SLOT.h * 0.80f) * 0.5f) * img_scale;
 
@@ -517,18 +518,18 @@ GLOBAL void controller_draw(void)
         nkBool is_locked = (get_waves_beaten() < slot.unlock);
 
         ImmClip clip = HUD_CLIP_ICON;
-        clip.x = NK_CAST(nkF32, i) * HUD_ICON_WIDTH;
-        if(cannot_afford || is_locked)
-        {
+        clip.x += NK_CAST(nkF32, i) * HUD_ICON_WIDTH;
+        if(cannot_afford)
             clip.y += HUD_ICON_HEIGHT;
-        }
+        if(is_locked)
+            clip = HUD_CLIP_PADLOCK;
 
         imm_texture_ex(texture, x,y, img_scale,img_scale, 0.0f, NULL, &clip, NK_V4_WHITE);
 
         imm_texture_ex(texture, x,y, img_scale,img_scale, nk_torad(NK_CAST(nkF32, angle)), NULL, &HUD_CLIP_SLOT, frame_color);
 
         // Draw the price of the slot if it has one.
-        if(slot.cost > 0)
+        if(slot.cost > 0 && !is_locked)
         {
             set_truetype_font_size(font, NK_CAST(nkS32, 10 * hud_scale));
 
