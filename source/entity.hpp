@@ -70,6 +70,7 @@ struct Entity
     nkF32         thrust;
     nkF32         z_depth;       // Controls how "high" the visual of the entity is compared to its shadow.
     nkF32         flip;          // Plants get this randomly set on spawn to add some visual variance.
+    nkF32         angle;
     nkVec4        color;
     AnimState     anim_state;
     EntityType    collision_mask;

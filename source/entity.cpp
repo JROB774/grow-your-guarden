@@ -341,7 +341,7 @@ GLOBAL void entity_draw(void)
             sy = ease;
         }
 
-        imm_texture_ex(texture, ex,ey - e->z_depth, sx,sy, 0.0f, NULL, &clip, color);
+        imm_texture_ex(texture, ex,ey - e->z_depth, sx,sy, e->angle, NULL, &clip, color);
 
         // A special case is made for the home tree. We draw different mouths on top of the base image.
         PERSISTENT const ImmClip TREE_FACE_HAPPY = { 1280.0f,   0.0f, 420.0f, 128.0f };
@@ -527,6 +527,7 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y, nkF32 z)
     entity.thrust           = 0.0f;
     entity.z_depth          = desc.z_depth * TILE_HEIGHT;
     entity.flip             = 1.0f;
+    entity.angle            = 0.0f;
     entity.color            = NK_V4_WHITE;
     entity.anim_state       = create_animation_state(desc.animation);
     entity.collision_mask   = desc.collision_mask;

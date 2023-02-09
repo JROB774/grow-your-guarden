@@ -122,7 +122,7 @@ DEF_ETICK(hedge_wall)
 
 DEF_ETICK(bell_plant)
 {
-    const nkF32 ATTACK_COOLDOWN = 2.0f;
+    const nkF32 ATTACK_COOLDOWN = 1.5f;
 
     nkF32& attack_cooldown = e.timer0;
 
@@ -377,8 +377,8 @@ DEF_ETICK(dripper)
 
 DEF_ETICK(bell_missile)
 {
-    const nkF32 HEIGHT_ADVANCE_SPEED = 1.0f;
-    const nkF32 HOMING_SPEED = 3.5f;
+    const nkF32 HEIGHT_ADVANCE_SPEED = 1.5f;
+    const nkF32 HOMING_SPEED = 5.5f;
 
     const nkF32 MAX_HOMING_DISTANCE = 7.1f * TILE_WIDTH;
 
@@ -392,8 +392,10 @@ DEF_ETICK(bell_missile)
     nkVec2 curr_dir = nk_normalize(e.velocity);
 
     nkVec2 new_velocity = nk_normalize(nk_lerp(curr_dir, target_dir, HOMING_SPEED * dt)) * e.speed;
+    nkVec2 new_dir = nk_normalize(new_velocity);
 
     e.velocity = new_velocity;
+    e.angle = atan2f(new_dir.y, new_dir.x);
 
     // If we are too far away from our target, stop tracking.
     nkF32 distance = distance_between_points(e.position, target->position);
