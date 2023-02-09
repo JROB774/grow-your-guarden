@@ -3,6 +3,7 @@
 DEF_ETICK(daisy);
 DEF_ETICK(bramble);
 DEF_ETICK(walker);
+DEF_ETICK(dripper);
 DEF_ETICK(coin);
 
 enum: nkU32
@@ -14,6 +15,7 @@ EntityID_Bramble,
 EntityID_Grunt,
 EntityID_Soldier,
 EntityID_Barbarian,
+EntityID_Dripper,
 EntityID_Pollen,
 EntityID_Tarball,
 EntityID_HomeTree,
@@ -211,6 +213,37 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Coin Drop Chance   */ 20,
 /* Coin Drop Min      */ 2,
 /* Coin Drop Max      */ 5,
+},
+
+// EntityID_Dripper
+{
+/* Texture            */ "entity/dripper.png",
+/* Animation          */ "entity/dripper.anm",
+/* Type               */ EntityType_Monster,
+/* Default State      */ EntityState_Move,
+/* Flags              */ EntityFlag_Aerial,
+/* Tick               */ ETICK(dripper),
+/* Health             */ 8.0f,
+/* Damage             */ 1.0f,
+/* Speed              */ 0.5f,
+/* Range              */ 0.0f,
+/* Radius             */ 0.3f,
+/* Z-Depth            */ 0.0f,
+/* Collision Mask     */ EntityType_None,
+/* Draw Offset        */ { 0.0f,-0.25f },
+/* Bounds             */ { 1.0f,1.0f },
+/* Growth Phases      */ { 0,0,0,0,0,0,0,0 },
+/* Death Sounds       */ { "splat_wet_000.wav","splat_wet_001.wav","splat_wet_002.wav",NULL,NULL,NULL,NULL,NULL },
+/* Death Effect       */ "tar_explosion",
+/* Death Particle     */ "tar_blobs_small",
+/* Death Particle Min */ 24,
+/* Death Particle Max */ 32,
+/* Death Decal        */ NULL,
+/* Death Decal Min    */ 0,
+/* Death Decal Max    */ 0,
+/* Coin Drop Chance   */ 10,
+/* Coin Drop Min      */ 3,
+/* Coin Drop Max      */ 7,
 },
 
 // EntityID_Pollen

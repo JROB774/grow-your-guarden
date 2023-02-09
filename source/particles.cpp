@@ -18,12 +18,12 @@ DEF_PSPAWN(tar_blobs_small)
 
     set_animation_frame(&p.anim_state, rng_s32(0,NK_CAST(nkS32,p.anim_state.current->frames.length)-1)); // Pick a random frame.
 
-    p.rotation = rng_f32(0.0f, NK_TAU_F32);
-    p.scale    = rng_f32(0.75f, 1.0f);
-    p.z_depth  = rng_f32(25.0f, 100.0f);
-    p.thrust   = rng_f32(1200.0f,1400.0f);
-    p.weight   = rng_f32(4200.0f,5000.0f);
-    p.velocity = nk_normalize(nk_rotate(NK_V2_UNIT_X, rng_f32(0.0f, NK_TAU_F32))) * rng_f32(MIN_SPEED,MAX_SPEED);
+    p.rotation  = rng_f32(0.0f, NK_TAU_F32);
+    p.scale     = rng_f32(0.75f, 1.0f);
+    p.z_depth  += rng_f32(25.0f, 100.0f);
+    p.thrust    = rng_f32(1200.0f,1400.0f);
+    p.weight    = rng_f32(4200.0f,5000.0f);
+    p.velocity  = nk_normalize(nk_rotate(NK_V2_UNIT_X, rng_f32(0.0f, NK_TAU_F32))) * rng_f32(MIN_SPEED,MAX_SPEED);
 }
 
 DEF_PTICK(tar_blobs_small)
@@ -155,7 +155,7 @@ GLOBAL void particle_reset(void)
     nk_hashset_clear(&g_particle_manager.free_slots);
 }
 
-GLOBAL void particle_spawn(const nkChar* name, nkF32 x, nkF32 y)
+GLOBAL void particle_spawn(const nkChar* name, nkF32 x, nkF32 y, nkF32 z)
 {
     nkString particle_name = name;
 
@@ -169,7 +169,7 @@ GLOBAL void particle_spawn(const nkChar* name, nkF32 x, nkF32 y)
     particle.weight     = 0.0f;
     particle.rotation   = 0.0f;
     particle.scale      = 1.0f;
-    particle.z_depth    = 0.0f;
+    particle.z_depth    = z;
     particle.anim_state = create_animation_state(g_particle_manager.animations);
     particle.tick       = nk_hashmap_getref(&g_particle_manager.ticks, particle_name);
     particle.active     = NK_TRUE;
@@ -200,14 +200,14 @@ GLOBAL void particle_spawn(const nkChar* name, nkF32 x, nkF32 y)
     }
 }
 
-GLOBAL void particle_spawn(const nkChar* name, nkF32 x, nkF32 y, nkF32 w, nkF32 h, nkS32 min, nkS32 max)
+GLOBAL void particle_spawn(const nkChar* name, nkF32 x, nkF32 y, nkF32 z, nkF32 w, nkF32 h, nkS32 min, nkS32 max)
 {
     nkS32 count = rng_s32(min,max);
     for(nkS32 i=0; i<count; ++i)
     {
         nkF32 px = rng_f32(x, x+w);
         nkF32 py = rng_f32(y, y+h);
-        particle_spawn(name, px,py);
+        particle_spawn(name, px,py,z);
     }
 }
 

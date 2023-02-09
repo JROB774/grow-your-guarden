@@ -48,6 +48,7 @@ NK_ENUM(EntityFlag, nkU32)
     EntityFlag_NotEdible    = (1<<1), // Cannot be eaten by monsters.
     EntityFlag_NotShootable = (1<<2), // Cannot be shot by bullets.
     EntityFlag_DrawFirst    = (1<<3), // Always draw entities with this flag before others.
+    EntityFlag_Aerial       = (1<<4), // Entity is in the air and avoids certain collisions.
     EntityFlag_All          = (  -1)
 };
 
@@ -139,6 +140,7 @@ GLOBAL nkU64  check_entity_bounds_vs_radius_collision(const Entity& e, EntityTyp
 GLOBAL nkBool check_entity_bounds_vs_radius_collision(const Entity& a, const Entity& b);
 GLOBAL nkU64  check_entity_collision                 (const Entity& e, EntityType collision_mask = EntityType_All);
 GLOBAL nkBool check_entity_collision                 (const Entity& a, const Entity& b);
+GLOBAL nkBool check_entity_collision_3d              (const Entity& a, const Entity& b);
 
 GLOBAL nkU64   get_entity_count              (void);
 GLOBAL Entity* get_entity                    (nkU64 index);

@@ -30,7 +30,7 @@ GLOBAL void particle_reset(void);
 // The name passed into these functions not only picks what animation to use but also the behavior to
 // give to the particles. Each name will map to a corresponding function in a large map. If there is
 // no matching function for the name then the default particle behavior will be assigned.
-GLOBAL void particle_spawn(const nkChar* name, nkF32 x, nkF32 y);
-GLOBAL void particle_spawn(const nkChar* name, nkF32 x, nkF32 y, nkF32 w, nkF32 h, nkS32 min, nkS32 max); // Spawn multiple in a box region.
+GLOBAL void particle_spawn(const nkChar* name, nkF32 x, nkF32 y, nkF32 z);
+GLOBAL void particle_spawn(const nkChar* name, nkF32 x, nkF32 y, nkF32 z, nkF32 w, nkF32 h, nkS32 min, nkS32 max); // Spawn multiple in a box region.
 
 /*////////////////////////////////////////////////////////////////////////////*/

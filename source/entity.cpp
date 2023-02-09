@@ -158,7 +158,7 @@ GLOBAL void entity_tick(nkF32 dt)
                             nkF32 w = (e.radius * 1.5f) * 2.0f;
                             nkF32 h = (e.radius * 1.5f) * 2.0f;
 
-                            particle_spawn("sparkle", x,y,w,h, 1,1);
+                            particle_spawn("sparkle", x,y,e.z_depth,w,h, 1,1);
                         }
                     }
                     else
@@ -195,7 +195,17 @@ GLOBAL void entity_tick(nkF32 dt)
                 {
                     if(b.type == EntityType_Bullet && b.state != EntityState_Dead && b.active && NK_CHECK_FLAGS(b.collision_mask, e.type))
                     {
-                        if(check_entity_collision(e, b))
+                        // If the entity or bullet is aerial do a 3D collision check otherwise just do a normal one.
+                        nkBool collided = NK_FALSE;
+                        if(NK_CHECK_FLAGS(e.flags, EntityFlag_Aerial) || NK_CHECK_FLAGS(b.flags, EntityFlag_Aerial))
+                        {
+                            collided = check_entity_collision_3d(e, b);
+                        }
+                        else
+                        {
+                            collided = check_entity_collision(e, b);
+                        }
+                        if(collided)
                         {
                             entity_damage(index, b.damage);
                             entity_kill(sub_index);
@@ -289,6 +299,17 @@ GLOBAL void entity_draw(void)
             if(e->type == EntityType_Bullet)
             {
                 scale *= 0.65f; // Make bullet shadows even smaller because it looks nice.
+            }
+
+            // Make z-depth change the size of the shadows.
+            if(e->z_depth > 0.0f)
+            {
+                nkF32 depth_in_tiles = (e->z_depth / TILE_HEIGHT) * 0.75f;
+                if(depth_in_tiles >= 1.0f)
+                {
+                    scale /= depth_in_tiles;
+                    if(scale < 0.05f) scale = 0.05f;
+                }
             }
 
             imm_texture_batched_ex(pos_x,pos_y, scale,scale*0.75f, 0.0f, NULL, NULL, shadow_color);
@@ -422,7 +443,7 @@ GLOBAL void entity_kill(nkU64 index)
             nkF32 x = e->position.x + e->draw_offset.x;
             nkF32 y = e->position.y + e->draw_offset.y;
 
-            particle_spawn(desc.death_effect, x,y);
+            particle_spawn(desc.death_effect, x,y, e->z_depth);
         }
 
         if(desc.death_particle)
@@ -432,7 +453,7 @@ GLOBAL void entity_kill(nkU64 index)
             nkF32 w = e->radius * 2.0f;
             nkF32 h = e->radius * 2.0f;
 
-            particle_spawn(desc.death_particle, x,y,w,h, desc.death_particle_min, desc.death_particle_max);
+            particle_spawn(desc.death_particle, x,y,e->z_depth,w,h, desc.death_particle_min, desc.death_particle_max);
         }
 
         // If the entity has death decals then spawn them.
@@ -684,6 +705,26 @@ GLOBAL nkBool check_entity_collision(const Entity& a, const Entity& b)
     nkF32 br = b.radius;
 
     return circle_vs_circle(ax,ay,ar, bx,by,br);
+}
+
+GLOBAL nkBool check_entity_collision_3d(const Entity& a, const Entity& b)
+{
+    if(!a.active || !b.active) return NK_FALSE;
+
+    if(a.state == EntityState_Dead) return NK_FALSE;
+    if(b.state == EntityState_Dead) return NK_FALSE;
+
+    nkF32 ax = a.position.x;
+    nkF32 ay = a.position.y;
+    nkF32 az = a.z_depth;
+    nkF32 ar = a.radius;
+
+    nkF32 bx = b.position.x;
+    nkF32 by = b.position.y;
+    nkF32 bz = b.z_depth;
+    nkF32 br = b.radius;
+
+    return nk_length(nkVec3{ ax-bx, ay-by, az-bz }) < (ar + br);
 }
 
 GLOBAL nkU64 get_entity_count(void)

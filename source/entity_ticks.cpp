@@ -43,7 +43,7 @@ DEF_ETICK(daisy)
 
         for(auto& m: g_entity_manager.entities)
         {
-            if(m.type == EntityType_Monster && m.active)
+            if(m.type == EntityType_Monster && m.active && !NK_CHECK_FLAGS(m.flags, EntityFlag_Aerial))
             {
                 distance = distance_between_points(e.position, m.position);
                 if(distance <= e.range && distance < shortest_distance)
@@ -87,7 +87,7 @@ DEF_ETICK(bramble)
         for(nkU64 i=0; i<get_entity_count(); ++i)
         {
             Entity* m = get_entity(i);
-            if(m && m->id != EntityType_None && m->active && m->state != EntityState_Dead && NK_CHECK_FLAGS(m->type, EntityType_Monster))
+            if(m && m->id != EntityType_None && m->active && m->state != EntityState_Dead && NK_CHECK_FLAGS(m->type, EntityType_Monster) && !NK_CHECK_FLAGS(m->flags, EntityFlag_Aerial))
             {
                 if(check_entity_bounds_vs_radius_collision(e, *m))
                 {
@@ -120,9 +120,9 @@ DEF_ETICK(bramble)
 // Monsters
 //
 
-INTERNAL nkBool do_monster_bite(Entity& e, nkF32& attack_cooldown, const nkF32 ATTACK_COOLDOWN)
+INTERNAL nkBool do_monster_bite(Entity& e, nkF32& attack_cooldown, const nkF32 ATTACK_COOLDOWN, EntityType collision_mask = EntityType_Plant|EntityType_Base)
 {
-    nkU64 hit_index = check_entity_collision(e, EntityType_Plant|EntityType_Base);
+    nkU64 hit_index = check_entity_collision(e, collision_mask);
     if(hit_index != NK_U64_MAX)
     {
         Entity* target = get_entity(hit_index);
@@ -163,7 +163,7 @@ DEF_ETICK(walker)
     e.velocity = NK_V2_ZERO;
 
     // If we collide with a plant or the base then stop to eat it, otherwise continue walking to the tree.
-    nkBool eating = do_monster_bite(e, bite_cooldown, BITE_COOLDOWN);
+    nkBool eating = eating = do_monster_bite(e, bite_cooldown, BITE_COOLDOWN);
     if(!eating)
     {
         // Hunt for the home tree if we aren't already.
@@ -193,7 +193,7 @@ DEF_ETICK(walker)
 
             for(auto& p: g_entity_manager.entities)
             {
-                if(p.type == EntityType_Plant && p.active)
+                if((p.type == EntityType_Plant || p.type == EntityType_Base) && p.active)
                 {
                     distance = distance_between_points(e.position, p.position);
                     if(distance <= e.range && distance < shortest_distance)
@@ -210,7 +210,7 @@ DEF_ETICK(walker)
                 spawn_bullet_at_target(EntityID_Tarball, e.position.x,e.position.y, *target);
                 e.velocity = NK_V2_ZERO; // Stop moving whilst shooting.
                 play_sound(asset_manager_load<Sound>("cough.wav"));
-                particle_spawn("tar_explosion", e.position.x + e.draw_offset.x, e.position.y + e.draw_offset.y);
+                particle_spawn("tar_explosion", e.position.x + e.draw_offset.x, e.position.y + e.draw_offset.y, 0.0f);
             }
         }
     }
@@ -227,6 +227,69 @@ DEF_ETICK(walker)
 
     // Randomly spawn splats under us.
     if(rng_s32(0,100) < 5)
+    {
+        nkF32 x = e.position.x - (e.radius * 0.75f);
+        nkF32 y = e.position.y - (e.radius * 0.75f);
+        nkF32 w = (e.radius * 0.75f) * 2.0f;
+        nkF32 h = (e.radius * 0.75f) * 2.0f;
+
+        decal_spawn("tar_splat_small", x,y,w,h, 1,5, 8.0f,10.0f);
+    }
+}
+
+DEF_ETICK(dripper)
+{
+    const nkF32 MAX_HEIGHT =  2.00f * TILE_HEIGHT;
+    const nkF32 MIN_BOUNCE = -0.25f * TILE_HEIGHT;
+    const nkF32 MAX_BOUNCE =  0.25f * TILE_HEIGHT;
+
+    const nkF32 HEIGHT_SPEED = 0.15f;
+    const nkF32 BOUNCE_SPEED = 1.50f;
+
+    const nkF32 BITE_COOLDOWN = 1.25f;
+
+    nkF32& bite_cooldown = e.timer0;
+
+    // Calculate our current Z value using these two timers.
+    nkF32& height_timer = e.timer1;
+    nkF32& bounce_timer = e.timer2;
+
+    height_timer += (dt * HEIGHT_SPEED);
+    bounce_timer += (dt * BOUNCE_SPEED);
+
+    height_timer = nk_clamp(height_timer, 0.0f, 1.0f);
+
+    e.z_depth = nk_lerp(0.0f, MAX_HEIGHT, height_timer) + (nk_sin_range(MIN_BOUNCE, MAX_BOUNCE, bounce_timer));
+
+    // Reset velocity.
+    e.velocity = NK_V2_ZERO;
+
+    // If we collide with the base then stop to eat it, otherwise continue floating to the tree.
+    nkBool eating = eating = do_monster_bite(e, bite_cooldown, BITE_COOLDOWN, EntityType_Base);
+    if(!eating)
+    {
+        // Float towards the tree if we found it.
+        if(e.target == NO_TARGET)
+        {
+            e.target = get_first_entity_index_with_id(EntityID_HomeTree);
+        }
+        if(e.target != NO_TARGET)
+        {
+            Entity* target = get_entity(e.target);
+            nkVec2 dir = nk_normalize(target->position - e.position);
+            e.velocity = dir * NK_CAST(nkF32, e.speed);
+            e.flip = (dir.x < 0.0f) ? -1.0f : 1.0f; // Face the floating direction.
+        }
+    }
+
+    // Cooldown our attack.
+    if(bite_cooldown > 0.0f)
+    {
+        bite_cooldown -= dt;
+    }
+
+    // Randomly spawn splats under us.
+    if(rng_s32(0,100) < 8)
     {
         nkF32 x = e.position.x - (e.radius * 0.75f);
         nkF32 y = e.position.y - (e.radius * 0.75f);
@@ -288,7 +351,7 @@ DEF_ETICK(coin)
             nkF32 h = e.radius * 2.0f;
 
             play_sound(asset_manager_load<Sound>("coin_collect.wav"));
-            particle_spawn("sparkle", x,y,w,h, 3, 5);
+            particle_spawn("sparkle", x,y,0.0f, w,h, 3, 5);
             entity_kill(index);
         }
     }
@@ -319,9 +382,9 @@ DEF_ETICK(coin)
             // Spawn a little animation on de-spawn.
             switch(e.id)
             {
-                case EntityID_CoinCopper: particle_spawn("puff_small", e.position.x,e.position.y); break;
-                case EntityID_CoinSilver: particle_spawn("puff_medium", e.position.x,e.position.y); break;
-                case EntityID_CoinGold:   particle_spawn("puff_large", e.position.x,e.position.y); break;
+                case EntityID_CoinCopper: particle_spawn("puff_small", e.position.x,e.position.y,0.0f); break;
+                case EntityID_CoinSilver: particle_spawn("puff_medium", e.position.x,e.position.y,0.0f); break;
+                case EntityID_CoinGold:   particle_spawn("puff_large", e.position.x,e.position.y,0.0f); break;
             }
         }
     }

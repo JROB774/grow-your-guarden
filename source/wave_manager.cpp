@@ -17,6 +17,7 @@ NK_ENUM(SpawnType, nkU32)
     SpawnType_Grunt     = (1<<0),
     SpawnType_Soldier   = (1<<1),
     SpawnType_Barbarian = (1<<2),
+    SpawnType_Dripper   = (1<<3),
     SpawnType_All       = (  -1)
 };
 
@@ -151,6 +152,7 @@ INTERNAL EntityID get_entity_id_from_spawn_type(SpawnType type)
         case SpawnType_Grunt:     return EntityID_Grunt;
         case SpawnType_Soldier:   return EntityID_Soldier;
         case SpawnType_Barbarian: return EntityID_Barbarian;
+        case SpawnType_Dripper:   return EntityID_Dripper;
     }
     NK_ASSERT(NK_FALSE); // Shouldn't get down here!
     return EntityID_None;
@@ -161,6 +163,7 @@ INTERNAL nkS32 get_entity_spawn_rate(EntityID id)
     switch(id)
     {
         case EntityID_Grunt:     return 60;
+        case EntityID_Dripper:   return 60;
         case EntityID_Soldier:   return 25;
         case EntityID_Barbarian: return 15;
     }
