@@ -21,6 +21,7 @@ NK_ENUM(HotbarID, nkU32)
 {
     HotbarID_Daisy,
     HotbarID_Bramble,
+    HotbarID_BellPlant,
     HotbarID_Fertilizer,
     HotbarID_Shovel,
     HotbarID_Bell,
@@ -245,6 +246,12 @@ GLOBAL void controller_init(void)
     g_controller.hotbar[HotbarID_Bramble   ].cost        = 50;
     g_controller.hotbar[HotbarID_Bramble   ].unlock      = 1;
     g_controller.hotbar[HotbarID_Bramble   ].spawn_id    = EntityID_Bramble;
+
+    g_controller.hotbar[HotbarID_BellPlant ].name        = "MISSILE BELL";
+    g_controller.hotbar[HotbarID_BellPlant ].description = "Fires anti-air homing projectiles at flying enemies.\nCannot attack ground enemies.";
+    g_controller.hotbar[HotbarID_BellPlant ].cost        = 150;
+    g_controller.hotbar[HotbarID_BellPlant ].unlock      = 0; // @Incomplete!
+    g_controller.hotbar[HotbarID_BellPlant ].spawn_id    = EntityID_BellPlant;
 
     g_controller.hotbar[HotbarID_Fertilizer].name        = "FERTILIZER";
     g_controller.hotbar[HotbarID_Fertilizer].description = "Increase a plant's stats for a limited time.";

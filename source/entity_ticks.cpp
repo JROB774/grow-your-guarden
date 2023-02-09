@@ -1,11 +1,12 @@
 /*////////////////////////////////////////////////////////////////////////////*/
 
-INTERNAL void spawn_bullet_at_target(EntityID id, nkF32 x, nkF32 y, const Entity& target)
+INTERNAL Entity* spawn_bullet_at_target(EntityID id, nkF32 x, nkF32 y, const Entity& target)
 {
     nkU64 index = entity_spawn(id, x,y);
     Entity* b = get_entity(index);
     nkVec2 dir = nk_normalize(target.position - b->position);
     b->velocity = dir * NK_CAST(nkF32, b->speed);
+    return b;
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/
@@ -104,6 +105,58 @@ DEF_ETICK(bramble)
                         case 3: entity_damage(i, 2.00f * multiplier); break;
                     }
                 }
+            }
+        }
+    }
+
+    if(attack_cooldown > 0.0f)
+    {
+        attack_cooldown -= dt;
+    }
+}
+
+DEF_ETICK(bell_plant)
+{
+    const nkF32 ATTACK_COOLDOWN = 2.0f;
+
+    nkF32& attack_cooldown = e.timer0;
+
+    // @Incomplete: Fertilized...
+
+    // If we are fully grown then try and shoot any enemies that are close enough (pick the closest one).
+    if(plant_is_fully_grown(e) && attack_cooldown <= 0.0f)
+    {
+        nkF32 shortest_distance = FLT_MAX;
+        nkF32 distance = 0.0f;
+
+        Entity* target = NULL;
+
+        nkU64 target_index = 0;
+        nkU64 entity_index = 0;
+
+        for(auto& m: g_entity_manager.entities)
+        {
+            if(m.type == EntityType_Monster && m.active && NK_CHECK_FLAGS(m.flags, EntityFlag_Aerial))
+            {
+                distance = distance_between_points(e.position, m.position);
+                if(distance <= e.range && distance < shortest_distance)
+                {
+                    shortest_distance = distance;
+                    target = &m;
+                    target_index = entity_index;
+                }
+            }
+
+            ++entity_index;
+        }
+        if(target)
+        {
+            change_entity_state(e, EntityState_Attack);
+            attack_cooldown = ATTACK_COOLDOWN;
+            Entity* b = spawn_bullet_at_target(EntityID_BellMissile, e.position.x,e.position.y, *target);
+            if(b)
+            {
+                b->target = target_index;
             }
         }
     }
@@ -308,6 +361,40 @@ DEF_ETICK(dripper)
         nkF32 h = (e.radius * 0.75f) * 2.0f;
 
         decal_spawn("tar_splat_small", x,y,w,h, 1,5, 8.0f,10.0f);
+    }
+}
+
+/*////////////////////////////////////////////////////////////////////////////*/
+
+//
+// Bullets
+//
+
+DEF_ETICK(bell_missile)
+{
+    const nkF32 HEIGHT_ADVANCE_SPEED = 1.0f;
+    const nkF32 HOMING_SPEED = 3.5f;
+
+    const nkF32 MAX_HOMING_DISTANCE = 7.1f * TILE_WIDTH;
+
+    Entity* target = get_entity(e.target);
+    if(!target) return;
+
+    // Move towards the target's z-depth and also home in.
+    e.z_depth = nk_lerp(e.z_depth, target->z_depth, HEIGHT_ADVANCE_SPEED * dt);
+
+    nkVec2 target_dir = nk_normalize(target->position - e.position);
+    nkVec2 curr_dir = nk_normalize(e.velocity);
+
+    nkVec2 new_velocity = nk_normalize(nk_lerp(curr_dir, target_dir, HOMING_SPEED * dt)) * e.speed;
+
+    e.velocity = new_velocity;
+
+    // If we are too far away from our target, stop tracking.
+    nkF32 distance = distance_between_points(e.position, target->position);
+    if(distance >= MAX_HOMING_DISTANCE)
+    {
+        e.target = NK_U64_MAX;
     }
 }
 
