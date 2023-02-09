@@ -145,7 +145,7 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Collision Mask     */ EntityType_None,
 /* Draw Offset        */ { 0.0f,-0.5f },
 /* Bounds             */ { 1.0f,1.0f },
-/* Growth Phases      */ { 4,0,0,0,0,0,0,0 },
+/* Growth Phases      */ { 4,4,0,0,0,0,0,0 },
 /* Death Sounds       */ { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL },
 /* Death Effect       */ NULL,
 /* Death Particle     */ NULL,

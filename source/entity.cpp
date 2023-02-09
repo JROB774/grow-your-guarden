@@ -408,9 +408,13 @@ GLOBAL void entity_damage(nkU64 index, nkF32 damage)
         {
             damage *= 0.5f; // Damage is halved when fully grown (essentially doubling the plant's health).
         }
+        else if(e->current_phase == 0)
+        {
+            damage *= 4.0f; // We take more damage as a seed to simulate less health.
+        }
         if(e->fertilized_timer > 0.0f)
         {
-            damage *= 0.5f; // Damage is halved when fertilized.
+            damage *= 0.5f; // All damage is halved when fertilized.
         }
     }
 
