@@ -212,6 +212,7 @@ GLOBAL void free_music(Music music)
 GLOBAL void play_music(Music music, nkS32 loops)
 {
     NK_ASSERT(music);
+    stop_music(); // Stop any previous music to prevent scenarios where we get blocked forever...
     if(Mix_PlayMusic(music->music, loops) == -1)
         printf("Failed to play music: %s\n", Mix_GetError());
 }
