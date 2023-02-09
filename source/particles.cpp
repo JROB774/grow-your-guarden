@@ -48,6 +48,36 @@ DEF_PTICK(tar_blobs_small)
 }
 
 //
+// tar_drips
+//
+
+DEF_PSPAWN(tar_drips)
+{
+    const nkF32 MIN_SPEED = 100.0f;
+    const nkF32 MAX_SPEED = 400.0f;
+
+    set_animation_frame(&p.anim_state, rng_s32(0,NK_CAST(nkS32,p.anim_state.current->frames.length)-1)); // Pick a random frame.
+
+    p.scale  = rng_f32(0.75f, 1.0f);
+    p.thrust = rng_f32(0.0f, -200.0f);
+    p.weight = rng_f32(4200.0f,5000.0f);
+}
+
+DEF_PTICK(tar_drips)
+{
+    p.z_depth += p.thrust * dt;
+    p.thrust -= p.weight * dt;
+    p.rotation += p.velocity.x * 0.1f * dt;
+
+    // Once we hit the floor we vanish.
+    if((p.z_depth <= 0.0f) && (rng_s32() % 2 == 0))
+    {
+        p.active = NK_FALSE;
+        decal_spawn("tar_splat_small", p.position.x,p.position.y, 8.0f,10.0f);
+    }
+}
+
+//
 // sparkle
 //
 
@@ -88,6 +118,7 @@ GLOBAL void particle_init(void)
 
     // Register particles!
     REG_PARTICLE(tar_blobs_small);
+    REG_PARTICLE(tar_drips);
     REG_PARTICLE(sparkle);
 }
 

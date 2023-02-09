@@ -288,6 +288,17 @@ DEF_ETICK(dripper)
         bite_cooldown -= dt;
     }
 
+    // Randomly spawn drips.
+    if(rng_s32(0,100) < 10)
+    {
+        nkF32 x = e.position.x - (e.radius * 0.5f);
+        nkF32 y = e.position.y - (e.radius * 0.5f);
+        nkF32 w = (e.radius * 0.5f) * 2.0f;
+        nkF32 h = (e.radius * 0.5f) * 2.0f;
+
+        particle_spawn("tar_drips", x,y,e.z_depth,w,h, 1,3);
+    }
+
     // Randomly spawn splats under us.
     if(rng_s32(0,100) < 8)
     {
