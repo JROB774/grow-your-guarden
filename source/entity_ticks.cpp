@@ -15,19 +15,6 @@ INTERNAL Entity* spawn_bullet_at_target(EntityID id, nkF32 x, nkF32 y, const Ent
 // Plants
 //
 
-INTERNAL nkBool plant_is_fully_grown(Entity& e)
-{
-    if(e.type != EntityType_Plant) return NK_FALSE;
-
-    const EntityDesc& desc = ENTITY_TABLE[e.id];
-    nkS32 max_phases = 0;
-    while(desc.phase_times[max_phases] > 0.0f)
-        max_phases++;
-    max_phases++;
-
-    return (e.current_phase >= max_phases-1);
-}
-
 DEF_ETICK(daisy)
 {
     const nkF32 ATTACK_COOLDOWN = 2.75f;
@@ -117,7 +104,8 @@ DEF_ETICK(bramble)
 
 DEF_ETICK(hedge_wall)
 {
-    // @Incomplete: ...
+    // This doesn't actually do anything, fertilized logic, etc. actually weirdly happens inside entity_damage.
+    // It's quite hacky but it works better than attempting to handle the logic inside of here instead.
 }
 
 DEF_ETICK(bell_plant)

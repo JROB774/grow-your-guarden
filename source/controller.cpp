@@ -256,7 +256,7 @@ GLOBAL void controller_init(void)
     g_controller.hotbar[HotbarID_Bramble   ].spawn_id    = EntityID_Bramble;
 
     g_controller.hotbar[HotbarID_HedgeWall ].name        = "HEDGE WALL";
-    g_controller.hotbar[HotbarID_HedgeWall ].description = "A defensive wall-like plant that can take quite a beating.";
+    g_controller.hotbar[HotbarID_HedgeWall ].description = "A defensive wall-like plant.\nDoes not attack.\nGets stronger as it grows.";
     g_controller.hotbar[HotbarID_HedgeWall ].cost        = 200;
     g_controller.hotbar[HotbarID_HedgeWall ].unlock      = 0; // @Incomplete!
     g_controller.hotbar[HotbarID_HedgeWall ].spawn_id    = EntityID_HedgeWall;

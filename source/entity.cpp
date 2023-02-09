@@ -401,6 +401,19 @@ GLOBAL void entity_damage(nkU64 index, nkF32 damage)
     Entity* e = get_entity(index);
     if(!e || e->state == EntityState_Dead) return;
 
+    // Special case to handle functionality of the Hedge Wall plant.
+    if(e->id == EntityID_HedgeWall)
+    {
+        if(plant_is_fully_grown(*e))
+        {
+            damage *= 0.5f; // Damage is halved when fully grown (essentially doubling the plant's health).
+        }
+        if(e->fertilized_timer > 0.0f)
+        {
+            damage *= 0.5f; // Damage is halved when fertilized.
+        }
+    }
+
     e->health -= damage;
     e->damage_timer = 0.1f;
 
@@ -772,6 +785,19 @@ GLOBAL nkBool any_entities_of_type_alive(EntityType type)
             return NK_TRUE;
     }
     return NK_FALSE;
+}
+
+GLOBAL nkBool plant_is_fully_grown(Entity& e)
+{
+    if(e.type != EntityType_Plant) return NK_FALSE;
+
+    const EntityDesc& desc = ENTITY_TABLE[e.id];
+    nkS32 max_phases = 0;
+    while(desc.phase_times[max_phases] > 0.0f)
+        max_phases++;
+    max_phases++;
+
+    return (e.current_phase >= max_phases-1);
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

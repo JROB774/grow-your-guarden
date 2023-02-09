@@ -152,4 +152,6 @@ GLOBAL nkBool is_entity_dead(nkU64 index);
 
 GLOBAL nkBool any_entities_of_type_alive(EntityType type);
 
+GLOBAL nkBool plant_is_fully_grown(Entity& e);
+
 /*////////////////////////////////////////////////////////////////////////////*/
