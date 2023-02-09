@@ -154,10 +154,17 @@ INTERNAL nkBool can_fertilize_plant_at_position(nkF32 x, nkF32 y)
     nkU64 entity_index = check_entity_bounds(x,y,1,1, EntityType_Plant);
     if(entity_index == NK_U64_MAX) return NK_FALSE; // Nothing at the spot to fertilize.
 
+    // Special cases for some plants that can be fertilized when not fully grown.
     Entity* entity = get_entity(entity_index);
-    if(!plant_is_fully_grown(*entity)) return NK_FALSE;
+    if(!entity) return NK_FALSE;
 
-    return NK_TRUE;
+    switch(entity->id)
+    {
+        case EntityID_Bramble: return NK_TRUE;
+        case EntityID_HedgeWall: return NK_TRUE;
+    }
+
+    return plant_is_fully_grown(*entity);
 }
 
 INTERNAL nkBool place_plant(nkS32 tile_x, nkS32 tile_y)
