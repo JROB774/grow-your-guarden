@@ -2,6 +2,7 @@
 
 DEF_ETICK(daisy);
 DEF_ETICK(bramble);
+DEF_ETICK(hedge_wall);
 DEF_ETICK(bell_plant);
 DEF_ETICK(walker);
 DEF_ETICK(dripper);
@@ -14,6 +15,7 @@ enum: nkU32
 EntityID_None,
 EntityID_Daisy,
 EntityID_Bramble,
+EntityID_HedgeWall,
 EntityID_BellPlant,
 EntityID_Grunt,
 EntityID_Soldier,
@@ -113,6 +115,37 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Draw Offset        */ { 0.0f,0.0f },
 /* Bounds             */ { 1.0f,1.0f },
 /* Growth Phases      */ { 60,90,150,0,0,0,0,0 },
+/* Death Sounds       */ { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL },
+/* Death Effect       */ NULL,
+/* Death Particle     */ NULL,
+/* Death Particle Min */ 0,
+/* Death Particle Max */ 0,
+/* Death Decal        */ NULL,
+/* Death Decal Min    */ 0,
+/* Death Decal Max    */ 0,
+/* Coin Drop Chance   */ 0,
+/* Coin Drop Min      */ 0,
+/* Coin Drop Max      */ 0,
+},
+
+// EntityID_HedgeWall
+{
+/* Texture            */ "entity/hedge_wall.png",
+/* Animation          */ "entity/hedge_wall.anm",
+/* Type               */ EntityType_Plant,
+/* Default State      */ EntityState_Idle,
+/* Flags              */ EntityFlag_None,
+/* Tick               */ ETICK(hedge_wall),
+/* Health             */ 40.0f,
+/* Damage             */ 0.0f,
+/* Speed              */ 0.0f,
+/* Range              */ 0.0f,
+/* Radius             */ 0.4f,
+/* Z-Depth            */ 0.0f,
+/* Collision Mask     */ EntityType_None,
+/* Draw Offset        */ { 0.0f,-0.5f },
+/* Bounds             */ { 1.0f,1.0f },
+/* Growth Phases      */ { 4,0,0,0,0,0,0,0 },
 /* Death Sounds       */ { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL },
 /* Death Effect       */ NULL,
 /* Death Particle     */ NULL,

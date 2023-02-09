@@ -115,6 +115,11 @@ DEF_ETICK(bramble)
     }
 }
 
+DEF_ETICK(hedge_wall)
+{
+    // @Incomplete: ...
+}
+
 DEF_ETICK(bell_plant)
 {
     const nkF32 ATTACK_COOLDOWN = 2.0f;
