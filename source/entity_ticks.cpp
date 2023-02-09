@@ -126,8 +126,6 @@ DEF_ETICK(bell_plant)
 
     nkF32& attack_cooldown = e.timer0;
 
-    // @Incomplete: Fertilized...
-
     // If we are fully grown then try and shoot any enemies that are close enough (pick the closest one).
     if(plant_is_fully_grown(e) && attack_cooldown <= 0.0f)
     {
@@ -157,11 +155,23 @@ DEF_ETICK(bell_plant)
         if(target)
         {
             change_entity_state(e, EntityState_Attack);
-            attack_cooldown = ATTACK_COOLDOWN;
             Entity* b = spawn_bullet_at_target(EntityID_BellMissile, e.position.x,e.position.y, *target);
             if(b)
             {
                 b->target = target_index;
+
+                // Bullets are faster when fertilized.
+                if(e.fertilized_timer > 0.0f)
+                {
+                    b->speed *= 2.0f;
+                }
+            }
+
+            attack_cooldown = ATTACK_COOLDOWN;
+            // We shoot faster if fertilized.
+            if(e.fertilized_timer > 0.0f)
+            {
+                attack_cooldown *= 0.33f;
             }
         }
     }
