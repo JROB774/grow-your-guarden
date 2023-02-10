@@ -466,7 +466,7 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Z-Depth            */ 0.5f,
 /* Collision Mask     */ EntityType_Monster,
 /* Draw Offset        */ { 0.0f,0.0f },
-/* Bounds             */ { 0.5f,0.5f },
+/* Bounds             */ { 1.0f,1.0f },
 /* Growth Phases      */ { 0,0,0,0,0,0,0,0 },
 /* Death Sounds       */ { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL },
 /* Death Effect       */ NULL,

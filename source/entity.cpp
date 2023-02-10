@@ -337,8 +337,8 @@ GLOBAL void entity_draw(void)
         nkF32 ex = e->position.x + e->draw_offset.x;
         nkF32 ey = e->position.y + e->draw_offset.y;
 
-        nkF32 sx = e->flip;
-        nkF32 sy = 1.0f;
+        nkF32 sx = e->flip_x;
+        nkF32 sy = e->flip_y;
 
         nkVec4 color = (e->damage_timer > 0.0f) ? NK_V4_RED : e->color;
 
@@ -346,8 +346,8 @@ GLOBAL void entity_draw(void)
         {
             nkF32 ease = nk_max(0.75f, ease_out_elastic(e->bounce_timer));
 
-            sx = ease * e->flip;
-            sy = ease;
+            sx = ease * e->flip_x;
+            sy = ease * e->flip_y;
         }
 
         imm_texture_ex(texture, ex,ey - e->z_depth, sx,sy, e->angle, NULL, &clip, color);
@@ -368,7 +368,7 @@ GLOBAL void entity_draw(void)
             nkF32 mx = ex - (1280 * 0.5f) +  652.0f;
             nkF32 my = ey - (1280 * 0.5f) + 1006.0f;
 
-            imm_texture_ex(texture, mx,my - e->z_depth, e->flip, 1.0f, 0.0f, NULL, &mouth_clip, color);
+            imm_texture_ex(texture, mx,my - e->z_depth, e->flip_x,e->flip_y, 0.0f, NULL, &mouth_clip, color);
         }
     }
 
@@ -563,7 +563,8 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y, nkF32 z)
     entity.radius           = desc.radius  * TILE_WIDTH;
     entity.thrust           = 0.0f;
     entity.z_depth          = desc.z_depth * TILE_HEIGHT;
-    entity.flip             = 1.0f;
+    entity.flip_x           = 1.0f;
+    entity.flip_y           = 1.0f;
     entity.angle            = 0.0f;
     entity.color            = NK_V4_WHITE;
     entity.anim_state       = create_animation_state(desc.animation);
@@ -593,7 +594,7 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y, nkF32 z)
     // Plants can be flipped for more visual variance.
     if(entity.type == EntityType_Plant && rng_s32(0,100) < 50)
     {
-        entity.flip = -1.0f;
+        entity.flip_x = -1.0f;
     }
 
     // If there are free slots available then use them, otherwise append on the end (potentially grow memory).

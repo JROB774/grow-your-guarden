@@ -274,7 +274,7 @@ DEF_ETICK(walker)
                 Entity* target = get_entity(e.target);
                 nkVec2 dir = nk_normalize(target->position - e.position);
                 e.velocity = dir * NK_CAST(nkF32, e.speed);
-                e.flip = (dir.x < 0.0f) ? -1.0f : 1.0f; // Face the walking direction.
+                e.flip_x = (dir.x < 0.0f) ? -1.0f : 1.0f; // Face the walking direction.
             }
         }
 
@@ -373,7 +373,7 @@ DEF_ETICK(dripper)
             Entity* target = get_entity(e.target);
             nkVec2 dir = nk_normalize(target->position - e.position);
             e.velocity = dir * NK_CAST(nkF32, e.speed);
-            e.flip = (dir.x < 0.0f) ? -1.0f : 1.0f; // Face the floating direction.
+            e.flip_x = (dir.x < 0.0f) ? -1.0f : 1.0f; // Face the floating direction.
         }
     }
 
@@ -441,7 +441,7 @@ DEF_ETICK(goliath)
             Entity* target = get_entity(e.target);
             nkVec2 dir = nk_normalize(target->position - e.position);
             e.velocity = dir * NK_CAST(nkF32, e.speed);
-            e.flip = (dir.x < 0.0f) ? -1.0f : 1.0f; // Face the walking direction.
+            e.flip_x = (dir.x < 0.0f) ? -1.0f : 1.0f; // Face the walking direction.
         }
     }
 
@@ -501,8 +501,6 @@ DEF_ETICK(bell_missile)
 
 DEF_ETICK(rocket)
 {
-    // @Incomplete: Spawn smoke particles behind us...
-
     // Face our direction.
     nkVec2 dir = nk_normalize(e.velocity);
     e.angle = atan2f(dir.y, dir.x);
@@ -542,6 +540,13 @@ DEF_ETICK(rocket)
         y += (backwards.y * e.radius);
 
         particle_spawn("smoke_small", x,y, e.z_depth);
+    }
+
+    // If we're moving to the left flip our sprite vertically.
+    if(e.velocity.x < 0.0f)
+    {
+        e.flip_y = -1.0f;
+        e.angle = -e.angle;
     }
 }
 
