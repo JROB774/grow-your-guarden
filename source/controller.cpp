@@ -24,6 +24,7 @@ NK_ENUM(HotbarID, nkU32)
     HotbarID_HedgeWall,
     HotbarID_BellPlant,
     HotbarID_Fertilizer,
+    HotbarID_InstaGrow,
     HotbarID_Shovel,
     HotbarID_Bell,
     HotbarID_TOTAL
@@ -154,10 +155,12 @@ INTERNAL nkBool can_fertilize_plant_at_position(nkF32 x, nkF32 y)
     nkU64 entity_index = check_entity_bounds(x,y,1,1, EntityType_Plant);
     if(entity_index == NK_U64_MAX) return NK_FALSE; // Nothing at the spot to fertilize.
 
-    // Special cases for some plants that can be fertilized when not fully grown.
     Entity* entity = get_entity(entity_index);
     if(!entity) return NK_FALSE;
 
+    if(entity->fertilized_timer > 0.0f) return NK_FALSE;
+
+    // Special cases for some plants that can be fertilized when not fully grown.
     switch(entity->id)
     {
         case EntityID_Bramble: return NK_TRUE;
@@ -165,6 +168,19 @@ INTERNAL nkBool can_fertilize_plant_at_position(nkF32 x, nkF32 y)
     }
 
     return plant_is_fully_grown(*entity);
+}
+
+INTERNAL nkBool can_insta_grow_plant_at_position(nkF32 x, nkF32 y)
+{
+    if(g_controller.selected != HotbarID_InstaGrow) return NK_FALSE;
+
+    nkU64 entity_index = check_entity_bounds(x,y,1,1, EntityType_Plant);
+    if(entity_index == NK_U64_MAX) return NK_FALSE; // Nothing at the spot to fertilize.
+
+    Entity* entity = get_entity(entity_index);
+    if(!entity) return NK_FALSE;
+
+    return !plant_is_fully_grown(*entity);
 }
 
 INTERNAL nkBool place_plant(nkS32 tile_x, nkS32 tile_y)
@@ -228,6 +244,21 @@ INTERNAL nkBool fertilize_plant(nkF32 x, nkF32 y)
     return NK_TRUE;
 }
 
+INTERNAL nkBool insta_grow_plant(nkF32 x, nkF32 y)
+{
+    if(!can_insta_grow_plant_at_position(x,y)) return NK_FALSE;
+
+    nkU64 entity_index = check_entity_bounds(x,y,1,1, EntityType_Plant);
+    Entity* entity = get_entity(entity_index);
+
+    entity->phase_timer = 9999.0f;
+    entity->bounce_timer = 0.6f;
+
+    play_sound(asset_manager_load<Sound>("instagrown.wav"));
+
+    return NK_TRUE;
+}
+
 GLOBAL void controller_init(void)
 {
     // Pre-load a bunch of assets.
@@ -238,6 +269,7 @@ GLOBAL void controller_init(void)
     g_controller.shovel_sfx[4] = asset_manager_load<Sound>("shovel_004.wav");
 
     asset_manager_load<Sound>("fertilized.wav");
+    asset_manager_load<Sound>("instagrown.wav");
     asset_manager_load<Sound>("bell.wav");
 
     asset_manager_load<Texture>("hud.png");
@@ -272,6 +304,12 @@ GLOBAL void controller_init(void)
     g_controller.hotbar[HotbarID_Fertilizer].cost        = 450;
     g_controller.hotbar[HotbarID_Fertilizer].unlock      = 0; // @Incomplete!
     g_controller.hotbar[HotbarID_Fertilizer].spawn_id    = EntityID_None;
+
+    g_controller.hotbar[HotbarID_InstaGrow ].name        = "INSTA-GROW";
+    g_controller.hotbar[HotbarID_InstaGrow ].description = "Instantly grow a plant to its maximum growth stage.";
+    g_controller.hotbar[HotbarID_InstaGrow ].cost        = 800;
+    g_controller.hotbar[HotbarID_InstaGrow ].unlock      = 0; // @Incomplete!
+    g_controller.hotbar[HotbarID_InstaGrow ].spawn_id    = EntityID_None;
 
     g_controller.hotbar[HotbarID_Shovel    ].name        = "Shovel";
     g_controller.hotbar[HotbarID_Shovel    ].description = "Dig up a plant and get some of your money back.";
@@ -400,6 +438,10 @@ GLOBAL void controller_tick(nkF32 dt)
                 {
                     success = fertilize_plant(pos.x, pos.y);
                 }
+                else if(g_controller.selected == HotbarID_InstaGrow)
+                {
+                    success = insta_grow_plant(pos.x, pos.y);
+                }
                 else if(g_controller.selected == HotbarID_Shovel)
                 {
                     success = remove_plant(pos.x, pos.y);
@@ -442,7 +484,7 @@ GLOBAL void controller_tick(nkF32 dt)
     // Update the cursor graphic.
     if(g_controller.selected != NO_SELECTION)
     {
-        if(g_controller.selected == HotbarID_Fertilizer || g_controller.selected == HotbarID_Shovel || g_controller.selected == HotbarID_Bell)
+        if(g_controller.selected == HotbarID_Fertilizer || g_controller.selected == HotbarID_InstaGrow || g_controller.selected == HotbarID_Shovel || g_controller.selected == HotbarID_Bell)
         {
             ImmClip clip = HUD_CLIP_ICON;
             clip.x += NK_CAST(nkF32, g_controller.selected) * HUD_ICON_WIDTH;
@@ -520,7 +562,7 @@ GLOBAL void controller_draw(void)
 
         // Make sure we can place at the spot.
         nkVec4 color = NK_V4_RED;
-        if(can_place_plant_at_position(tile.x, tile.y) || can_remove_plant_at_position(pos.x, pos.y) || can_fertilize_plant_at_position(pos.x, pos.y))
+        if(can_place_plant_at_position(tile.x, tile.y) || can_remove_plant_at_position(pos.x, pos.y) || can_fertilize_plant_at_position(pos.x, pos.y) || can_insta_grow_plant_at_position(pos.x, pos.y))
         {
             color = NK_V4_YELLOW;
         }

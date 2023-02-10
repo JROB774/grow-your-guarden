@@ -139,13 +139,19 @@ GLOBAL void entity_tick(nkF32 dt)
                         }
                     }
 
+                    // Update the bouncing effect.
+                    const nkF32 BOUNCE_SPEED = 0.5f;
+
+                    e.bounce_timer += (dt * BOUNCE_SPEED);
+                    if(e.bounce_timer > 1.0f)
+                    {
+                        e.bounce_timer = 1.0f;
+                    }
+
                     // If a plant is fertilized then do some extra effects.
                     if(e.fertilized_timer > 0.0f)
                     {
-                        const nkF32 BOUNCE_SPEED = 0.5f;
                         const nkF32 PULSE_SPEED = 5.0f;
-
-                        e.bounce_timer += (dt * BOUNCE_SPEED);
 
                         e.color.r = nk_sin_range(1.0f, 2.0f, e.fertilized_timer * PULSE_SPEED);
                         e.color.g = nk_sin_range(1.0f, 2.0f, e.fertilized_timer * PULSE_SPEED);
@@ -333,7 +339,7 @@ GLOBAL void entity_draw(void)
 
         nkVec4 color = (e->damage_timer > 0.0f) ? NK_V4_RED : e->color;
 
-        if(e->fertilized_timer > 0.0f && (e->bounce_timer < 1.0f))
+        if(e->bounce_timer < 1.0f)
         {
             nkF32 ease = nk_max(0.75f, ease_out_elastic(e->bounce_timer));
 
@@ -555,7 +561,7 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y, nkF32 z)
     entity.current_phase    = 0;
     entity.phase_timer      = 0.0f;
     entity.fertilized_timer = 0.0f;
-    entity.bounce_timer     = 0.0f;
+    entity.bounce_timer     = 1.0f;
     entity.timer0           = 0.0f;
     entity.timer1           = 0.0f;
     entity.timer2           = 0.0f;
