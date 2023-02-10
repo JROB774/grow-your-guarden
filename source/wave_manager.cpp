@@ -61,7 +61,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Prep Timer   */ 15.0f,
 /* Wave Bonus   */ 500,
 {
-/* Phase 1      */ { 0.0f, 2, SpawnType_Grunt, 8,10 },
+/* Phase 1      */ { 0.0f, 2, SpawnType_Goliath, 1,1 },
 /* Phase 2      */ NO_PHASE,
 /* Phase 3      */ NO_PHASE,
 /* Phase 4      */ NO_PHASE,
@@ -374,7 +374,6 @@ INTERNAL void tick_wave_fight_state(nkF32 dt)
             // Spawn monsters.
             case SpawnerState_InProgress:
             {
-                // @Incomplete: This could be improved to be a bit nicer for better spawn distribution...
                 if(rng_s32(0,100) < spawner.spawn_rate)
                 {
                     nkS32 spawn_index = 0;
