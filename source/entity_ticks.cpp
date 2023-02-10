@@ -619,9 +619,27 @@ DEF_ETICK(coin)
 
 DEF_ETICK(explosion)
 {
+    if(e.state == EntityState_Dead) return;
+
     play_sound(asset_manager_load<Sound>("explosion.wav"));
 
-    // @Incomplete: Apply blast damage to monsters...
+    // Loop through all monsters, determine if they are in range to receive blast damage.
+    // Then calculate how much blast damage they should receive based on their distance.
+    nkU64 sub_index = 0;
+    for(auto& m: g_entity_manager.entities)
+    {
+        if(m.active && m.type == EntityType_Monster)
+        {
+            nkF32 distance = distance_between_points(e.position, m.position);
+            if(distance <= e.radius)
+            {
+                nkF32 blast_damage = e.damage * (1.0f - (distance / e.radius));
+                entity_damage(sub_index, blast_damage);
+                printf("BLAST DAMAGE: %f\n", blast_damage);
+            }
+        }
+        ++sub_index;
+    }
 
     entity_kill(index); // When we are done we die instantly so this only happens on one tick.
 }
