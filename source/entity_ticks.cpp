@@ -536,8 +536,8 @@ DEF_ETICK(rocket)
 
         nkVec2 backwards = nk_rotate(nk_normalize(e.velocity), NK_PI_F32);
 
-        x += (backwards.x * e.radius);
-        y += (backwards.y * e.radius);
+        x += (backwards.x * (e.radius * 3.0f));
+        y += (backwards.y * (e.radius * 3.0f));
 
         particle_spawn("smoke_small", x,y, e.z_depth);
     }
