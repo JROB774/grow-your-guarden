@@ -503,6 +503,10 @@ DEF_ETICK(rocket)
 {
     // @Incomplete: Spawn smoke particles behind us...
 
+    // Face our direction.
+    nkVec2 dir = nk_normalize(e.velocity);
+    e.angle = atan2f(dir.y, dir.x);
+
     // Collide with enemies like normal. On collision we also spawn an explosion.
     // This explosion will calculate and handle splash damage to surrounding enemies.
     nkU64 hit_index = check_entity_collision(e, EntityType_Monster);
@@ -524,6 +528,20 @@ DEF_ETICK(rocket)
     if(distance >= e.range)
     {
         entity_kill(index);
+    }
+
+    // Spawn smoke puffs behind us as we go.
+    if(rng_s32(0, 100) < 50)
+    {
+        nkF32 x = e.position.x + rng_f32(-(e.radius * 0.5f), (e.radius * 0.5f));
+        nkF32 y = e.position.y + rng_f32(-(e.radius * 0.5f), (e.radius * 0.5f));
+
+        nkVec2 backwards = nk_rotate(nk_normalize(e.velocity), NK_PI_F32);
+
+        x += (backwards.x * e.radius);
+        y += (backwards.y * e.radius);
+
+        particle_spawn("smoke_small", x,y, e.z_depth);
     }
 }
 

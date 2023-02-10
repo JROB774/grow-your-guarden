@@ -460,7 +460,7 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Tick               */ ETICK(rocket),
 /* Health             */ 1.0f,
 /* Damage             */ 40.0f,
-/* Speed              */ 7.5f,
+/* Speed              */ 9.0f,
 /* Range              */ 25.0f,
 /* Radius             */ 0.3f,
 /* Z-Depth            */ 0.5f,
