@@ -331,6 +331,11 @@ GLOBAL void controller_tick(nkF32 dt)
 
     if(is_game_paused()) return;
 
+    #if defined(BUILD_DEBUG)
+    if(is_key_pressed(KeyCode_F2))
+        add_money(5000);
+    #endif // BUILD_DEBUG
+
     nkVec2 cursor_pos = get_window_mouse_pos();
 
     // Pan the camera around the world (via mouse or keyboard).
@@ -507,8 +512,6 @@ GLOBAL void controller_tick(nkF32 dt)
 
     // Interpolate the money counter toward the actual money. We only do this when money goes up as it feels better
     // to have it tick upwards and be set immediately when going down from purchasing stuff.
-    const nkS32 MONEY_INCREMENT = 10;
-
     if(g_controller.money_counter > g_controller.money)
     {
         g_controller.money_counter = g_controller.money;
@@ -516,7 +519,9 @@ GLOBAL void controller_tick(nkF32 dt)
     }
     if(g_controller.money_counter < g_controller.money)
     {
-        g_controller.money_counter += MONEY_INCREMENT;
+        nkS32 money_increment = nk_max((g_controller.money - g_controller.money_counter) / 20, 15);
+
+        g_controller.money_counter += money_increment;
         g_controller.money_color = NK_V4_GREEN;
 
         if(g_controller.money_counter > g_controller.money)
