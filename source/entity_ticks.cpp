@@ -367,6 +367,63 @@ DEF_ETICK(dripper)
     }
 }
 
+DEF_ETICK(goliath)
+{
+    nkF32 BITE_COOLDOWN = 2.0f;
+
+    nkF32& bite_cooldown = e.timer0;
+
+    // Reset velocity.
+    e.velocity = NK_V2_ZERO;
+
+    // If we collide with any plants we just instantly kill them, don't even bother biting.
+    nkU64 hit_index = check_entity_collision(e, EntityType_Plant);
+    if(hit_index != NK_U64_MAX)
+    {
+        Entity* target = get_entity(hit_index);
+        if(target)
+        {
+            play_sound(asset_manager_load<Sound>("squish.wav"));
+            entity_kill(hit_index);
+        }
+    }
+
+    // If we collide with the tree then stop to eat it, otherwise continue walking to the tree.
+    nkBool eating = eating = do_monster_bite(e, bite_cooldown, BITE_COOLDOWN, EntityType_Base);
+    if(!eating)
+    {
+        // Float towards the tree if we found it.
+        if(e.target == NO_TARGET)
+        {
+            e.target = get_first_entity_index_with_id(EntityID_HomeTree);
+        }
+        if(e.target != NO_TARGET)
+        {
+            Entity* target = get_entity(e.target);
+            nkVec2 dir = nk_normalize(target->position - e.position);
+            e.velocity = dir * NK_CAST(nkF32, e.speed);
+            e.flip = (dir.x < 0.0f) ? -1.0f : 1.0f; // Face the walking direction.
+        }
+    }
+
+    // Cooldown our attack.
+    if(bite_cooldown > 0.0f)
+    {
+        bite_cooldown -= dt;
+    }
+
+    // Randomly spawn splats under us.
+    if(rng_s32(0,100) < 10)
+    {
+        nkF32 x = e.position.x - (e.radius * 0.9f);
+        nkF32 y = e.position.y - (e.radius * 0.9f);
+        nkF32 w = (e.radius * 0.9f) * 2.0f;
+        nkF32 h = (e.radius * 0.9f) * 2.0f;
+
+        decal_spawn("tar_splat_large", x,y,w,h, 1,5, 14.0f,20.0f);
+    }
+}
+
 /*////////////////////////////////////////////////////////////////////////////*/
 
 //

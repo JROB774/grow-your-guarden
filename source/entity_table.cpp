@@ -6,6 +6,7 @@ DEF_ETICK(hedge_wall);
 DEF_ETICK(bell_plant);
 DEF_ETICK(walker);
 DEF_ETICK(dripper);
+DEF_ETICK(goliath);
 DEF_ETICK(bell_missile);
 DEF_ETICK(coin);
 
@@ -88,7 +89,7 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Collision Mask     */ EntityType_None,
 /* Draw Offset        */ { 0.0f,-0.4f },
 /* Bounds             */ { 1.0f,1.0f },
-/* Growth Phases      */ { 5,10,0,0,0,0,0,0 },
+/* Growth Phases      */ { 10,15,0,0,0,0,0,0 },
 /* Death Sounds       */ { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL },
 /* Death Effect       */ NULL,
 /* Death Particle     */ NULL,
@@ -181,7 +182,7 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Collision Mask     */ EntityType_None,
 /* Draw Offset        */ { 0.0f,-0.3f },
 /* Bounds             */ { 1.0f,1.0f },
-/* Growth Phases      */ { 5,10,0,0,0,0,0,0 },
+/* Growth Phases      */ { 10,15,0,0,0,0,0,0 },
 /* Death Sounds       */ { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL },
 /* Death Effect       */ NULL,
 /* Death Particle     */ NULL,
@@ -326,9 +327,9 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Type               */ EntityType_Monster,
 /* Default State      */ EntityState_Move,
 /* Flags              */ EntityFlag_None,
-/* Tick               */ ETICK(walker),
+/* Tick               */ ETICK(goliath),
 /* Health             */ 500.0f,
-/* Damage             */ 10.0f,
+/* Damage             */ 5.0f,
 /* Speed              */ 0.125f,
 /* Range              */ 0.0f,
 /* Radius             */ 1.1f,
