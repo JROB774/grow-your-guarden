@@ -135,7 +135,7 @@ INTERNAL void pause_tick(nkF32 dt)
     nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
     nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
 
-    nkF32 bx = NK_CAST(nkF32, get_window_width()) - (btn_width * 0.5f);
+    nkF32 bx = NK_CAST(nkF32, get_window_width()) - (btn_width * 0.6f);
     nkF32 by = (NK_CAST(nkF32, get_window_height()) * 0.85f) - (btn_height * 0.6f);
 
     if(tick_menu_toggle_button(HUD_CLIP_MUSIC,      bx-(btn_width*0.0f),by, is_music_on  ())) set_music_volume((is_music_on()) ? 0.0f : 0.7f);

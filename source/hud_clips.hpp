@@ -20,6 +20,7 @@ GLOBAL constexpr ImmClip HUD_CLIP_SOUND      = { 1280.0f,   0.0f, 128.0f, 128.0f
 GLOBAL constexpr ImmClip HUD_CLIP_BACK       = { 1408.0f,   0.0f, 128.0f, 128.0f };
 GLOBAL constexpr ImmClip HUD_CLIP_PAGE_L     = { 1536.0f,   0.0f, 128.0f, 128.0f };
 GLOBAL constexpr ImmClip HUD_CLIP_PAGE_R     = { 1664.0f,   0.0f, 128.0f, 128.0f };
+GLOBAL constexpr ImmClip HUD_CLIP_PAUSE      = { 1792.0f,   0.0f, 128.0f, 128.0f };
 GLOBAL constexpr ImmClip HUD_CLIP_SKULL      = {    0.0f, 256.0f, 128.0f, 128.0f };
 GLOBAL constexpr ImmClip HUD_CLIP_FLAG       = {  128.0f, 256.0f, 128.0f, 128.0f };
 GLOBAL constexpr ImmClip HUD_CLIP_HEART      = {  256.0f, 256.0f, 128.0f, 128.0f };

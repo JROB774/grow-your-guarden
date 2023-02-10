@@ -345,6 +345,26 @@ GLOBAL void controller_tick(nkF32 dt)
 
     nkVec2 cursor_pos = get_window_mouse_pos();
 
+    // Images need to be scaled down because they are actually at the max scale initially and scaled down for lower scales.
+    // Other elements like text and general positioning need to still be scaled up, so we have these two variables to do it.
+    nkF32 img_scale = get_hud_scale() / 4.0f;
+    nkF32 hud_scale = get_hud_scale();
+
+    NK_UNUSED(hud_scale);
+
+    // Handle the pause button in the top-right corner.
+    nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
+    nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
+
+    nkF32 bx = NK_CAST(nkF32, get_window_width()) - (btn_width * 0.6f);
+    nkF32 by = (btn_height * 0.6f);
+
+    if(tick_menu_image_button(HUD_CLIP_PAUSE, bx, by))
+    {
+        pause_game();
+        return; // Return early so we don't place a plant etc. if we have something selected.
+    }
+
     // Pan the camera around the world (via mouse or keyboard).
     g_controller.panning = NK_FALSE;
 
@@ -392,13 +412,6 @@ GLOBAL void controller_tick(nkF32 dt)
     }
 
     g_controller.camera_current_zoom = nk_lerp(g_controller.camera_current_zoom, g_controller.camera_target_zoom, CAMERA_ZOOM_SPEED * dt);
-
-    // Images need to be scaled down because they are actually at the max scale initially and scaled down for lower scales.
-    // Other elements like text and general positioning need to still be scaled up, so we have these two variables to do it.
-    nkF32 img_scale = get_hud_scale() / 4.0f;
-    nkF32 hud_scale = get_hud_scale();
-
-    NK_UNUSED(hud_scale);
 
     // Check hovering and handle interaction with the hotbar slots.
     nkF32 x = ((HUD_CLIP_SLOT.w * 0.80f) * 0.5f) * img_scale;
@@ -562,6 +575,11 @@ GLOBAL void controller_draw(void)
 
     nkVec2 cursor_pos = get_window_mouse_pos();
 
+    // Images need to be scaled down because they are actually at the max scale initially and scaled down for lower scales.
+    // Other elements like text and general positioning need to still be scaled up, so we have these two variables to do it.
+    nkF32 img_scale = get_hud_scale() / 4.0f;
+    nkF32 hud_scale = get_hud_scale();
+
     // Draw the highlighted tile.
     if(g_controller.hovered == NO_SELECTION && g_controller.selected != NO_SELECTION && g_controller.selected != HotbarID_Bell)
     {
@@ -588,10 +606,14 @@ GLOBAL void controller_draw(void)
     // Unset the camera so that we render in screen-space for the HUD.
     unset_controller_camera();
 
-    // Images need to be scaled down because they are actually at the max scale initially and scaled down for lower scales.
-    // Other elements like text and general positioning need to still be scaled up, so we have these two variables to do it.
-    nkF32 img_scale = get_hud_scale() / 4.0f;
-    nkF32 hud_scale = get_hud_scale();
+     // Draw the pause button in the top-right corner.
+    nkF32 btn_width = HUD_ICON_WIDTH * img_scale;
+    nkF32 btn_height = HUD_ICON_HEIGHT * img_scale;
+
+    nkF32 bx = NK_CAST(nkF32, get_window_width()) - (btn_width * 0.6f);
+    nkF32 by = (btn_height * 0.6f);
+
+    draw_menu_image_button(HUD_CLIP_PAUSE, bx,by);
 
     // Draw the hotbar.
     nkF32 x = ((HUD_CLIP_SLOT.w * 0.80f) * 0.5f) * img_scale;
