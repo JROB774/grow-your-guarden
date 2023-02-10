@@ -24,6 +24,7 @@ NK_ENUM(SpawnType, nkU32)
 struct PhaseDesc
 {
     nkF32     start_time;  // How much time should elapse from the start of the previous phase before this phase should start. (If the previous phase completes early the next phase starts immediately).
+    nkS32     spawn_rate;  // How fast to spawn the phase's monsters. The higher the number the faster they spawn.
     SpawnType spawn_types; // What types of enemies should spawn during this phase.
     nkU32     min_spawns;  // The minimum bound for the total number of monsters to spawn.
     nkU32     max_spawns;  // The maximum bound for the total number of monsters to spawn.
@@ -59,7 +60,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Prep Timer   */ 15.0f,
 /* Wave Bonus   */ 500,
 {
-/* Phase 1      */ { 0.0f, SpawnType_Grunt, 8,10 },
+/* Phase 1      */ { 0.0f, 2, SpawnType_Grunt, 8,10 },
 /* Phase 2      */ NO_PHASE,
 /* Phase 3      */ NO_PHASE,
 /* Phase 4      */ NO_PHASE,
@@ -79,7 +80,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Prep Timer   */ 30.0f,
 /* Wave Bonus   */ 500,
 {
-/* Phase 1      */ { 0.0f, SpawnType_Grunt, 15,17 },
+/* Phase 1      */ { 0.0f, 2, SpawnType_Grunt, 15,17 },
 /* Phase 2      */ NO_PHASE,
 /* Phase 3      */ NO_PHASE,
 /* Phase 4      */ NO_PHASE,
@@ -121,6 +122,7 @@ struct Spawner
 {
     SpawnerState      state;
     nkF32             timer;
+    nkS32             spawn_rate;
     nkU32             spawns_left;
     nkArray<EntityID> spawns;
 };
@@ -236,6 +238,7 @@ INTERNAL void setup_next_wave(void)
 
         wm.spawners[i].state       = SpawnerState_Waiting;
         wm.spawners[i].timer       = phase.start_time;
+        wm.spawners[i].spawn_rate  = phase.spawn_rate;
         wm.spawners[i].spawns_left = rng_s32(min_spawns, max_spawns);
 
         // Build an array for handling the probabilities of spawning different entity types.
@@ -369,7 +372,7 @@ INTERNAL void tick_wave_fight_state(nkF32 dt)
             case SpawnerState_InProgress:
             {
                 // @Incomplete: This could be improved to be a bit nicer for better spawn distribution...
-                if(rng_s32(0,100) < 2)
+                if(rng_s32(0,100) < spawner.spawn_rate)
                 {
                     nkS32 spawn_index = 0;
                     while(NK_TRUE)
