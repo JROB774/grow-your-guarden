@@ -466,7 +466,18 @@ GLOBAL void entity_kill(nkU64 index)
             nkF32 x = e->position.x + e->draw_offset.x;
             nkF32 y = e->position.y + e->draw_offset.y;
 
-            particle_spawn(desc.death_effect, x,y, e->z_depth);
+            // Making a special case for the goliath to spawn more of them...
+            if(e->id == EntityID_Goliath)
+            {
+                nkF32 w = e->radius * 2.0f;
+                nkF32 h = e->radius * 2.0f;
+
+                particle_spawn(desc.death_effect, x,y,e->z_depth, w,h, 20,30);
+            }
+            else
+            {
+                particle_spawn(desc.death_effect, x,y, e->z_depth);
+            }
         }
 
         if(desc.death_particle)

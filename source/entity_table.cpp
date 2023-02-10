@@ -13,17 +13,22 @@ enum: nkU32
 {
 
 EntityID_None,
+// Plants
 EntityID_Daisy,
 EntityID_Bramble,
 EntityID_HedgeWall,
 EntityID_BellPlant,
+// Monsters
 EntityID_Grunt,
 EntityID_Soldier,
 EntityID_Barbarian,
 EntityID_Dripper,
+EntityID_Goliath,
+// Bullets
 EntityID_Pollen,
 EntityID_BellMissile,
 EntityID_Tarball,
+// Other
 EntityID_HomeTree,
 EntityID_CoinCopper,
 EntityID_CoinSilver,
@@ -312,6 +317,37 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Coin Drop Chance   */ 10,
 /* Coin Drop Min      */ 3,
 /* Coin Drop Max      */ 7,
+},
+
+// EntityID_Goliath
+{
+/* Texture            */ "entity/goliath.png",
+/* Animation          */ "entity/goliath.anm",
+/* Type               */ EntityType_Monster,
+/* Default State      */ EntityState_Move,
+/* Flags              */ EntityFlag_None,
+/* Tick               */ ETICK(walker),
+/* Health             */ 500.0f,
+/* Damage             */ 10.0f,
+/* Speed              */ 0.125f,
+/* Range              */ 0.0f,
+/* Radius             */ 1.1f,
+/* Z-Depth            */ 0.0f,
+/* Collision Mask     */ EntityType_None,
+/* Draw Offset        */ { 0.0f,-0.25f },
+/* Bounds             */ { 4.0f,3.0f },
+/* Growth Phases      */ { 0,0,0,0,0,0,0,0 },
+/* Death Sounds       */ { "splat_wet_000.wav","splat_wet_001.wav","splat_wet_002.wav",NULL,NULL,NULL,NULL,NULL },
+/* Death Effect       */ "tar_explosion",
+/* Death Particle     */ "tar_blobs_small",
+/* Death Particle Min */ 150,
+/* Death Particle Max */ 200,
+/* Death Decal        */ "tar_splat_large",
+/* Death Decal Min    */ 80,
+/* Death Decal Max    */ 100,
+/* Coin Drop Chance   */ 25,
+/* Coin Drop Min      */ 12,
+/* Coin Drop Max      */ 24,
 },
 
 // EntityID_Pollen
