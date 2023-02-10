@@ -591,8 +591,8 @@ GLOBAL nkU64 entity_spawn(EntityID id, nkF32 x, nkF32 y, nkF32 z)
         entity.z_depth = z;
     }
 
-    // Plants can be flipped for more visual variance.
-    if(entity.type == EntityType_Plant && rng_s32(0,100) < 50)
+    // Plants can be flipped for more visual variance. (Except for Rocket Plants because they look better unflipped).
+    if((entity.type == EntityType_Plant && rng_s32(0,100) < 50) && (entity.id != EntityID_RocketPlant))
     {
         entity.flip_x = -1.0f;
     }
