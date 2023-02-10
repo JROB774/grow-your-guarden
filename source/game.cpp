@@ -36,6 +36,62 @@ struct GameState
 
 INTERNAL GameState g_game;
 
+INTERNAL fRect calculate_pause_button_bounds(TrueTypeFont font, const nkChar* text, nkF32& prev_y, nkF32 curr_y)
+{
+    // We multiply by a percentage because it gives just a bit of a gap between the buttons which is nice.
+    nkF32 ww = NK_CAST(nkF32, get_window_width());
+    nkF32 wh = NK_CAST(nkF32, get_window_height());
+
+    if(curr_y <= -1.0f) curr_y = ((wh * prev_y) + (get_truetype_line_height(font) * 1.3f)) / wh; // Increment from the previous y-position.
+
+    fRect bounds;
+
+    bounds.w = get_truetype_text_width(font, text);
+    bounds.h = get_truetype_text_height(font, text);
+    bounds.x = ((ww - bounds.w) * 0.5f);
+    bounds.y = (wh * curr_y);
+
+    prev_y = curr_y;
+
+    return bounds;
+}
+
+INTERNAL nkBool tick_pause_text_button(const nkChar* text, nkF32 y, nkS32 size, nkBool interactive = NK_TRUE)
+{
+    PERSISTENT nkF32 previous_y = 0.0f;
+
+    TrueTypeFont font = get_font();
+
+    set_truetype_font_size(font, size);
+
+    fRect t = calculate_pause_button_bounds(font, text, previous_y, y);
+
+    nkVec2 cursor_pos = get_window_mouse_pos();
+
+    nkBool clicked = (point_vs_rect(cursor_pos, t.x,t.y-t.h,t.w,t.h) && is_mouse_button_pressed(MouseButton_Left) && interactive);
+    if(clicked)
+        play_sound(asset_manager_load<Sound>("click.wav"));
+    return clicked;
+}
+
+INTERNAL void draw_pause_text_button(const nkChar* text, nkF32 y, nkS32 size, nkBool interactive = NK_TRUE)
+{
+    PERSISTENT nkF32 previous_y = 0.0f;
+
+    TrueTypeFont font = get_font();
+
+    set_truetype_font_size(font, size);
+
+    fRect t = calculate_pause_button_bounds(font, text, previous_y, y);
+
+    nkVec2 cursor_pos = get_window_mouse_pos();
+
+    nkVec4 color = (point_vs_rect(cursor_pos, t.x,t.y-t.h,t.w,t.h) && interactive) ? NK_V4_YELLOW : NK_V4_WHITE;
+
+    draw_truetype_text(font, t.x+5,t.y+5, text, NK_V4_BLACK);
+    draw_truetype_text(font, t.x,t.y, text, color);
+}
+
 INTERNAL void draw_letterbox_background(void)
 {
     nkF32 ww = NK_CAST(nkF32, get_window_width());
@@ -52,7 +108,7 @@ INTERNAL void draw_letterbox_background(void)
 INTERNAL void pause_tick(nkF32 dt)
 {
     // Toggle the pause state.
-    if(is_key_pressed(KeyCode_Escape))
+    if(is_key_pressed(KeyCode_Escape) || is_key_pressed(KeyCode_P))
     {
         g_game.paused = !g_game.paused;
         if(g_game.paused) pause_music();
@@ -62,13 +118,13 @@ INTERNAL void pause_tick(nkF32 dt)
 
     if(!g_game.paused) return;
 
-    if(tick_menu_text_button(PAUSE_RESUME_TEXT, PAUSE_RESUME_YPOS, PAUSE_RESUME_SIZE))
+    if(tick_pause_text_button(PAUSE_RESUME_TEXT, PAUSE_RESUME_YPOS, PAUSE_RESUME_SIZE))
     {
         g_game.paused = NK_FALSE;
         resume_music();
         play_sound(g_game.pause_sound);
     }
-    if(tick_menu_text_button(PAUSE_MENU_TEXT, PAUSE_MENU_YPOS, PAUSE_MENU_SIZE))
+    if(tick_pause_text_button(PAUSE_MENU_TEXT, PAUSE_MENU_YPOS, PAUSE_MENU_SIZE))
     {
         set_app_state(AppState_Menu);
     }
@@ -94,9 +150,9 @@ INTERNAL void pause_draw(void)
     draw_letterbox_background();
 
     // Draw the text and buttons.
-    draw_menu_text_button(PAUSE_TITLE_TEXT, PAUSE_TITLE_YPOS, PAUSE_TITLE_SIZE, NK_FALSE);
-    draw_menu_text_button(PAUSE_RESUME_TEXT, PAUSE_RESUME_YPOS, PAUSE_RESUME_SIZE);
-    draw_menu_text_button(PAUSE_MENU_TEXT, PAUSE_MENU_YPOS, PAUSE_MENU_SIZE);
+    draw_pause_text_button(PAUSE_TITLE_TEXT, PAUSE_TITLE_YPOS, PAUSE_TITLE_SIZE, NK_FALSE);
+    draw_pause_text_button(PAUSE_RESUME_TEXT, PAUSE_RESUME_YPOS, PAUSE_RESUME_SIZE);
+    draw_pause_text_button(PAUSE_MENU_TEXT, PAUSE_MENU_YPOS, PAUSE_MENU_SIZE);
 
     // Draw the options buttons.
     nkF32 img_scale = (get_hud_scale() / 4.0f);
@@ -114,12 +170,12 @@ INTERNAL void pause_draw(void)
 
 INTERNAL void game_over_tick(nkF32 dt)
 {
-    if(tick_menu_text_button(GAMEOVER_RETRY_TEXT, GAMEOVER_RETRY_YPOS, GAMEOVER_RETRY_SIZE))
+    if(tick_pause_text_button(GAMEOVER_RETRY_TEXT, GAMEOVER_RETRY_YPOS, GAMEOVER_RETRY_SIZE))
     {
         game_start();
         play_music(asset_manager_load<Music>("garden.ogg"));
     }
-    if(tick_menu_text_button(GAMEOVER_MENU_TEXT, GAMEOVER_MENU_YPOS, GAMEOVER_MENU_SIZE))
+    if(tick_pause_text_button(GAMEOVER_MENU_TEXT, GAMEOVER_MENU_YPOS, GAMEOVER_MENU_SIZE))
     {
         set_app_state(AppState_Menu);
     }
@@ -132,9 +188,9 @@ INTERNAL void game_over_draw(void)
     draw_letterbox_background();
 
     // Draw the text and buttons.
-    draw_menu_text_button(GAMEOVER_TITLE_TEXT, GAMEOVER_TITLE_YPOS, GAMEOVER_TITLE_SIZE, NK_FALSE);
-    draw_menu_text_button(GAMEOVER_RETRY_TEXT, GAMEOVER_RETRY_YPOS, GAMEOVER_RETRY_SIZE);
-    draw_menu_text_button(GAMEOVER_MENU_TEXT, GAMEOVER_MENU_YPOS, GAMEOVER_MENU_SIZE);
+    draw_pause_text_button(GAMEOVER_TITLE_TEXT, GAMEOVER_TITLE_YPOS, GAMEOVER_TITLE_SIZE, NK_FALSE);
+    draw_pause_text_button(GAMEOVER_RETRY_TEXT, GAMEOVER_RETRY_YPOS, GAMEOVER_RETRY_SIZE);
+    draw_pause_text_button(GAMEOVER_MENU_TEXT, GAMEOVER_MENU_YPOS, GAMEOVER_MENU_SIZE);
 
     // Draw the stats.
     nkF32 img_scale = get_hud_scale() / 4.0f;
@@ -270,6 +326,22 @@ GLOBAL void game_draw(void)
     wave_manager_draw_hud();
     pause_draw();
     game_over_draw();
+}
+
+GLOBAL void pause_game(void)
+{
+    if(g_game.paused) return;
+    g_game.paused = NK_TRUE;
+    pause_music();
+    play_sound(g_game.pause_sound);
+}
+
+GLOBAL void unpause_game(void)
+{
+    if(!g_game.paused) return;
+    g_game.paused = NK_FALSE;
+    resume_music();
+    play_sound(g_game.pause_sound);
 }
 
 GLOBAL nkBool is_game_paused(void)

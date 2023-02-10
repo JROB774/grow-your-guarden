@@ -5,6 +5,8 @@ GLOBAL void   game_quit     (void);
 GLOBAL void   game_start    (void);
 GLOBAL void   game_tick     (nkF32 dt);
 GLOBAL void   game_draw     (void);
+GLOBAL void   pause_game    (void);
+GLOBAL void   unpause_game  (void);
 GLOBAL nkBool is_game_paused(void);
 GLOBAL nkBool is_game_over  (void);
 
