@@ -4,11 +4,14 @@ DEF_ETICK(daisy);
 DEF_ETICK(bramble);
 DEF_ETICK(hedge_wall);
 DEF_ETICK(bell_plant);
+DEF_ETICK(rocket_plant);
 DEF_ETICK(walker);
 DEF_ETICK(dripper);
 DEF_ETICK(goliath);
 DEF_ETICK(bell_missile);
+DEF_ETICK(rocket);
 DEF_ETICK(coin);
+DEF_ETICK(explosion);
 
 enum: nkU32
 {
@@ -19,6 +22,7 @@ EntityID_Daisy,
 EntityID_Bramble,
 EntityID_HedgeWall,
 EntityID_BellPlant,
+EntityID_RocketPlant,
 // Monsters
 EntityID_Grunt,
 EntityID_Soldier,
@@ -28,12 +32,14 @@ EntityID_Goliath,
 // Bullets
 EntityID_Pollen,
 EntityID_BellMissile,
+EntityID_Rocket,
 EntityID_Tarball,
 // Other
 EntityID_HomeTree,
 EntityID_CoinCopper,
 EntityID_CoinSilver,
 EntityID_CoinGold,
+EntityID_Explosion,
 EntityID_TOTAL
 
 };
@@ -183,6 +189,37 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Draw Offset        */ { 0.0f,-0.3f },
 /* Bounds             */ { 1.0f,1.0f },
 /* Growth Phases      */ { 10,15,0,0,0,0,0,0 },
+/* Death Sounds       */ { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL },
+/* Death Effect       */ NULL,
+/* Death Particle     */ NULL,
+/* Death Particle Min */ 0,
+/* Death Particle Max */ 0,
+/* Death Decal        */ NULL,
+/* Death Decal Min    */ 0,
+/* Death Decal Max    */ 0,
+/* Coin Drop Chance   */ 0,
+/* Coin Drop Min      */ 0,
+/* Coin Drop Max      */ 0,
+},
+
+// EntityID_RocketPlant
+{
+/* Texture            */ "entity/rocket_plant.png",
+/* Animation          */ "entity/rocket_plant.anm",
+/* Type               */ EntityType_Plant,
+/* Default State      */ EntityState_Idle,
+/* Flags              */ EntityFlag_None,
+/* Tick               */ ETICK(rocket_plant),
+/* Health             */ 7.0f,
+/* Damage             */ 0.0f,
+/* Speed              */ 0.0f,
+/* Range              */ 10.0f,
+/* Radius             */ 0.3f,
+/* Z-Depth            */ 0.0f,
+/* Collision Mask     */ EntityType_None,
+/* Draw Offset        */ { 0.0f,0.0f },
+/* Bounds             */ { 1.0f,1.0f },
+/* Growth Phases      */ { 3,5,10,15,0,0,0,0 },
 /* Death Sounds       */ { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL },
 /* Death Effect       */ NULL,
 /* Death Particle     */ NULL,
@@ -413,6 +450,37 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Coin Drop Max      */ 0,
 },
 
+// EntityID_Rocket
+{
+/* Texture            */ "entity/rocket.png",
+/* Animation          */ "entity/rocket.anm",
+/* Type               */ EntityType_Bullet,
+/* Default State      */ EntityState_Idle,
+/* Flags              */ EntityFlag_None,
+/* Tick               */ ETICK(rocket),
+/* Health             */ 1.0f,
+/* Damage             */ 40.0f,
+/* Speed              */ 7.5f,
+/* Range              */ 25.0f,
+/* Radius             */ 0.3f,
+/* Z-Depth            */ 0.5f,
+/* Collision Mask     */ EntityType_Monster,
+/* Draw Offset        */ { 0.0f,0.0f },
+/* Bounds             */ { 0.5f,0.5f },
+/* Growth Phases      */ { 0,0,0,0,0,0,0,0 },
+/* Death Sounds       */ { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL },
+/* Death Effect       */ NULL,
+/* Death Particle     */ NULL,
+/* Death Particle Min */ 0,
+/* Death Particle Max */ 0,
+/* Death Decal        */ NULL,
+/* Death Decal Min    */ 0,
+/* Death Decal Max    */ 0,
+/* Coin Drop Chance   */ 0,
+/* Coin Drop Min      */ 0,
+/* Coin Drop Max      */ 0,
+},
+
 // EntityID_Tarball
 {
 /* Texture            */ "entity/tarball.png",
@@ -537,7 +605,7 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Coin Drop Max      */ 0,
 },
 
-// EntityID_CoinCopper
+// EntityID_CoinGold
 {
 /* Texture            */ "entity/coin_gold.png",
 /* Animation          */ "entity/coin_gold.anm",
@@ -554,6 +622,37 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Collision Mask     */ EntityType_None,
 /* Draw Offset        */ { 0.0f,0.0f },
 /* Bounds             */ { 0.4f,0.4f },
+/* Growth Phases      */ { 0,0,0,0,0,0,0,0 },
+/* Death Sounds       */ { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL },
+/* Death Effect       */ NULL,
+/* Death Particle     */ NULL,
+/* Death Particle Min */ 0,
+/* Death Particle Max */ 0,
+/* Death Decal        */ NULL,
+/* Death Decal Min    */ 0,
+/* Death Decal Max    */ 0,
+/* Coin Drop Chance   */ 0,
+/* Coin Drop Min      */ 0,
+/* Coin Drop Max      */ 0,
+},
+
+// EntityID_Explosion
+{
+/* Texture            */ "entity/explosion.png",
+/* Animation          */ "entity/explosion.anm",
+/* Type               */ EntityType_Other,
+/* Default State      */ EntityState_Idle,
+/* Flags              */ EntityFlag_None,
+/* Tick               */ ETICK(explosion),
+/* Health             */ 1.0f,
+/* Damage             */ 0.0f,
+/* Speed              */ 0.0f,
+/* Range              */ 0.0f,
+/* Radius             */ 0.0f,
+/* Z-Depth            */ 0.0f,
+/* Collision Mask     */ EntityType_None,
+/* Draw Offset        */ { 0.0f,0.0f },
+/* Bounds             */ { 1.5f,1.5f },
 /* Growth Phases      */ { 0,0,0,0,0,0,0,0 },
 /* Death Sounds       */ { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL },
 /* Death Effect       */ NULL,

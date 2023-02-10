@@ -18,6 +18,7 @@ NK_ENUM(EntityType, nkU32)
     EntityType_Base    = (1<<2),
     EntityType_Bullet  = (1<<3),
     EntityType_Item    = (1<<4),
+    EntityType_Other   = (1<<5),
     EntityType_All     = (  -1)
 };
 

@@ -23,6 +23,7 @@ NK_ENUM(HotbarID, nkU32)
     HotbarID_Bramble,
     HotbarID_HedgeWall,
     HotbarID_BellPlant,
+    HotbarID_RocketPlant,
     HotbarID_Fertilizer,
     HotbarID_InstaGrow,
     HotbarID_Shovel,
@@ -275,53 +276,59 @@ GLOBAL void controller_init(void)
     asset_manager_load<Texture>("hud.png");
 
     // Fill out the hotbar slot information.
-    g_controller.hotbar[HotbarID_Daisy     ].name        = "DAISY";
-    g_controller.hotbar[HotbarID_Daisy     ].description = "Fires shots at nearby enemies.";
-    g_controller.hotbar[HotbarID_Daisy     ].cost        = 100;
-    g_controller.hotbar[HotbarID_Daisy     ].unlock      = 0;
-    g_controller.hotbar[HotbarID_Daisy     ].spawn_id    = EntityID_Daisy;
+    g_controller.hotbar[HotbarID_Daisy      ].name        = "DAISY";
+    g_controller.hotbar[HotbarID_Daisy      ].description = "Fires shots at nearby enemies.";
+    g_controller.hotbar[HotbarID_Daisy      ].cost        = 100;
+    g_controller.hotbar[HotbarID_Daisy      ].unlock      = 0;
+    g_controller.hotbar[HotbarID_Daisy      ].spawn_id    = EntityID_Daisy;
 
-    g_controller.hotbar[HotbarID_Bramble   ].name        = "BRAMBLE";
-    g_controller.hotbar[HotbarID_Bramble   ].description = "Damages enemies that walk over it.\nDamage increases as it grows.";
-    g_controller.hotbar[HotbarID_Bramble   ].cost        = 75;
-    g_controller.hotbar[HotbarID_Bramble   ].unlock      = 0; // @Incomplete!
-    g_controller.hotbar[HotbarID_Bramble   ].spawn_id    = EntityID_Bramble;
+    g_controller.hotbar[HotbarID_Bramble    ].name        = "BRAMBLE";
+    g_controller.hotbar[HotbarID_Bramble    ].description = "Damages enemies that walk over it.\nDamage increases as it grows.";
+    g_controller.hotbar[HotbarID_Bramble    ].cost        = 75;
+    g_controller.hotbar[HotbarID_Bramble    ].unlock      = 0; // @Incomplete!
+    g_controller.hotbar[HotbarID_Bramble    ].spawn_id    = EntityID_Bramble;
 
-    g_controller.hotbar[HotbarID_HedgeWall ].name        = "HEDGE WALL";
-    g_controller.hotbar[HotbarID_HedgeWall ].description = "A defensive wall-like plant.\nDoes not attack.\nGets stronger as it grows.";
-    g_controller.hotbar[HotbarID_HedgeWall ].cost        = 200;
-    g_controller.hotbar[HotbarID_HedgeWall ].unlock      = 0; // @Incomplete!
-    g_controller.hotbar[HotbarID_HedgeWall ].spawn_id    = EntityID_HedgeWall;
+    g_controller.hotbar[HotbarID_HedgeWall  ].name        = "HEDGE WALL";
+    g_controller.hotbar[HotbarID_HedgeWall  ].description = "A defensive wall-like plant.\nDoes not attack.\nGets stronger as it grows.";
+    g_controller.hotbar[HotbarID_HedgeWall  ].cost        = 200;
+    g_controller.hotbar[HotbarID_HedgeWall  ].unlock      = 0; // @Incomplete!
+    g_controller.hotbar[HotbarID_HedgeWall  ].spawn_id    = EntityID_HedgeWall;
 
-    g_controller.hotbar[HotbarID_BellPlant ].name        = "MISSILE BELL";
-    g_controller.hotbar[HotbarID_BellPlant ].description = "Fires anti-air homing projectiles at flying enemies.\nCannot attack ground enemies.";
-    g_controller.hotbar[HotbarID_BellPlant ].cost        = 150;
-    g_controller.hotbar[HotbarID_BellPlant ].unlock      = 0; // @Incomplete!
-    g_controller.hotbar[HotbarID_BellPlant ].spawn_id    = EntityID_BellPlant;
+    g_controller.hotbar[HotbarID_BellPlant  ].name        = "MISSILE BELL";
+    g_controller.hotbar[HotbarID_BellPlant  ].description = "Fires anti-air homing projectiles at flying enemies.\nCannot attack ground enemies.";
+    g_controller.hotbar[HotbarID_BellPlant  ].cost        = 150;
+    g_controller.hotbar[HotbarID_BellPlant  ].unlock      = 0; // @Incomplete!
+    g_controller.hotbar[HotbarID_BellPlant  ].spawn_id    = EntityID_BellPlant;
 
-    g_controller.hotbar[HotbarID_Fertilizer].name        = "FERTILIZER";
-    g_controller.hotbar[HotbarID_Fertilizer].description = "Increase a plant's stats for a limited time.";
-    g_controller.hotbar[HotbarID_Fertilizer].cost        = 450;
-    g_controller.hotbar[HotbarID_Fertilizer].unlock      = 0; // @Incomplete!
-    g_controller.hotbar[HotbarID_Fertilizer].spawn_id    = EntityID_None;
+    g_controller.hotbar[HotbarID_RocketPlant].name        = "ROCKET PLANT";
+    g_controller.hotbar[HotbarID_RocketPlant].description = "Fires itself at the enemy in an explosive blast.\nCauses splash damage on surrounding enemies.";
+    g_controller.hotbar[HotbarID_RocketPlant].cost        = 325;
+    g_controller.hotbar[HotbarID_RocketPlant].unlock      = 0; // @Incomplete!
+    g_controller.hotbar[HotbarID_RocketPlant].spawn_id    = EntityID_RocketPlant;
 
-    g_controller.hotbar[HotbarID_InstaGrow ].name        = "INSTA-GROW";
-    g_controller.hotbar[HotbarID_InstaGrow ].description = "Instantly grow a plant to its maximum growth stage.";
-    g_controller.hotbar[HotbarID_InstaGrow ].cost        = 800;
-    g_controller.hotbar[HotbarID_InstaGrow ].unlock      = 0; // @Incomplete!
-    g_controller.hotbar[HotbarID_InstaGrow ].spawn_id    = EntityID_None;
+    g_controller.hotbar[HotbarID_Fertilizer ].name        = "FERTILIZER";
+    g_controller.hotbar[HotbarID_Fertilizer ].description = "Increase a plant's stats for a limited time.";
+    g_controller.hotbar[HotbarID_Fertilizer ].cost        = 450;
+    g_controller.hotbar[HotbarID_Fertilizer ].unlock      = 0; // @Incomplete!
+    g_controller.hotbar[HotbarID_Fertilizer ].spawn_id    = EntityID_None;
 
-    g_controller.hotbar[HotbarID_Shovel    ].name        = "Shovel";
-    g_controller.hotbar[HotbarID_Shovel    ].description = "Dig up a plant and get some of your money back.";
-    g_controller.hotbar[HotbarID_Shovel    ].cost        = 0;
-    g_controller.hotbar[HotbarID_Shovel    ].unlock      = 0;
-    g_controller.hotbar[HotbarID_Shovel    ].spawn_id    = EntityID_None;
+    g_controller.hotbar[HotbarID_InstaGrow  ].name        = "INSTA-GROW";
+    g_controller.hotbar[HotbarID_InstaGrow  ].description = "Instantly grow a plant to its maximum growth stage.";
+    g_controller.hotbar[HotbarID_InstaGrow  ].cost        = 800;
+    g_controller.hotbar[HotbarID_InstaGrow  ].unlock      = 0; // @Incomplete!
+    g_controller.hotbar[HotbarID_InstaGrow  ].spawn_id    = EntityID_None;
 
-    g_controller.hotbar[HotbarID_Bell      ].name        = "Summoning Bell";
-    g_controller.hotbar[HotbarID_Bell      ].description = "Spawn the forces of evil straight away.";
-    g_controller.hotbar[HotbarID_Bell      ].cost        = 0;
-    g_controller.hotbar[HotbarID_Bell      ].unlock      = 0;
-    g_controller.hotbar[HotbarID_Bell      ].spawn_id    = EntityID_None;
+    g_controller.hotbar[HotbarID_Shovel     ].name        = "Shovel";
+    g_controller.hotbar[HotbarID_Shovel     ].description = "Dig up a plant and get some of your money back.";
+    g_controller.hotbar[HotbarID_Shovel     ].cost        = 0;
+    g_controller.hotbar[HotbarID_Shovel     ].unlock      = 0;
+    g_controller.hotbar[HotbarID_Shovel     ].spawn_id    = EntityID_None;
+
+    g_controller.hotbar[HotbarID_Bell       ].name        = "Summoning Bell";
+    g_controller.hotbar[HotbarID_Bell       ].description = "Spawn the forces of evil straight away.";
+    g_controller.hotbar[HotbarID_Bell       ].cost        = 0;
+    g_controller.hotbar[HotbarID_Bell       ].unlock      = 0;
+    g_controller.hotbar[HotbarID_Bell       ].spawn_id    = EntityID_None;
 }
 
 GLOBAL void controller_tick(nkF32 dt)

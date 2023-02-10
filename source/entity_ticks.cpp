@@ -170,6 +170,45 @@ DEF_ETICK(bell_plant)
     }
 }
 
+DEF_ETICK(rocket_plant)
+{
+    // @Incomplete: Fertilized...
+
+    // Once we are fully grown we check for any nearby targets. If we have one then we launch
+    // our rocket (which is acutally ourselves). Afterwards, we set our growth phase back to
+    // the start to grow again and repeat the process.
+    if(!plant_is_fully_grown(e)) return;
+
+    nkF32 shortest_distance = FLT_MAX;
+    nkF32 distance = 0.0f;
+
+    Entity* target = NULL;
+
+    for(auto& m: g_entity_manager.entities)
+    {
+        if(m.type == EntityType_Monster && m.active && !NK_CHECK_FLAGS(m.flags, EntityFlag_Aerial))
+        {
+            distance = distance_between_points(e.position, m.position);
+            if(distance <= e.range && distance < shortest_distance)
+            {
+                shortest_distance = distance;
+                target = &m;
+            }
+        }
+    }
+    if(target)
+    {
+        play_sound(asset_manager_load<Sound>("rocket.wav"));
+
+        spawn_bullet_at_target(EntityID_Rocket, e.position.x,e.position.y, *target);
+
+        e.current_phase = 0;
+        e.phase_timer = 0.0f;
+
+        set_animation(&e.anim_state, get_current_entity_anim_name(e).cstr);
+    }
+}
+
 /*////////////////////////////////////////////////////////////////////////////*/
 
 //
@@ -460,10 +499,38 @@ DEF_ETICK(bell_missile)
     }
 }
 
+DEF_ETICK(rocket)
+{
+    // @Incomplete: Spawn smoke particles behind us...
+
+    // Collide with enemies like normal. On collision we also spawn an explosion.
+    // This explosion will calculate and handle splash damage to surrounding enemies.
+    nkU64 hit_index = check_entity_collision(e, EntityType_Monster);
+    if(hit_index != NK_U64_MAX)
+    {
+        Entity* target = get_entity(hit_index);
+        if(target)
+        {
+            Entity* explosion = get_entity(entity_spawn(EntityID_Explosion, e.position.x,e.position.y));
+            if(explosion)
+                explosion->z_depth = e.z_depth;
+            entity_damage(hit_index, e.damage);
+            entity_kill(index);
+        }
+    }
+
+    // If we go outside our range, we just de-spawn.
+    nkF32 distance = distance_between_points(e.position, e.spawn);
+    if(distance >= e.range)
+    {
+        entity_kill(index);
+    }
+}
+
 /*////////////////////////////////////////////////////////////////////////////*/
 
 //
-// Items
+// Other
 //
 
 DEF_ETICK(coin)
@@ -548,6 +615,15 @@ DEF_ETICK(coin)
             }
         }
     }
+}
+
+DEF_ETICK(explosion)
+{
+    play_sound(asset_manager_load<Sound>("explosion.wav"));
+
+    // @Incomplete: Apply blast damage to monsters...
+
+    entity_kill(index); // When we are done we die instantly so this only happens on one tick.
 }
 
 /*////////////////////////////////////////////////////////////////////////////*/

@@ -176,7 +176,7 @@ GLOBAL void entity_tick(nkF32 dt)
                 // Check if we have reached our max range and if so drop off, once we hit the floor die.
                 case EntityType_Bullet:
                 {
-                    if(e.state != EntityState_Dead)
+                    if(e.state != EntityState_Dead && e.id != EntityID_Rocket) // Rockets are an exception...
                     {
                         const nkF32 BULLET_DROPOFF_SPEED = 300.0f;
                         nkF32 distance = distance_between_points(e.position, e.spawn);
@@ -199,23 +199,26 @@ GLOBAL void entity_tick(nkF32 dt)
                 nkU64 sub_index = 0;
                 for(auto& b: g_entity_manager.entities)
                 {
-                    if(b.type == EntityType_Bullet && b.state != EntityState_Dead && b.active && NK_CHECK_FLAGS(b.collision_mask, e.type))
+                    if(b.id != EntityID_Rocket) // Rockets are an exception...
                     {
-                        // If the entity or bullet is aerial do a 3D collision check otherwise just do a normal one.
-                        nkBool collided = NK_FALSE;
-                        if(NK_CHECK_FLAGS(e.flags, EntityFlag_Aerial) || NK_CHECK_FLAGS(b.flags, EntityFlag_Aerial))
+                        if(b.type == EntityType_Bullet && b.state != EntityState_Dead && b.active && NK_CHECK_FLAGS(b.collision_mask, e.type))
                         {
-                            collided = check_entity_collision_3d(e, b);
-                        }
-                        else
-                        {
-                            collided = check_entity_collision(e, b);
-                        }
-                        if(collided)
-                        {
-                            entity_damage(index, b.damage);
-                            entity_kill(sub_index);
-                            b.velocity = NK_V2_ZERO;
+                            // If the entity or bullet is aerial do a 3D collision check otherwise just do a normal one.
+                            nkBool collided = NK_FALSE;
+                            if(NK_CHECK_FLAGS(e.flags, EntityFlag_Aerial) || NK_CHECK_FLAGS(b.flags, EntityFlag_Aerial))
+                            {
+                                collided = check_entity_collision_3d(e, b);
+                            }
+                            else
+                            {
+                                collided = check_entity_collision(e, b);
+                            }
+                            if(collided)
+                            {
+                                entity_damage(index, b.damage);
+                                entity_kill(sub_index);
+                                b.velocity = NK_V2_ZERO;
+                            }
                         }
                     }
                     ++sub_index;
