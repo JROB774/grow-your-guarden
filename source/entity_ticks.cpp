@@ -288,7 +288,7 @@ DEF_ETICK(walker)
 
             for(auto& p: g_entity_manager.entities)
             {
-                if((p.type == EntityType_Plant || p.type == EntityType_Base) && p.active)
+                if((p.type == EntityType_Plant || p.type == EntityType_Base) && p.active && !NK_CHECK_FLAGS(p.flags, EntityFlag_NotShootable))
                 {
                     distance = distance_between_points(e.position, p.position);
                     if(distance <= e.range && distance < shortest_distance)
