@@ -97,12 +97,15 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 
 /*////////////////////////////////////////////////////////////////////////////*/
 
-INTERNAL constexpr nkF32 WAVE_MULTIPLICATION_RATE = 0.5f;
+INTERNAL constexpr nkF32 WAVE_MULTIPLICATION_RATE  = 0.5f;
+INTERNAL constexpr nkF32 BONUS_MULTIPLICATION_RATE = 0.1f;
 
 INTERNAL constexpr nkF32 MESSAGE_TIME = 3.5f;
 
 INTERNAL constexpr nkF32 BATTLE_MUSIC_FADE_IN_TIME  = 8.0f;
 INTERNAL constexpr nkF32 BATTLE_MUSIC_FADE_OUT_TIME = 8.0f;
+
+INTERNAL constexpr nkS32 SLOW_PHASE = 14;
 
 NK_ENUM(SpawnerState, nkS32)
 {
@@ -135,6 +138,7 @@ struct WaveManager
     WaveState        state;
     nkF32            timer;
     nkF32            wave_multiplier;
+    nkF32            bonus_multiplier;
     nkU32            waves_beaten;
     nkU32            current_wave;
     Spawner          spawners[MAX_PHASES];
@@ -204,10 +208,12 @@ INTERNAL void setup_next_wave(void)
         // If we couldn't find a wave for the wave number just use the last wave in the list.
         nk_array_append(&possible_waves, NK_CAST(nkS32,NK_ARRAY_SIZE(WAVE_LIST)-1));
         wm.wave_multiplier += WAVE_MULTIPLICATION_RATE; // Increase the multiplier to make the wave harder!
+        wm.bonus_multiplier += BONUS_MULTIPLICATION_RATE;
     }
     else
     {
         wm.wave_multiplier = 1.0f;
+        wm.bonus_multiplier = 1.0f;
     }
 
     nkS32 wave_index = rng_s32(0,NK_CAST(nkS32,possible_waves.length)-1);
@@ -293,7 +299,7 @@ INTERNAL void end_wave(void)
 {
     auto& wm = g_wave_manager;
 
-    nkS32 wave_bonus = NK_CAST(nkS32, NK_CAST(nkF32, wm.wave_desc->wave_bonus) * wm.wave_multiplier);
+    nkS32 wave_bonus = NK_CAST(nkS32, NK_CAST(nkF32, wm.wave_desc->wave_bonus) * wm.bonus_multiplier);
 
     add_money(wave_bonus);
 
@@ -350,7 +356,7 @@ INTERNAL void tick_wave_fight_state(nkF32 dt)
             // Wait until it is our time to start spawning.
             case SpawnerState_Waiting:
             {
-                if(spawner.timer <= 0.0f)
+                if(spawner.timer == 0.0f)
                 {
                     spawner.state = SpawnerState_InProgress;
                     DEBUG_LOG("[Wave]: Starting phase %d!\n", i);
@@ -360,9 +366,13 @@ INTERNAL void tick_wave_fight_state(nkF32 dt)
                     // If the phase before us is in progress then countdown our waiting timer.
                     // Otherwise, if the phase before us has completed and the player has killed
                     // all the enemies then just start now so they aren't stuck waiting around.
-                    if(i > 0 && wm.spawners[i-1].state == SpawnerState_InProgress)
+                    if(i > 0 && wm.spawners[i-1].state == SpawnerState_InProgress && spawner.timer > 0.0f)
                     {
                         spawner.timer -= dt;
+                        if(spawner.timer < 0.0f)
+                        {
+                            spawner.timer = 0.0f;
+                        }
                     }
                     if(i == 0 || (wm.spawners[i-1].state == SpawnerState_Complete && !any_entities_of_type_alive(EntityType_Monster)))
                     {
@@ -374,7 +384,28 @@ INTERNAL void tick_wave_fight_state(nkF32 dt)
             // Spawn monsters.
             case SpawnerState_InProgress:
             {
-                if(rng_s32(0,100) < spawner.spawn_rate)
+                // If all other waves are complete and we are a slow wave then speed up!
+                if(spawner.spawn_rate <= SLOW_PHASE)
+                {
+                    nkBool all_complete = NK_TRUE;
+                    for(nkU32 j=0; j<wave_desc.num_phases; ++j)
+                    {
+                        if(j == i) continue;
+                        if(wm.spawners[j].state != SpawnerState_Complete && !any_entities_of_type_alive(EntityType_Monster))
+                        {
+                            all_complete = NK_FALSE;
+                            break;
+                        }
+                    }
+                    if(all_complete)
+                    {
+                        printf("[Wave]: Speeding up phase %d!\n", i);
+                        spawner.spawn_rate *= 2;
+                    }
+                }
+
+                // Spawn the monsters at our desired spawn rate.
+                if(rng_s32(0,1000) < spawner.spawn_rate)
                 {
                     nkS32 spawn_index = 0;
                     while(NK_TRUE)
@@ -543,13 +574,14 @@ GLOBAL void wave_manager_reset(void)
     wm.spawn_points[7] = { { ww * 0.75f,     wh+SPAWN_INSET }, { ww * 0.5f, wh+(SPAWN_INSET   ), ww * 0.5f, +(SPAWN_INSET*2.0f) }, NK_FALSE };
 
     // Reset the rest of the wave manager state.
-    wm.state           = WaveState_Prepare;
-    wm.timer           = 0.0f; // Will get set inside setup_next_wave.
-    wm.wave_multiplier = 1.0f;
-    wm.waves_beaten    = 0;
-    wm.current_wave    = 0;
-    wm.message_timer   = 0.0f;
-    wm.message_alpha   = 1.0f;
+    wm.state            = WaveState_Prepare;
+    wm.timer            = 0.0f; // Will get set inside setup_next_wave.
+    wm.wave_multiplier  = 1.0f;
+    wm.bonus_multiplier = 1.0f;
+    wm.waves_beaten     = 0;
+    wm.current_wave     = 0;
+    wm.message_timer    = 0.0f;
+    wm.message_alpha    = 1.0f;
 
     nk_string_clear(&wm.message);
 
