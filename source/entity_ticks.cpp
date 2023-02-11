@@ -89,7 +89,7 @@ DEF_ETICK(bramble)
                         case 0: entity_damage(i, 0.25f * multiplier); break;
                         case 1: entity_damage(i, 0.50f * multiplier); break;
                         case 2: entity_damage(i, 1.00f * multiplier); break;
-                        case 3: entity_damage(i, 1.50f * multiplier); break;
+                        case 3: entity_damage(i, 2.00f * multiplier); break;
                     }
                 }
             }
@@ -476,7 +476,7 @@ DEF_ETICK(goliath)
 DEF_ETICK(bell_missile)
 {
     const nkF32 HEIGHT_ADVANCE_SPEED = 1.5f;
-    const nkF32 HOMING_SPEED = 5.5f;
+    const nkF32 HOMING_SPEED = 6.5f;
 
     const nkF32 MAX_HOMING_DISTANCE = 7.1f * TILE_WIDTH;
 

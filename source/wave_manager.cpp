@@ -58,7 +58,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Wave Number  */ 1,
 /* Phases       */ 1,
 /* Spawn Points */ 1,
-/* Prep Timer   */ 60.0f,
+/* Prep Timer   */ 90.0f,
 /* Wave Bonus   */ 750,
 {
 /* Phase 1      */ { -1.0f, 5, SpawnType_Grunt, 8,10 },
@@ -103,7 +103,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 {
 /* Phase 1      */ {  -1.0f,  5, SpawnType_Grunt, 15,22 },
 /* Phase 2      */ {  30.0f, 40, SpawnType_Grunt, 20,25 },
-/* Phase 3      */ {  20.0f, 80, SpawnType_Grunt, 25,28 },
+/* Phase 3      */ {  20.0f, 60, SpawnType_Grunt, 25,28 },
 /* Phase 4      */ NO_PHASE,
 /* Phase 5      */ NO_PHASE,
 /* Phase 6      */ NO_PHASE,
@@ -239,7 +239,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Phases       */ 3,
 /* Spawn Points */ 8,
 /* Prep Timer   */ 60.0f,
-/* Wave Bonus   */ 1550,
+/* Wave Bonus   */ 2000,
 {
 /* Phase 1      */ {  -1.0f,  15, SpawnType_Grunt|SpawnType_Soldier, 135,145 },
 /* Phase 2      */ {  60.0f, 100, SpawnType_Barbarian,                14, 18 },
@@ -259,12 +259,112 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Phases       */ 4,
 /* Spawn Points */ 8,
 /* Prep Timer   */ 60.0f,
-/* Wave Bonus   */ 1600,
+/* Wave Bonus   */ 2050,
 {
 /* Phase 1      */ {  -1.0f,  15, SpawnType_Grunt|SpawnType_Soldier,                    135,145 },
 /* Phase 2      */ {  95.0f, 100, SpawnType_Barbarian,                                   14, 18 },
 /* Phase 3      */ {  -1.0f, 100, SpawnType_Grunt|SpawnType_Soldier,                     40, 55 },
 /* Phase 4      */ {  -1.0f,  50, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian, 60, 65 },
+/* Phase 5      */ NO_PHASE,
+/* Phase 6      */ NO_PHASE,
+/* Phase 7      */ NO_PHASE,
+/* Phase 8      */ NO_PHASE,
+}
+},
+// -----------------------------------------------
+
+// WAVE 12 ---------------------------------------
+{
+/* Wave Number  */ 12,
+/* Phases       */ 4,
+/* Spawn Points */ 8,
+/* Prep Timer   */ 60.0f,
+/* Wave Bonus   */ 2100,
+{
+/* Phase 1      */ {  -1.0f,  15, SpawnType_Grunt|SpawnType_Soldier, 160,165 },
+/* Phase 2      */ {  95.0f, 150, SpawnType_Barbarian,                20, 25 },
+/* Phase 3      */ {  -1.0f,  30, SpawnType_Grunt|SpawnType_Soldier,  90,100 },
+/* Phase 4      */ {  95.0f, 150, SpawnType_Barbarian,                20, 25 },
+/* Phase 5      */ NO_PHASE,
+/* Phase 6      */ NO_PHASE,
+/* Phase 7      */ NO_PHASE,
+/* Phase 8      */ NO_PHASE,
+}
+},
+// -----------------------------------------------
+
+// WAVE 13 ---------------------------------------
+{
+/* Wave Number  */ 13,
+/* Phases       */ 5,
+/* Spawn Points */ 8,
+/* Prep Timer   */ 60.0f,
+/* Wave Bonus   */ 2150,
+{
+/* Phase 1      */ {  -1.0f,  15, SpawnType_Grunt|SpawnType_Soldier,                     160,165 },
+/* Phase 2      */ {  95.0f, 150, SpawnType_Barbarian,                                    20, 25 },
+/* Phase 3      */ {  -1.0f,  30, SpawnType_Grunt|SpawnType_Soldier,                      90,100 },
+/* Phase 4      */ {  95.0f, 150, SpawnType_Barbarian,                                    20, 25 },
+/* Phase 5      */ {  -1.0f,  30, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian, 100,120 },
+/* Phase 6      */ NO_PHASE,
+/* Phase 7      */ NO_PHASE,
+/* Phase 8      */ NO_PHASE,
+}
+},
+// -----------------------------------------------
+
+// WAVE 14 ---------------------------------------
+{
+/* Wave Number  */ 14,
+/* Phases       */ 5,
+/* Spawn Points */ 8,
+/* Prep Timer   */ 60.0f,
+/* Wave Bonus   */ 2200,
+{
+/* Phase 1      */ {  -1.0f,  15, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian, 170,180 },
+/* Phase 2      */ {  30.0f, 150, SpawnType_Soldier,                                      20, 25 },
+/* Phase 3      */ {  30.0f, 150, SpawnType_Soldier,                                      20, 25 },
+/* Phase 4      */ {  30.0f, 150, SpawnType_Soldier,                                      20, 25 },
+/* Phase 5      */ {  -1.0f,  40, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian, 100,120 },
+/* Phase 6      */ NO_PHASE,
+/* Phase 7      */ NO_PHASE,
+/* Phase 8      */ NO_PHASE,
+}
+},
+// -----------------------------------------------
+
+// WAVE 15 ---------------------------------------
+{
+/* Wave Number  */ 15,
+/* Phases       */ 5,
+/* Spawn Points */ 8,
+/* Prep Timer   */ 60.0f,
+/* Wave Bonus   */ 2250,
+{
+/* Phase 1      */ {  -1.0f,  15, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian, 170,180 },
+/* Phase 2      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                  20, 25 },
+/* Phase 3      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                  20, 25 },
+/* Phase 4      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                  20, 25 },
+/* Phase 5      */ {  -1.0f,  40, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian, 100,120 },
+/* Phase 6      */ NO_PHASE,
+/* Phase 7      */ NO_PHASE,
+/* Phase 8      */ NO_PHASE,
+}
+},
+// -----------------------------------------------
+
+// WAVE 16 ---------------------------------------
+{
+/* Wave Number  */ 16,
+/* Phases       */ 4,
+/* Spawn Points */ 8,
+/* Prep Timer   */ 60.0f,
+/* Wave Bonus   */ 2300,
+{
+/* Phase 1      */ {  -1.0f,  10, SpawnType_Grunt|SpawnType_Soldier,                     100,120 },
+/* Phase 2      */ {  -1.0f, 150, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian, 100,120 },
+/* Phase 3      */ {  30.0f, 150, SpawnType_Soldier,                                      22, 25 },
+/* Phase 4      */ {  -1.0f,  60, SpawnType_Dripper,                                      17, 24 },
 /* Phase 5      */ NO_PHASE,
 /* Phase 6      */ NO_PHASE,
 /* Phase 7      */ NO_PHASE,

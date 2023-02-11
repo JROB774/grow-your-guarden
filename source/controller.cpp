@@ -15,7 +15,7 @@ INTERNAL constexpr nkF32 CAMERA_ZOOM_SENSITIVITY = 0.15f;
 INTERNAL constexpr nkF32 CAMERA_ZOOM_SPEED       = 12.0f;
 INTERNAL constexpr nkF32 CAMERA_PAN_SPEED        = 12.0f;
 
-INTERNAL constexpr nkF32 FERTILIZE_TIME = 60.0f * 2.0f;
+INTERNAL constexpr nkF32 FERTILIZE_TIME = 60.0f * 5.0f;
 
 NK_ENUM(HotbarID, nkU32)
 {
@@ -309,13 +309,13 @@ GLOBAL void controller_init(void)
 
     g_controller.hotbar[HotbarID_Fertilizer ].name        = "FERTILIZER";
     g_controller.hotbar[HotbarID_Fertilizer ].description = "Increase a plant's stats for a limited time.";
-    g_controller.hotbar[HotbarID_Fertilizer ].cost        = 450;
+    g_controller.hotbar[HotbarID_Fertilizer ].cost        = 400;
     g_controller.hotbar[HotbarID_Fertilizer ].unlock      = 10;
     g_controller.hotbar[HotbarID_Fertilizer ].spawn_id    = EntityID_None;
 
     g_controller.hotbar[HotbarID_InstaGrow  ].name        = "INSTA-GROW";
     g_controller.hotbar[HotbarID_InstaGrow  ].description = "Instantly grow a plant to its maximum growth stage.";
-    g_controller.hotbar[HotbarID_InstaGrow  ].cost        = 650;
+    g_controller.hotbar[HotbarID_InstaGrow  ].cost        = 600;
     g_controller.hotbar[HotbarID_InstaGrow  ].unlock      = 25;
     g_controller.hotbar[HotbarID_InstaGrow  ].spawn_id    = EntityID_None;
 
