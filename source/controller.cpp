@@ -309,8 +309,8 @@ GLOBAL void controller_init(void)
 
     g_controller.hotbar[HotbarID_Fertilizer ].name        = "FERTILIZER";
     g_controller.hotbar[HotbarID_Fertilizer ].description = "Increase a plant's stats for a limited time.";
-    g_controller.hotbar[HotbarID_Fertilizer ].cost        = 350;
-    g_controller.hotbar[HotbarID_Fertilizer ].unlock      = 17;
+    g_controller.hotbar[HotbarID_Fertilizer ].cost        = 300;
+    g_controller.hotbar[HotbarID_Fertilizer ].unlock      = 12;
     g_controller.hotbar[HotbarID_Fertilizer ].spawn_id    = EntityID_None;
 
     g_controller.hotbar[HotbarID_InstaGrow  ].name        = "INSTA-GROW";

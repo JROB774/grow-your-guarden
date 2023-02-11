@@ -101,7 +101,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Prep Timer   */ 60.0f,
 /* Wave Bonus   */ 850,
 {
-/* Phase 1      */ {  -1.0f,  5, SpawnType_Grunt, 15,22 },
+/* Phase 1      */ {  -1.0f, 20, SpawnType_Grunt, 15,22 },
 /* Phase 2      */ {  30.0f, 40, SpawnType_Grunt, 20,25 },
 /* Phase 3      */ {  20.0f, 60, SpawnType_Grunt, 25,28 },
 /* Phase 4      */ NO_PHASE,
@@ -121,7 +121,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Prep Timer   */ 60.0f,
 /* Wave Bonus   */ 900,
 {
-/* Phase 1      */ {  -1.0f,   7, SpawnType_Grunt, 40,48 },
+/* Phase 1      */ {  -1.0f,  25, SpawnType_Grunt, 40,48 },
 /* Phase 2      */ {  10.0f, 120, SpawnType_Grunt, 12,17 },
 /* Phase 3      */ {  20.0f, 120, SpawnType_Grunt, 12,17 },
 /* Phase 4      */ {  30.0f, 120, SpawnType_Grunt, 12,17 },
@@ -141,7 +141,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Prep Timer   */ 60.0f,
 /* Wave Bonus   */ 1200,
 {
-/* Phase 1      */ {  -1.0f,  5, SpawnType_Grunt,                   50,52 },
+/* Phase 1      */ {  -1.0f, 10, SpawnType_Grunt,                   50,52 },
 /* Phase 2      */ {  60.0f, 20, SpawnType_Soldier,                 18,22 },
 /* Phase 3      */ {  30.0f, 40, SpawnType_Grunt|SpawnType_Soldier, 30,35 },
 /* Phase 4      */ NO_PHASE,
@@ -216,15 +216,15 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 // WAVE 09 ---------------------------------------
 {
 /* Wave Number  */ 9,
-/* Phases       */ 4,
+/* Phases       */ 3,
 /* Spawn Points */ 8,
 /* Prep Timer   */ 60.0f,
 /* Wave Bonus   */ 1500,
 {
 /* Phase 1      */ {  -1.0f,  20, SpawnType_Grunt|SpawnType_Soldier, 70,80 },
-/* Phase 2      */ {  -1.0f, 300, SpawnType_Barbarian,                6, 8 },
-/* Phase 3      */ {  -1.0f, 300, SpawnType_Barbarian,               10,12 },
-/* Phase 4      */ {  -1.0f, 300, SpawnType_Barbarian,               10,12 },
+/* Phase 2      */ {  -1.0f, 300, SpawnType_Barbarian,               10,12 },
+/* Phase 3      */ {  -1.0f, 300, SpawnType_Barbarian,               12,14 },
+/* Phase 4      */ NO_PHASE,
 /* Phase 5      */ NO_PHASE,
 /* Phase 6      */ NO_PHASE,
 /* Phase 7      */ NO_PHASE,
@@ -242,8 +242,8 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Wave Bonus   */ 2000,
 {
 /* Phase 1      */ {  -1.0f,  15, SpawnType_Grunt|SpawnType_Soldier, 135,145 },
-/* Phase 2      */ {  60.0f, 100, SpawnType_Barbarian,                14, 18 },
-/* Phase 3      */ {  30.0f, 100, SpawnType_Barbarian,                18, 22 },
+/* Phase 2      */ {  60.0f, 100, SpawnType_Barbarian,                13, 15 },
+/* Phase 3      */ {  30.0f, 100, SpawnType_Barbarian,                13, 15 },
 /* Phase 4      */ NO_PHASE,
 /* Phase 5      */ NO_PHASE,
 /* Phase 6      */ NO_PHASE,
@@ -264,28 +264,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Phase 1      */ {  -1.0f,  25, SpawnType_Grunt|SpawnType_Soldier,    100,120 },
 /* Phase 2      */ {  45.0f, 150, SpawnType_Soldier|SpawnType_Barbarian, 20, 24 },
 /* Phase 3      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian, 22, 25 },
-/* Phase 4      */ {  -1.0f,  60, SpawnType_Dripper,                     17, 24 },
-/* Phase 5      */ NO_PHASE,
-/* Phase 6      */ NO_PHASE,
-/* Phase 7      */ NO_PHASE,
-/* Phase 8      */ NO_PHASE,
-}
-},
-// -----------------------------------------------
-
-#if 0
-// WAVE 11 ---------------------------------------
-{
-/* Wave Number  */ 11,
-/* Phases       */ 4,
-/* Spawn Points */ 8,
-/* Prep Timer   */ 60.0f,
-/* Wave Bonus   */ 2050,
-{
-/* Phase 1      */ {  -1.0f,  15, SpawnType_Grunt|SpawnType_Soldier,                    135,145 },
-/* Phase 2      */ {  95.0f, 100, SpawnType_Barbarian,                                   14, 18 },
-/* Phase 3      */ {  -1.0f, 100, SpawnType_Grunt|SpawnType_Soldier,                     40, 55 },
-/* Phase 4      */ {  -1.0f,  50, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian, 60, 65 },
+/* Phase 4      */ {  -1.0f,  60, SpawnType_Dripper,                     8,  12 },
 /* Phase 5      */ NO_PHASE,
 /* Phase 6      */ NO_PHASE,
 /* Phase 7      */ NO_PHASE,
@@ -302,10 +281,10 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Prep Timer   */ 60.0f,
 /* Wave Bonus   */ 2100,
 {
-/* Phase 1      */ {  -1.0f,  15, SpawnType_Grunt|SpawnType_Soldier, 160,165 },
-/* Phase 2      */ {  95.0f, 150, SpawnType_Barbarian,                20, 25 },
-/* Phase 3      */ {  -1.0f,  30, SpawnType_Grunt|SpawnType_Soldier,  90,100 },
-/* Phase 4      */ {  95.0f, 150, SpawnType_Barbarian,                20, 25 },
+/* Phase 1      */ {  -1.0f,  35, SpawnType_Grunt|SpawnType_Soldier,                    135,145 },
+/* Phase 2      */ {  95.0f, 100, SpawnType_Barbarian,                                   14, 18 },
+/* Phase 3      */ {  -1.0f, 100, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Dripper,   40, 55 },
+/* Phase 4      */ {  -1.0f,  50, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian, 60, 65 },
 /* Phase 5      */ NO_PHASE,
 /* Phase 6      */ NO_PHASE,
 /* Phase 7      */ NO_PHASE,
@@ -313,6 +292,68 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 }
 },
 // -----------------------------------------------
+
+// WAVE 13 ---------------------------------------
+{
+/* Wave Number  */ 13,
+/* Phases       */ 3,
+/* Spawn Points */ 8,
+/* Prep Timer   */ 60.0f,
+/* Wave Bonus   */ 2150,
+{
+/* Phase 1      */ {  -1.0f,  30, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Dripper, 160,165 },
+/* Phase 2      */ {  30.0f, 150, SpawnType_Barbarian,                                  18, 20 },
+/* Phase 4      */ {  60.0f, 150, SpawnType_Barbarian,                                  18, 20 },
+/* Phase 5      */ NO_PHASE,
+/* Phase 6      */ NO_PHASE,
+/* Phase 7      */ NO_PHASE,
+/* Phase 8      */ NO_PHASE,
+}
+},
+// -----------------------------------------------
+
+// WAVE 14 ---------------------------------------
+{
+/* Wave Number  */ 14,
+/* Phases       */ 4,
+/* Spawn Points */ 8,
+/* Prep Timer   */ 60.0f,
+/* Wave Bonus   */ 2200,
+{
+/* Phase 1      */ {  -1.0f,  40, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian, 170,180 },
+/* Phase 2      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Dripper,                    30, 34 },
+/* Phase 3      */ {  30.0f, 150, SpawnType_Soldier,                                      25, 32 },
+/* Phase 4      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Dripper,                    30, 34 },
+/* Phase 5      */ NO_PHASE,
+/* Phase 6      */ NO_PHASE,
+/* Phase 7      */ NO_PHASE,
+/* Phase 8      */ NO_PHASE,
+}
+},
+// -----------------------------------------------
+
+// WAVE 15 ---------------------------------------
+{
+/* Wave Number  */ 15,
+/* Phases       */ 5,
+/* Spawn Points */ 8,
+/* Prep Timer   */ 60.0f,
+/* Wave Bonus   */ 2500,
+{
+/* Phase 1      */ {  -1.0f,  40, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian|SpawnType_Dripper, 190,200 },
+/* Phase 2      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                                    20, 25 },
+/* Phase 3      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                                    20, 25 },
+/* Phase 4      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                                    20, 25 },
+/* Phase 5      */ {  -1.0f, 999, SpawnType_Goliath,                                                         2,  2 },
+/* Phase 6      */ NO_PHASE,
+/* Phase 7      */ NO_PHASE,
+/* Phase 8      */ NO_PHASE,
+}
+},
+// -----------------------------------------------
+
+#if 0
+
 
 // WAVE 13 ---------------------------------------
 {
@@ -454,7 +495,7 @@ INTERNAL nkS32 get_entity_spawn_rate(EntityID id)
     {
         case EntityID_Grunt:     return 60;
         case EntityID_Soldier:   return 25;
-        case EntityID_Dripper:   return 20;
+        case EntityID_Dripper:   return 15;
         case EntityID_Barbarian: return 10;
         case EntityID_Goliath:   return  3;
     }
@@ -744,6 +785,15 @@ INTERNAL void tick_wave_fight_state(nkF32 dt)
 GLOBAL void wave_manager_tick(nkF32 dt)
 {
     auto& wm = g_wave_manager;
+
+    // Debug control for jumping to a later wave.
+    #if defined(BUILD_DEBUG)
+    if(is_key_pressed(KeyCode_Home))
+    {
+        start_wave();
+        end_wave();
+    }
+    #endif // BUILD_DEBUG
 
     // Update the current wave manager state.
     switch(wm.state)
