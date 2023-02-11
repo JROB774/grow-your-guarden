@@ -172,7 +172,11 @@ DEF_ETICK(bell_plant)
 
 DEF_ETICK(rocket_plant)
 {
-    // @Incomplete: Fertilized...
+    // If fertilized then grow twice as fast (essentially doubling fire-rate).
+    if(e.fertilized_timer)
+    {
+        e.phase_timer += dt;
+    }
 
     // Once we are fully grown we check for any nearby targets. If we have one then we launch
     // our rocket (which is acutally ourselves). Afterwards, we set our growth phase back to
