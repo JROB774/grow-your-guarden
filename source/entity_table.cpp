@@ -303,7 +303,7 @@ INTERNAL constexpr EntityDesc ENTITY_TABLE[] =
 /* Default State      */ EntityState_Move,
 /* Flags              */ EntityFlag_None,
 /* Tick               */ ETICK(walker),
-/* Health             */ 20.0f,
+/* Health             */ 22.0f,
 /* Damage             */ 1.0f,
 /* Speed              */ 1.0f,
 /* Range              */ 0.0f,
