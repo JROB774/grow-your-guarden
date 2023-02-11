@@ -222,9 +222,9 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Wave Bonus   */ 1500,
 {
 /* Phase 1      */ {  -1.0f,  20, SpawnType_Grunt|SpawnType_Soldier, 70,80 },
-/* Phase 2      */ {  -1.0f, 300, SpawnType_Barbarian,               10,12 },
-/* Phase 3      */ {  -1.0f, 300, SpawnType_Barbarian,               14,18 },
-/* Phase 4      */ {  -1.0f, 300, SpawnType_Barbarian,               17,20 },
+/* Phase 2      */ {  -1.0f, 300, SpawnType_Barbarian,                6, 8 },
+/* Phase 3      */ {  -1.0f, 300, SpawnType_Barbarian,               10,12 },
+/* Phase 4      */ {  -1.0f, 300, SpawnType_Barbarian,               10,12 },
 /* Phase 5      */ NO_PHASE,
 /* Phase 6      */ NO_PHASE,
 /* Phase 7      */ NO_PHASE,
@@ -253,6 +253,27 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 },
 // -----------------------------------------------
 
+// WAVE 11 ---------------------------------------
+{
+/* Wave Number  */ 11,
+/* Phases       */ 4,
+/* Spawn Points */ 8,
+/* Prep Timer   */ 60.0f,
+/* Wave Bonus   */ 2050,
+{
+/* Phase 1      */ {  -1.0f,  25, SpawnType_Grunt|SpawnType_Soldier,    100,120 },
+/* Phase 2      */ {  45.0f, 150, SpawnType_Soldier|SpawnType_Barbarian, 20, 24 },
+/* Phase 3      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian, 22, 25 },
+/* Phase 4      */ {  -1.0f,  60, SpawnType_Dripper,                     17, 24 },
+/* Phase 5      */ NO_PHASE,
+/* Phase 6      */ NO_PHASE,
+/* Phase 7      */ NO_PHASE,
+/* Phase 8      */ NO_PHASE,
+}
+},
+// -----------------------------------------------
+
+#if 0
 // WAVE 11 ---------------------------------------
 {
 /* Wave Number  */ 11,
@@ -352,26 +373,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 }
 },
 // -----------------------------------------------
-
-// WAVE 16 ---------------------------------------
-{
-/* Wave Number  */ 16,
-/* Phases       */ 4,
-/* Spawn Points */ 8,
-/* Prep Timer   */ 60.0f,
-/* Wave Bonus   */ 2300,
-{
-/* Phase 1      */ {  -1.0f,  10, SpawnType_Grunt|SpawnType_Soldier,                     100,120 },
-/* Phase 2      */ {  -1.0f, 150, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian, 100,120 },
-/* Phase 3      */ {  30.0f, 150, SpawnType_Soldier,                                      22, 25 },
-/* Phase 4      */ {  -1.0f,  60, SpawnType_Dripper,                                      17, 24 },
-/* Phase 5      */ NO_PHASE,
-/* Phase 6      */ NO_PHASE,
-/* Phase 7      */ NO_PHASE,
-/* Phase 8      */ NO_PHASE,
-}
-},
-// -----------------------------------------------
+# endif
 
 }; // WAVE_LIST
 

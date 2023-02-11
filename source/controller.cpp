@@ -15,7 +15,7 @@ INTERNAL constexpr nkF32 CAMERA_ZOOM_SENSITIVITY = 0.15f;
 INTERNAL constexpr nkF32 CAMERA_ZOOM_SPEED       = 12.0f;
 INTERNAL constexpr nkF32 CAMERA_PAN_SPEED        = 12.0f;
 
-INTERNAL constexpr nkF32 FERTILIZE_TIME = 60.0f * 5.0f;
+INTERNAL constexpr nkF32 FERTILIZE_TIME = 60.0f * 3.5f;
 
 NK_ENUM(HotbarID, nkU32)
 {
@@ -291,32 +291,32 @@ GLOBAL void controller_init(void)
 
     g_controller.hotbar[HotbarID_HedgeWall  ].name        = "HEDGE WALL";
     g_controller.hotbar[HotbarID_HedgeWall  ].description = "A defensive wall-like plant.\nDoes not attack.\nGets stronger as it grows.";
-    g_controller.hotbar[HotbarID_HedgeWall  ].cost        = 200;
+    g_controller.hotbar[HotbarID_HedgeWall  ].cost        = 250;
     g_controller.hotbar[HotbarID_HedgeWall  ].unlock      = 5;
     g_controller.hotbar[HotbarID_HedgeWall  ].spawn_id    = EntityID_HedgeWall;
 
     g_controller.hotbar[HotbarID_BellPlant  ].name        = "MISSILE BELL";
     g_controller.hotbar[HotbarID_BellPlant  ].description = "Fires anti-air homing projectiles at flying enemies.\nCannot attack ground enemies.";
     g_controller.hotbar[HotbarID_BellPlant  ].cost        = 150;
-    g_controller.hotbar[HotbarID_BellPlant  ].unlock      = 15;
+    g_controller.hotbar[HotbarID_BellPlant  ].unlock      = 10;
     g_controller.hotbar[HotbarID_BellPlant  ].spawn_id    = EntityID_BellPlant;
 
     g_controller.hotbar[HotbarID_RocketPlant].name        = "ROCKET PLANT";
     g_controller.hotbar[HotbarID_RocketPlant].description = "Fires itself at the enemy in an explosive blast.\nCauses splash damage on surrounding enemies.";
     g_controller.hotbar[HotbarID_RocketPlant].cost        = 325;
-    g_controller.hotbar[HotbarID_RocketPlant].unlock      = 20;
+    g_controller.hotbar[HotbarID_RocketPlant].unlock      = 15;
     g_controller.hotbar[HotbarID_RocketPlant].spawn_id    = EntityID_RocketPlant;
 
     g_controller.hotbar[HotbarID_Fertilizer ].name        = "FERTILIZER";
     g_controller.hotbar[HotbarID_Fertilizer ].description = "Increase a plant's stats for a limited time.";
-    g_controller.hotbar[HotbarID_Fertilizer ].cost        = 400;
-    g_controller.hotbar[HotbarID_Fertilizer ].unlock      = 10;
+    g_controller.hotbar[HotbarID_Fertilizer ].cost        = 350;
+    g_controller.hotbar[HotbarID_Fertilizer ].unlock      = 17;
     g_controller.hotbar[HotbarID_Fertilizer ].spawn_id    = EntityID_None;
 
     g_controller.hotbar[HotbarID_InstaGrow  ].name        = "INSTA-GROW";
     g_controller.hotbar[HotbarID_InstaGrow  ].description = "Instantly grow a plant to its maximum growth stage.";
     g_controller.hotbar[HotbarID_InstaGrow  ].cost        = 600;
-    g_controller.hotbar[HotbarID_InstaGrow  ].unlock      = 25;
+    g_controller.hotbar[HotbarID_InstaGrow  ].unlock      = 17;
     g_controller.hotbar[HotbarID_InstaGrow  ].spawn_id    = EntityID_None;
 
     g_controller.hotbar[HotbarID_Shovel     ].name        = "Shovel";
@@ -329,6 +329,7 @@ GLOBAL void controller_init(void)
     g_controller.hotbar[HotbarID_Bell       ].description = "Spawn the forces of evil straight away.";
     g_controller.hotbar[HotbarID_Bell       ].cost        = 0;
     g_controller.hotbar[HotbarID_Bell       ].unlock      = 0;
+    g_controller.hotbar[HotbarID_Bell       ].spawn_id    = EntityID_None;
     g_controller.hotbar[HotbarID_Bell       ].spawn_id    = EntityID_None;
 }
 
