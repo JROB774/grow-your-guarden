@@ -340,7 +340,16 @@ GLOBAL void controller_tick(nkF32 dt)
 
     #if defined(BUILD_DEBUG)
     if(is_key_pressed(KeyCode_F2))
+    {
         add_money(5000);
+    }
+    if(is_key_pressed(KeyCode_F3))
+    {
+        for(nkS32 i=0; i<HotbarID_TOTAL; ++i)
+        {
+            g_controller.hotbar[i].unlock = 0;
+        }
+    }
     #endif // BUILD_DEBUG
 
     nkVec2 cursor_pos = get_window_mouse_pos();
