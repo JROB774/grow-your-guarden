@@ -166,6 +166,7 @@ INTERNAL nkBool can_fertilize_plant_at_position(nkF32 x, nkF32 y)
     {
         case EntityID_Bramble: return NK_TRUE;
         case EntityID_HedgeWall: return NK_TRUE;
+        case EntityID_RocketPlant: return NK_TRUE;
     }
 
     return plant_is_fully_grown(*entity);
