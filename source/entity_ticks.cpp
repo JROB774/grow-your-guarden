@@ -89,7 +89,7 @@ DEF_ETICK(bramble)
                         case 0: entity_damage(i, 0.25f * multiplier); break;
                         case 1: entity_damage(i, 0.50f * multiplier); break;
                         case 2: entity_damage(i, 1.00f * multiplier); break;
-                        case 3: entity_damage(i, 2.00f * multiplier); break;
+                        case 3: entity_damage(i, 1.50f * multiplier); break;
                     }
                 }
             }

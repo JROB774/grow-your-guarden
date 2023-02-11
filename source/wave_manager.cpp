@@ -61,7 +61,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Prep Timer   */ 60.0f,
 /* Wave Bonus   */ 750,
 {
-/* Phase 1      */ { -1.0f, 10, SpawnType_Grunt, 8,10 },
+/* Phase 1      */ { -1.0f, 5, SpawnType_Grunt, 8,10 },
 /* Phase 2      */ NO_PHASE,
 /* Phase 3      */ NO_PHASE,
 /* Phase 4      */ NO_PHASE,
@@ -141,10 +141,90 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Prep Timer   */ 60.0f,
 /* Wave Bonus   */ 1200,
 {
-/* Phase 1      */ {  -1.0f,  5, SpawnType_Grunt,                   15,22 },
-/* Phase 2      */ {  30.0f, 20, SpawnType_Soldier,                   5,5 },
-/* Phase 3      */ {  20.0f, 40, SpawnType_Grunt|SpawnType_Soldier, 30,35 },
+/* Phase 1      */ {  -1.0f,  5, SpawnType_Grunt,                   50,52 },
+/* Phase 2      */ {  60.0f, 20, SpawnType_Soldier,                 18,22 },
+/* Phase 3      */ {  30.0f, 40, SpawnType_Grunt|SpawnType_Soldier, 30,35 },
 /* Phase 4      */ NO_PHASE,
+/* Phase 5      */ NO_PHASE,
+/* Phase 6      */ NO_PHASE,
+/* Phase 7      */ NO_PHASE,
+/* Phase 8      */ NO_PHASE,
+}
+},
+// -----------------------------------------------
+
+// WAVE 06 ---------------------------------------
+{
+/* Wave Number  */ 6,
+/* Phases       */ 4,
+/* Spawn Points */ 8,
+/* Prep Timer   */ 60.0f,
+/* Wave Bonus   */ 1250,
+{
+/* Phase 1      */ {  -1.0f,  5, SpawnType_Grunt,                   80,89 },
+/* Phase 2      */ {   0.0f, 50, SpawnType_Grunt|SpawnType_Soldier, 20,28 },
+/* Phase 3      */ {  20.0f, 50, SpawnType_Grunt|SpawnType_Soldier, 20,28 },
+/* Phase 4      */ {  20.0f, 50, SpawnType_Grunt|SpawnType_Soldier, 20,28 },
+/* Phase 5      */ NO_PHASE,
+/* Phase 6      */ NO_PHASE,
+/* Phase 7      */ NO_PHASE,
+/* Phase 8      */ NO_PHASE,
+}
+},
+// -----------------------------------------------
+
+// WAVE 07 ---------------------------------------
+{
+/* Wave Number  */ 7,
+/* Phases       */ 3,
+/* Spawn Points */ 8,
+/* Prep Timer   */ 60.0f,
+/* Wave Bonus   */ 1300,
+{
+/* Phase 1      */ {  -1.0f,  7, SpawnType_Grunt|SpawnType_Soldier, 100,120 },
+/* Phase 2      */ {  70.0f, 90, SpawnType_Soldier,                  17, 20 },
+/* Phase 3      */ {  30.0f, 90, SpawnType_Soldier,                  17, 20 },
+/* Phase 4      */ NO_PHASE,
+/* Phase 5      */ NO_PHASE,
+/* Phase 6      */ NO_PHASE,
+/* Phase 7      */ NO_PHASE,
+/* Phase 8      */ NO_PHASE,
+}
+},
+// -----------------------------------------------
+
+// WAVE 08 ---------------------------------------
+{
+/* Wave Number  */ 8,
+/* Phases       */ 3,
+/* Spawn Points */ 8,
+/* Prep Timer   */ 60.0f,
+/* Wave Bonus   */ 1350,
+{
+/* Phase 1      */ {  -1.0f,   9, SpawnType_Grunt|SpawnType_Soldier, 100,120 },
+/* Phase 2      */ {  55.0f, 100, SpawnType_Soldier,                  20, 22 },
+/* Phase 3      */ {  30.0f, 100, SpawnType_Soldier,                  20, 22 },
+/* Phase 4      */ NO_PHASE,
+/* Phase 5      */ NO_PHASE,
+/* Phase 6      */ NO_PHASE,
+/* Phase 7      */ NO_PHASE,
+/* Phase 8      */ NO_PHASE,
+}
+},
+// -----------------------------------------------
+
+// WAVE 09 ---------------------------------------
+{
+/* Wave Number  */ 9,
+/* Phases       */ 4,
+/* Spawn Points */ 8,
+/* Prep Timer   */ 60.0f,
+/* Wave Bonus   */ 1500,
+{
+/* Phase 1      */ {  -1.0f,  20, SpawnType_Grunt|SpawnType_Soldier, 70,80 },
+/* Phase 2      */ {  -1.0f, 300, SpawnType_Barbarian,               10,12 },
+/* Phase 3      */ {  -1.0f, 300, SpawnType_Barbarian,               14,18 },
+/* Phase 4      */ {  -1.0f, 300, SpawnType_Barbarian,               17,20 },
 /* Phase 5      */ NO_PHASE,
 /* Phase 6      */ NO_PHASE,
 /* Phase 7      */ NO_PHASE,
@@ -231,10 +311,10 @@ INTERNAL nkS32 get_entity_spawn_rate(EntityID id)
     switch(id)
     {
         case EntityID_Grunt:     return 60;
-        case EntityID_Dripper:   return 60;
         case EntityID_Soldier:   return 25;
-        case EntityID_Barbarian: return 15;
-        case EntityID_Goliath:   return  2;
+        case EntityID_Dripper:   return 20;
+        case EntityID_Barbarian: return 10;
+        case EntityID_Goliath:   return  3;
     }
     return 0;
 }
