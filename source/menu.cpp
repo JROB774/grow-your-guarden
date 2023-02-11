@@ -15,6 +15,21 @@ INTERNAL constexpr nkF32 MENU_HOWTO_YPOS   = -1.00f;
 INTERNAL constexpr nkF32 MENU_CREDITS_YPOS = -1.00f;
 INTERNAL constexpr nkF32 MENU_EXIT_YPOS    = -1.00f;
 
+INTERNAL constexpr const nkChar* MENU_DIFFICULTY_INFO_TEXT   = "Select Your Difficulty";
+INTERNAL constexpr const nkChar* MENU_DIFFICULTY_EASY_TEXT   = "Easy";
+INTERNAL constexpr const nkChar* MENU_DIFFICULTY_NORMAL_TEXT = "Normal";
+INTERNAL constexpr const nkChar* MENU_DIFFICULTY_HARD_TEXT   = "Hard";
+
+INTERNAL constexpr nkS32 MENU_DIFFICULTY_INFO_SIZE   = 100;
+INTERNAL constexpr nkS32 MENU_DIFFICULTY_EASY_SIZE   =  35;
+INTERNAL constexpr nkS32 MENU_DIFFICULTY_NORMAL_SIZE =  35;
+INTERNAL constexpr nkS32 MENU_DIFFICULTY_HARD_SIZE   =  35;
+
+INTERNAL constexpr nkF32 MENU_DIFFICULTY_INFO_YPOS   =  0.40f;
+INTERNAL constexpr nkF32 MENU_DIFFICULTY_EASY_YPOS   =  0.75f;
+INTERNAL constexpr nkF32 MENU_DIFFICULTY_NORMAL_YPOS = -1.00f;
+INTERNAL constexpr nkF32 MENU_DIFFICULTY_HARD_YPOS   = -1.00f;
+
 INTERNAL constexpr nkF32 MENU_SLIDE_SPEED = 2.0f;
 
 INTERNAL constexpr nkS32 MENU_LAYERS = 4;
@@ -28,7 +43,8 @@ NK_ENUM(MenuScreen, nkS32)
 {
     MenuScreen_Main,
     MenuScreen_Tutorial,
-    MenuScreen_Credits
+    MenuScreen_Credits,
+    MenuScreen_Difficulty
 };
 
 NK_ENUM(MenuStage, nkS32)
@@ -150,7 +166,7 @@ INTERNAL void menu_tick_main(nkF32 dt)
     {
         if(tick_menu_text_button(MENU_PLAY_TEXT, MENU_PLAY_YPOS, MENU_PLAY_SIZE))
         {
-            game_start();
+            g_menu.screen = MenuScreen_Difficulty;
         }
         if(tick_menu_text_button(MENU_HOWTO_TEXT, MENU_HOWTO_YPOS, MENU_HOWTO_SIZE))
         {
@@ -339,6 +355,50 @@ INTERNAL void menu_draw_credits(void)
     draw_back_button();
 }
 
+INTERNAL void menu_tick_difficulty(nkF32 dt)
+{
+    tick_menu_text_button(MENU_DIFFICULTY_INFO_TEXT, MENU_DIFFICULTY_INFO_YPOS, MENU_DIFFICULTY_INFO_SIZE, NK_FALSE);
+
+    // Handle the difficulty selection buttons.
+    if(tick_menu_text_button(MENU_DIFFICULTY_EASY_TEXT, MENU_DIFFICULTY_EASY_YPOS, MENU_DIFFICULTY_EASY_SIZE))
+    {
+        set_spawn_multiplier(0.5f);
+        set_coin_multiplier(2.0f);
+        game_start();
+        g_menu.screen = MenuScreen_Main;
+    }
+    if(tick_menu_text_button(MENU_DIFFICULTY_NORMAL_TEXT, MENU_DIFFICULTY_NORMAL_YPOS, MENU_DIFFICULTY_NORMAL_SIZE))
+    {
+        set_spawn_multiplier(1.0f);
+        set_coin_multiplier(1.0f);
+        game_start();
+        g_menu.screen = MenuScreen_Main;
+    }
+    if(tick_menu_text_button(MENU_DIFFICULTY_HARD_TEXT, MENU_DIFFICULTY_HARD_YPOS, MENU_DIFFICULTY_HARD_SIZE))
+    {
+        set_spawn_multiplier(2.0f);
+        set_coin_multiplier(1.0f);
+        game_start();
+        g_menu.screen = MenuScreen_Main;
+    }
+
+    // Handle the back button.
+    tick_back_button();
+}
+
+INTERNAL void menu_draw_difficulty(void)
+{
+    draw_menu_text_button(MENU_DIFFICULTY_INFO_TEXT, MENU_DIFFICULTY_INFO_YPOS, MENU_DIFFICULTY_INFO_SIZE, NK_FALSE);
+
+    // Draw the difficulty selection buttons.
+    draw_menu_text_button(MENU_DIFFICULTY_EASY_TEXT, MENU_DIFFICULTY_EASY_YPOS, MENU_DIFFICULTY_EASY_SIZE);
+    draw_menu_text_button(MENU_DIFFICULTY_NORMAL_TEXT, MENU_DIFFICULTY_NORMAL_YPOS, MENU_DIFFICULTY_NORMAL_SIZE);
+    draw_menu_text_button(MENU_DIFFICULTY_HARD_TEXT, MENU_DIFFICULTY_HARD_YPOS, MENU_DIFFICULTY_HARD_SIZE);
+
+    // Draw the back button.
+    draw_back_button();
+}
+
 GLOBAL void menu_init(void)
 {
     asset_manager_load<Sound>("click.wav");
@@ -401,6 +461,7 @@ GLOBAL void menu_tick(nkF32 dt)
         case MenuScreen_Main: menu_tick_main(dt); break;
         case MenuScreen_Tutorial: menu_tick_tutorial(dt); break;
         case MenuScreen_Credits: menu_tick_credits(dt); break;
+        case MenuScreen_Difficulty: menu_tick_difficulty(dt); break;
     }
 }
 
@@ -431,6 +492,7 @@ GLOBAL void menu_draw(void)
         case MenuScreen_Main: menu_draw_main(); break;
         case MenuScreen_Tutorial: menu_draw_tutorial(); break;
         case MenuScreen_Credits: menu_draw_credits(); break;
+        case MenuScreen_Difficulty: menu_draw_difficulty(); break;
     }
 }
 

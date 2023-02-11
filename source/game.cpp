@@ -32,6 +32,8 @@ struct GameState
     Sound  splat_sounds[3];
     nkBool paused;
     nkBool game_over;
+    nkF32  spawn_multiplier;
+    nkF32  coin_multiplier;
 };
 
 INTERNAL GameState g_game;
@@ -352,6 +354,26 @@ GLOBAL nkBool is_game_paused(void)
 GLOBAL nkBool is_game_over(void)
 {
     return g_game.game_over;
+}
+
+GLOBAL void set_spawn_multiplier(nkF32 multiplier)
+{
+    g_game.spawn_multiplier = multiplier;
+}
+
+GLOBAL void set_coin_multiplier(nkF32 multiplier)
+{
+    g_game.coin_multiplier = multiplier;
+}
+
+GLOBAL nkF32 get_spawn_multiplier(void)
+{
+    return g_game.spawn_multiplier;
+}
+
+GLOBAL nkF32 get_coin_multiplier(void)
+{
+    return g_game.coin_multiplier;
 }
 
 GLOBAL Sound get_random_munch_sound(void)

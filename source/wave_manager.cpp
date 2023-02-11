@@ -522,8 +522,8 @@ INTERNAL void setup_next_wave(void)
     {
         const PhaseDesc& phase = wm.wave_desc->phases[i];
 
-        nkS32 min_spawns = NK_CAST(nkS32, NK_CAST(nkF32, phase.min_spawns) * wm.wave_multiplier);
-        nkS32 max_spawns = NK_CAST(nkS32, NK_CAST(nkF32, phase.max_spawns) * wm.wave_multiplier);
+        nkS32 min_spawns = NK_CAST(nkS32, (NK_CAST(nkF32, phase.min_spawns) * wm.wave_multiplier) * get_spawn_multiplier());
+        nkS32 max_spawns = NK_CAST(nkS32, (NK_CAST(nkF32, phase.max_spawns) * wm.wave_multiplier) * get_spawn_multiplier());
 
         wm.spawners[i].state       = SpawnerState_Waiting;
         wm.spawners[i].timer       = phase.start_time;

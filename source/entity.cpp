@@ -511,7 +511,7 @@ GLOBAL void entity_kill(nkU64 index)
         }
 
         // Potentially spawn some coins!
-        if(rng_s32(1,100) <= desc.coin_chance)
+        if(rng_s32(1,100) <= (desc.coin_chance * get_coin_multiplier()))
         {
             nkS32 count = rng_s32(desc.coin_min, desc.coin_max);
             for(nkS32 i=0; i<count; ++i)

@@ -475,7 +475,7 @@ DEF_ETICK(goliath)
 
 DEF_ETICK(bell_missile)
 {
-    const nkF32 HEIGHT_ADVANCE_SPEED = 1.5f;
+    const nkF32 HEIGHT_ADVANCE_SPEED = 1.75f;
     const nkF32 HOMING_SPEED = 6.5f;
 
     const nkF32 MAX_HOMING_DISTANCE = 7.1f * TILE_WIDTH;
