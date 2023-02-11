@@ -459,7 +459,7 @@ INTERNAL void tick_wave_fight_state(nkF32 dt)
                     }
                     if(all_complete)
                     {
-                        printf("[Wave]: Speeding up phase %d!\n", i);
+                        DEBUG_LOG("[Wave]: Speeding up phase %d!\n", i);
                         spawner.spawn_rate *= 2;
                     }
                 }

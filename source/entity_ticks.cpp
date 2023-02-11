@@ -662,7 +662,6 @@ DEF_ETICK(explosion)
             {
                 nkF32 blast_damage = e.damage * (1.0f - (distance / e.radius));
                 entity_damage(sub_index, blast_damage);
-                printf("BLAST DAMAGE: %f\n", blast_damage);
             }
         }
         ++sub_index;
