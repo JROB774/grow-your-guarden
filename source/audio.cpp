@@ -227,8 +227,9 @@ GLOBAL void play_music_fade_in(Music music, nkS32 loops, nkF32 seconds)
     // and is the best we can do.
     if(Mix_PlayingMusic())
     {
-        g_audio.next_track = music;
-        g_audio.next_track_fade = seconds;
+        g_audio.next_track       = music;
+        g_audio.next_track_fade  = seconds;
+        g_audio.next_track_loops = loops;
 
         stop_music_fade_out(seconds * 0.5f);
         Mix_HookMusicFinished(play_music_audio_hook);
