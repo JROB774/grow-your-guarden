@@ -6,7 +6,8 @@ INTERNAL constexpr nkS32 STARTING_MONEY = 750;
 
 INTERNAL constexpr nkF32 TOOLTIP_PADDING = 5.0f;
 
-INTERNAL constexpr nkF32 PANNING_SPEED = 10.0f * TILE_WIDTH;
+INTERNAL constexpr nkF32 PANNING_SPEED = 10.00f * TILE_WIDTH;
+INTERNAL constexpr nkF32 ZOOMING_SPEED =  0.07f;
 
 INTERNAL constexpr nkF32 CAMERA_START_ZOOM       = 0.50f;
 INTERNAL constexpr nkF32 CAMERA_MIN_ZOOM         = 0.25f;
@@ -419,9 +420,17 @@ GLOBAL void controller_tick(nkF32 dt)
     if(mouse_wheel.y != 0.0f)
     {
         g_controller.camera_target_zoom += (mouse_wheel.y * CAMERA_ZOOM_SENSITIVITY) * g_controller.camera_target_zoom; // Multiply by the current zoom for more even increments.
-        g_controller.camera_target_zoom = nk_clamp(g_controller.camera_target_zoom, CAMERA_MIN_ZOOM, CAMERA_MAX_ZOOM);
+    }
+    if(is_key_down(KeyCode_Q))
+    {
+        g_controller.camera_target_zoom -= (ZOOMING_SPEED * g_controller.camera_target_zoom);
+    }
+    if(is_key_down(KeyCode_E))
+    {
+        g_controller.camera_target_zoom += (ZOOMING_SPEED * g_controller.camera_target_zoom);
     }
 
+    g_controller.camera_target_zoom = nk_clamp(g_controller.camera_target_zoom, CAMERA_MIN_ZOOM, CAMERA_MAX_ZOOM);
     g_controller.camera_current_zoom = nk_lerp(g_controller.camera_current_zoom, g_controller.camera_target_zoom, CAMERA_ZOOM_SPEED * dt);
 
     // Check hovering and handle interaction with the hotbar slots.
