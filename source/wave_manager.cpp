@@ -341,16 +341,38 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Wave Bonus   */ 5000,
 {
 /* Phase 1      */ {  -1.0f,  40, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian|SpawnType_Dripper, 190,200 },
-/* Phase 2      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                                    20, 25 },
-/* Phase 3      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                                    20, 25 },
-/* Phase 4      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                                    20, 25 },
-/* Phase 5      */ {  -1.0f, 999, SpawnType_Goliath,                                                         2,  2 },
-/* Phase 6      */ {   0.0f,  20, SpawnType_Grunt|SpawnType_Soldier,                                        65, 75 },
+/* Phase 2      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                                    23, 27 },
+/* Phase 3      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                                    23, 27 },
+/* Phase 4      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                                    23, 27 },
+/* Phase 5      */ NO_PHASE,
+/* Phase 6      */ NO_PHASE,
 /* Phase 7      */ NO_PHASE,
 /* Phase 8      */ NO_PHASE,
 }
 },
 // -----------------------------------------------
+
+// WAVE 16 ---------------------------------------
+{
+/* Wave Number  */ 16,
+/* Phases       */ 2,
+/* Spawn Points */ 8,
+/* Prep Timer   */ 60.0f,
+/* Wave Bonus   */ 6000,
+{
+/* Phase 1      */ {  -1.0f, 45, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian|SpawnType_Dripper|SpawnType_Goliath, 150,160 },
+/* Phase 2      */ {  -1.0f, 65, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian|SpawnType_Dripper|SpawnType_Goliath,  50, 70 },
+/* Phase 3      */ NO_PHASE,
+/* Phase 4      */ NO_PHASE,
+/* Phase 5      */ NO_PHASE,
+/* Phase 6      */ NO_PHASE,
+/* Phase 7      */ NO_PHASE,
+/* Phase 7      */ NO_PHASE,
+}
+},
+// -----------------------------------------------
+
+// CONTINUES ON FOREVER...
 
 }; // WAVE_LIST
 
@@ -433,7 +455,7 @@ INTERNAL nkS32 get_entity_spawn_rate(EntityID id)
         case EntityID_Soldier:   return 25;
         case EntityID_Dripper:   return 15;
         case EntityID_Barbarian: return 10;
-        case EntityID_Goliath:   return  3;
+        case EntityID_Goliath:   return  1;
     }
     return 0;
 }

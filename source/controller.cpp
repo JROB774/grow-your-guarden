@@ -316,7 +316,7 @@ GLOBAL void controller_init(void)
 
     g_controller.hotbar[HotbarID_InstaGrow  ].name        = "INSTA-GROW";
     g_controller.hotbar[HotbarID_InstaGrow  ].description = "Instantly grow a plant to its maximum growth stage.";
-    g_controller.hotbar[HotbarID_InstaGrow  ].cost        = 500;
+    g_controller.hotbar[HotbarID_InstaGrow  ].cost        = 400;
     g_controller.hotbar[HotbarID_InstaGrow  ].unlock      = 17;
     g_controller.hotbar[HotbarID_InstaGrow  ].spawn_id    = EntityID_None;
 
