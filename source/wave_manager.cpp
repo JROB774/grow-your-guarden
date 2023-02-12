@@ -352,76 +352,12 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 },
 // -----------------------------------------------
 
-#if 0
-
-
-// WAVE 13 ---------------------------------------
-{
-/* Wave Number  */ 13,
-/* Phases       */ 5,
-/* Spawn Points */ 8,
-/* Prep Timer   */ 60.0f,
-/* Wave Bonus   */ 2150,
-{
-/* Phase 1      */ {  -1.0f,  15, SpawnType_Grunt|SpawnType_Soldier,                     160,165 },
-/* Phase 2      */ {  95.0f, 150, SpawnType_Barbarian,                                    20, 25 },
-/* Phase 3      */ {  -1.0f,  30, SpawnType_Grunt|SpawnType_Soldier,                      90,100 },
-/* Phase 4      */ {  95.0f, 150, SpawnType_Barbarian,                                    20, 25 },
-/* Phase 5      */ {  -1.0f,  30, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian, 100,120 },
-/* Phase 6      */ NO_PHASE,
-/* Phase 7      */ NO_PHASE,
-/* Phase 8      */ NO_PHASE,
-}
-},
-// -----------------------------------------------
-
-// WAVE 14 ---------------------------------------
-{
-/* Wave Number  */ 14,
-/* Phases       */ 5,
-/* Spawn Points */ 8,
-/* Prep Timer   */ 60.0f,
-/* Wave Bonus   */ 2200,
-{
-/* Phase 1      */ {  -1.0f,  15, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian, 170,180 },
-/* Phase 2      */ {  30.0f, 150, SpawnType_Soldier,                                      20, 25 },
-/* Phase 3      */ {  30.0f, 150, SpawnType_Soldier,                                      20, 25 },
-/* Phase 4      */ {  30.0f, 150, SpawnType_Soldier,                                      20, 25 },
-/* Phase 5      */ {  -1.0f,  40, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian, 100,120 },
-/* Phase 6      */ NO_PHASE,
-/* Phase 7      */ NO_PHASE,
-/* Phase 8      */ NO_PHASE,
-}
-},
-// -----------------------------------------------
-
-// WAVE 15 ---------------------------------------
-{
-/* Wave Number  */ 15,
-/* Phases       */ 5,
-/* Spawn Points */ 8,
-/* Prep Timer   */ 60.0f,
-/* Wave Bonus   */ 2250,
-{
-/* Phase 1      */ {  -1.0f,  15, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian, 170,180 },
-/* Phase 2      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                  20, 25 },
-/* Phase 3      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                  20, 25 },
-/* Phase 4      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                  20, 25 },
-/* Phase 5      */ {  -1.0f,  40, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian, 100,120 },
-/* Phase 6      */ NO_PHASE,
-/* Phase 7      */ NO_PHASE,
-/* Phase 8      */ NO_PHASE,
-}
-},
-// -----------------------------------------------
-# endif
-
 }; // WAVE_LIST
 
 /*////////////////////////////////////////////////////////////////////////////*/
 
-INTERNAL constexpr nkF32 WAVE_MULTIPLICATION_RATE  = 0.5f;
-INTERNAL constexpr nkF32 BONUS_MULTIPLICATION_RATE = 0.1f;
+INTERNAL constexpr nkF32 WAVE_MULTIPLICATION_RATE  = 0.2f;
+INTERNAL constexpr nkF32 BONUS_MULTIPLICATION_RATE = 0.2f;
 
 INTERNAL constexpr nkF32 MESSAGE_TIME = 3.5f;
 
@@ -596,7 +532,7 @@ INTERNAL void setup_next_wave(void)
     }
 
     // Start the timer until the wave begins.
-    wm.timer = wm.wave_desc->prep_timer;
+    wm.timer = (wm.wave_desc->prep_timer * get_prep_multiplier());
 
     // Debug print for making sure waves are setting up correctly.
     DEBUG_LOG("[Wave]: Setup wave %d using %d!\n", wm.current_wave+1, wave_index);
@@ -622,7 +558,7 @@ INTERNAL void end_wave(void)
 {
     auto& wm = g_wave_manager;
 
-    nkS32 wave_bonus = NK_CAST(nkS32, NK_CAST(nkF32, wm.wave_desc->wave_bonus) * wm.bonus_multiplier);
+    nkS32 wave_bonus = NK_CAST(nkS32, (NK_CAST(nkF32, wm.wave_desc->wave_bonus) * wm.bonus_multiplier) * get_bonus_multiplier());
 
     add_money(wave_bonus);
 

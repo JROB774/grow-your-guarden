@@ -34,6 +34,8 @@ struct GameState
     nkBool game_over;
     nkF32  spawn_multiplier;
     nkF32  coin_multiplier;
+    nkF32  bonus_multiplier;
+    nkF32  prep_multiplier;
 };
 
 INTERNAL GameState g_game;
@@ -366,6 +368,16 @@ GLOBAL void set_coin_multiplier(nkF32 multiplier)
     g_game.coin_multiplier = multiplier;
 }
 
+GLOBAL void set_bonus_multiplier(nkF32 multiplier)
+{
+    g_game.bonus_multiplier = multiplier;
+}
+
+GLOBAL void set_prep_multiplier(nkF32 multiplier)
+{
+    g_game.prep_multiplier = multiplier;
+}
+
 GLOBAL nkF32 get_spawn_multiplier(void)
 {
     return g_game.spawn_multiplier;
@@ -374,6 +386,16 @@ GLOBAL nkF32 get_spawn_multiplier(void)
 GLOBAL nkF32 get_coin_multiplier(void)
 {
     return g_game.coin_multiplier;
+}
+
+GLOBAL nkF32 get_bonus_multiplier(void)
+{
+    return g_game.bonus_multiplier;
+}
+
+GLOBAL nkF32 get_prep_multiplier(void)
+{
+    return g_game.prep_multiplier;
 }
 
 GLOBAL Sound get_random_munch_sound(void)

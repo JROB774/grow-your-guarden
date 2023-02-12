@@ -363,7 +363,9 @@ INTERNAL void menu_tick_difficulty(nkF32 dt)
     if(tick_menu_text_button(MENU_DIFFICULTY_EASY_TEXT, MENU_DIFFICULTY_EASY_YPOS, MENU_DIFFICULTY_EASY_SIZE))
     {
         set_spawn_multiplier(0.5f);
-        set_coin_multiplier(2.0f);
+        set_coin_multiplier(1.5f);
+        set_bonus_multiplier(2.0f);
+        set_prep_multiplier(1.5f);
         game_start();
         g_menu.screen = MenuScreen_Main;
     }
@@ -371,13 +373,17 @@ INTERNAL void menu_tick_difficulty(nkF32 dt)
     {
         set_spawn_multiplier(1.0f);
         set_coin_multiplier(1.0f);
+        set_bonus_multiplier(1.0f);
+        set_prep_multiplier(1.0f);
         game_start();
         g_menu.screen = MenuScreen_Main;
     }
     if(tick_menu_text_button(MENU_DIFFICULTY_HARD_TEXT, MENU_DIFFICULTY_HARD_YPOS, MENU_DIFFICULTY_HARD_SIZE))
     {
         set_spawn_multiplier(2.0f);
-        set_coin_multiplier(1.0f);
+        set_coin_multiplier(1.5f);
+        set_bonus_multiplier(2.0f);
+        set_prep_multiplier(0.5f);
         game_start();
         g_menu.screen = MenuScreen_Main;
     }
