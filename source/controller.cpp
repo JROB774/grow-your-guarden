@@ -303,19 +303,19 @@ GLOBAL void controller_init(void)
 
     g_controller.hotbar[HotbarID_RocketPlant].name        = "ROCKET PLANT";
     g_controller.hotbar[HotbarID_RocketPlant].description = "Fires itself at the enemy in an explosive blast.\nCauses splash damage on surrounding enemies.";
-    g_controller.hotbar[HotbarID_RocketPlant].cost        = 325;
+    g_controller.hotbar[HotbarID_RocketPlant].cost        = 300;
     g_controller.hotbar[HotbarID_RocketPlant].unlock      = 15;
     g_controller.hotbar[HotbarID_RocketPlant].spawn_id    = EntityID_RocketPlant;
 
     g_controller.hotbar[HotbarID_Fertilizer ].name        = "FERTILIZER";
     g_controller.hotbar[HotbarID_Fertilizer ].description = "Increase a plant's stats for a limited time.";
-    g_controller.hotbar[HotbarID_Fertilizer ].cost        = 300;
+    g_controller.hotbar[HotbarID_Fertilizer ].cost        = 225;
     g_controller.hotbar[HotbarID_Fertilizer ].unlock      = 12;
     g_controller.hotbar[HotbarID_Fertilizer ].spawn_id    = EntityID_None;
 
     g_controller.hotbar[HotbarID_InstaGrow  ].name        = "INSTA-GROW";
     g_controller.hotbar[HotbarID_InstaGrow  ].description = "Instantly grow a plant to its maximum growth stage.";
-    g_controller.hotbar[HotbarID_InstaGrow  ].cost        = 600;
+    g_controller.hotbar[HotbarID_InstaGrow  ].cost        = 500;
     g_controller.hotbar[HotbarID_InstaGrow  ].unlock      = 17;
     g_controller.hotbar[HotbarID_InstaGrow  ].spawn_id    = EntityID_None;
 

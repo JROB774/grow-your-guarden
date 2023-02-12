@@ -259,7 +259,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Phases       */ 4,
 /* Spawn Points */ 8,
 /* Prep Timer   */ 60.0f,
-/* Wave Bonus   */ 2050,
+/* Wave Bonus   */ 2250,
 {
 /* Phase 1      */ {  -1.0f,  25, SpawnType_Grunt|SpawnType_Soldier,    100,120 },
 /* Phase 2      */ {  45.0f, 150, SpawnType_Soldier|SpawnType_Barbarian, 20, 24 },
@@ -279,7 +279,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Phases       */ 4,
 /* Spawn Points */ 8,
 /* Prep Timer   */ 60.0f,
-/* Wave Bonus   */ 2100,
+/* Wave Bonus   */ 3000,
 {
 /* Phase 1      */ {  -1.0f,  35, SpawnType_Grunt|SpawnType_Soldier,                    135,145 },
 /* Phase 2      */ {  95.0f, 100, SpawnType_Barbarian,                                   14, 18 },
@@ -299,11 +299,11 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Phases       */ 3,
 /* Spawn Points */ 8,
 /* Prep Timer   */ 60.0f,
-/* Wave Bonus   */ 2150,
+/* Wave Bonus   */ 3000,
 {
-/* Phase 1      */ {  -1.0f,  30, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Dripper, 160,165 },
-/* Phase 2      */ {  30.0f, 150, SpawnType_Barbarian,                                  18, 20 },
-/* Phase 4      */ {  60.0f, 150, SpawnType_Barbarian,                                  18, 20 },
+/* Phase 1      */ {  -1.0f,  30, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Dripper, 140,150 },
+/* Phase 2      */ {  30.0f, 150, SpawnType_Barbarian,                                  15, 18 },
+/* Phase 4      */ {  60.0f, 150, SpawnType_Barbarian,                                  15, 18 },
 /* Phase 5      */ NO_PHASE,
 /* Phase 6      */ NO_PHASE,
 /* Phase 7      */ NO_PHASE,
@@ -318,7 +318,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 /* Phases       */ 4,
 /* Spawn Points */ 8,
 /* Prep Timer   */ 60.0f,
-/* Wave Bonus   */ 2200,
+/* Wave Bonus   */ 3500,
 {
 /* Phase 1      */ {  -1.0f,  40, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian, 170,180 },
 /* Phase 2      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Dripper,                    30, 34 },
@@ -335,17 +335,17 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 // WAVE 15 ---------------------------------------
 {
 /* Wave Number  */ 15,
-/* Phases       */ 5,
+/* Phases       */ 6,
 /* Spawn Points */ 8,
 /* Prep Timer   */ 60.0f,
-/* Wave Bonus   */ 2500,
+/* Wave Bonus   */ 5000,
 {
 /* Phase 1      */ {  -1.0f,  40, SpawnType_Grunt|SpawnType_Soldier|SpawnType_Barbarian|SpawnType_Dripper, 190,200 },
 /* Phase 2      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                                    20, 25 },
 /* Phase 3      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                                    20, 25 },
 /* Phase 4      */ {  30.0f, 150, SpawnType_Soldier|SpawnType_Barbarian,                                    20, 25 },
 /* Phase 5      */ {  -1.0f, 999, SpawnType_Goliath,                                                         2,  2 },
-/* Phase 6      */ NO_PHASE,
+/* Phase 6      */ {   0.0f,  20, SpawnType_Grunt|SpawnType_Soldier,                                        65, 75 },
 /* Phase 7      */ NO_PHASE,
 /* Phase 8      */ NO_PHASE,
 }

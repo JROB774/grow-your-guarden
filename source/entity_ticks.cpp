@@ -50,7 +50,7 @@ DEF_ETICK(daisy)
             // Shoot faster if fertilized.
             if(e.fertilized_timer > 0.0f)
             {
-                attack_cooldown *= 0.33f;
+                attack_cooldown *= 0.25f;
             }
         }
     }
@@ -159,7 +159,7 @@ DEF_ETICK(bell_plant)
             // We shoot faster if fertilized.
             if(e.fertilized_timer > 0.0f)
             {
-                attack_cooldown *= 0.33f;
+                attack_cooldown *= 0.25f;
             }
         }
     }
