@@ -335,7 +335,7 @@ GLOBAL constexpr WaveDesc WAVE_LIST[] =
 // WAVE 15 ---------------------------------------
 {
 /* Wave Number  */ 15,
-/* Phases       */ 6,
+/* Phases       */ 4,
 /* Spawn Points */ 8,
 /* Prep Timer   */ 60.0f,
 /* Wave Bonus   */ 5000,
