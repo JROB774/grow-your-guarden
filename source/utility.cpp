@@ -72,13 +72,22 @@ GLOBAL nkString format_string(const nkChar* fmt, ...)
     return str;
 }
 
-GLOBAL nkString format_string_v(const nkChar* fmt, va_list args)
+GLOBAL nkString format_string_v(const nkChar* fmt, va_list args0)
 {
-    nkS32 length = vsnprintf(NULL, 0, fmt, args);
+    // We copy the argument list because we need to use it twice, and calling
+    // vsnprintf can invalidate the original copy of the argument list.
+    va_list args1;
+    va_copy(args1, args0);
+
+    nkS32 length = vsnprintf(NULL, 0, fmt, args0);
+
     nkString str;
     nk_string_reserve(&str, length);
-    vsnprintf(str.cstr, length+1, fmt, args);
+    vsnprintf(str.cstr, length+1, fmt, args1);
     str.length = length;
+
+    va_end(args1);
+
     return str;
 }
 

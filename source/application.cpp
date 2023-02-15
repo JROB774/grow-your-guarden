@@ -24,6 +24,7 @@
 #include <string.h>
 #include <time.h>
 #include <float.h>
+#include <wchar.h>
 
 #include <stb_image.h>
 

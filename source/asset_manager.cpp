@@ -5,7 +5,11 @@
 #define USE_NPAK_ASSETS
 #endif // BUILD_NATIVE
 
+#if defined(NK_OS_MACOS)
+INTERNAL constexpr const nkChar* ASSET_PATH = "assets/";
+#else
 INTERNAL constexpr const nkChar* ASSET_PATH = "../../assets/";
+#endif // NK_OS_MACOS
 
 struct AssetManager
 {
@@ -67,6 +71,7 @@ GLOBAL T asset_manager_load(const nkChar* name, void* userdata, const nkChar* ov
     {
         // ...if not found then check on disk as well.
         nk_string_insert(&file_path, 0, ASSET_PATH);
+        nk_string_insert(&file_path, 0, get_base_path());
         if(nk_file_exists(file_path.cstr))
         {
             nkFileContent file_content = NK_ZERO_MEM;
