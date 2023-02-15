@@ -81,7 +81,7 @@ GLOBAL nkVec2 get_bitmap_text_bounds(BitmapFont font, const nkChar* text)
     {
         nkChar c = text[i];
         if(c != '\n')
-            line_w += font->glyphs[c].w;
+            line_w += font->glyphs[NK_CAST(nkS32, c)].w;
         else
         {
             w = nk_max(w,line_w);
@@ -138,7 +138,7 @@ GLOBAL void draw_bitmap_text(BitmapFont font, nkF32 x, nkF32 y, const nkChar* te
         }
         else
         {
-            ImmClip* clip = &font->glyphs[*text];
+            ImmClip* clip = &font->glyphs[NK_CAST(nkS32, *text)];
             x += clip->w * 0.5f;
             imm_texture_batched(x,y, clip, color);
             x += clip->w * 0.5f;

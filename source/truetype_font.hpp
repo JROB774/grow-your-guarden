@@ -47,7 +47,7 @@ struct TrueTypeFontDesc
 {
     TrueTypeFontFlags  flags     = TrueTypeFontFlags_None;
     void*              data      = NULL;
-    nkU64              size      = NULL;
+    nkU64              size      = 0;
     nkBool             owns_data = NK_FALSE;
     nkArray<nkS32>     px_sizes  = { 12 };
     nkArray<CharRange> ranges    = { { L'\u0020', L'\u007E' } };

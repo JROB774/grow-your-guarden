@@ -53,9 +53,6 @@ DEF_PTICK(tar_blobs_small)
 
 DEF_PSPAWN(tar_drips)
 {
-    const nkF32 MIN_SPEED = 100.0f;
-    const nkF32 MAX_SPEED = 400.0f;
-
     set_animation_frame(&p.anim_state, rng_s32(0,NK_CAST(nkS32,p.anim_state.current->frames.length)-1)); // Pick a random frame.
 
     p.scale  = rng_f32(0.75f, 1.0f);

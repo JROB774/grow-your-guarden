@@ -7,7 +7,7 @@ if [ "${args[0]}" == "macos" ]; then
     idir="-I ../../depends/sdl/macos/SDL2.framework/Headers -I ../../depends/sdl_mixer/macos/SDL2_mixer.framework/Headers -I ../../depends/freetype/macos/include -I ../../depends/nksdk/nklibs -I ../../depends/glew/include -I ../../depends/glew/source -I ../../depends/stb"
     ldir="-F ../../depends/sdl/macos -F ../../depends/sdl_mixer/macos -L ../../depends/freetype/macos/lib"
     libs="-framework OpenGL -framework SDL2 -framework SDL2_mixer -lz -lbz2 -lfreetype"
-    cflg="-std=c++14 -rpath @executable_path/Frameworks -g" # @Incomplete: Always generating symbols right now...
+    cflg="-std=c++14 -rpath @executable_path/Frameworks -Wall -Wno-missing-braces -Wno-unused-function -g" # @Incomplete: Always generating symbols right now...
     lflg="-fsanitize=address"
 
     if [ ! -d "binary/macos" ];
