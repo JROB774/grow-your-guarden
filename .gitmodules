@@ -7,3 +7,6 @@
 [submodule "depends/makeicon"]
 	path = depends/makeicon
 	url = https://github.com/JROB774/makeicon.git
+[submodule "depends/gamejolt"]
+	path = depends/gamejolt
+	url = https://github.com/JROB774/gamejolt-c-api.git
