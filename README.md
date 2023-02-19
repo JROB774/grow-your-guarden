@@ -14,7 +14,7 @@ The game was developed in C++ using **[SDL2](https://libsdl.org/)**, with the we
 
 After cloning the repository you will need to run `git submodule update --init --recursive` to setup submodules.
 
-The game can then be built by running the `build\win32build.bat` script with a build profile as the first argument. The following build
+The game can then be built by running the `build\win32\build.bat` script with a build profile as the first argument. The following build
 profiles are available:
 
 - `win32` which builds the Windows version of the game.
