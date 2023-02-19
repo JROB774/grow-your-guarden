@@ -10,11 +10,11 @@ if [ "${args[0]}" == "macos" ]; then
     cflg="-std=c++14 -rpath @executable_path/Frameworks -Wall -Wno-missing-braces -Wno-unused-function -g" # @Incomplete: Always generating symbols right now...
     lflg="-fsanitize=address"
 
-    if [ ! -d "binary/macos" ];
-        then mkdir -p "binary/macos"
+    if [ ! -d "../../binary/macos" ];
+        then mkdir -p "../../binary/macos"
     fi
 
-    cd "binary/macos"
+    cd "../../binary/macos"
     g++ $cflg $idir $ldir $libs $lflg $defs ../../source/application.cpp -o game
 
     # Build the .app package manually.
@@ -43,9 +43,9 @@ fi
 if [ "${args[0]}" == "web" ]; then
     echo "----------------------------------------"
 
-    depends/emsdk/emsdk install latest
-    depends/emsdk/emsdk activate latest
-    source depends/emsdk/emsdk_env.sh
+    ../../depends/emsdk/emsdk install latest
+    ../../depends/emsdk/emsdk activate latest
+    source ../../depends/emsdk/emsdk_env.sh
 
     defs="-D BUILD_WEB"
     idir="-I ../../depends/nksdk/nklibs -I ../../depends/stb"
@@ -53,11 +53,11 @@ if [ "${args[0]}" == "web" ]; then
     cflg="-std=c++14"
     lflg=$"--preload-file ../../assets -s EXPORTED_FUNCTIONS=_main,_main_callback -s EXPORTED_RUNTIME_METHODS=ccall -s ALLOW_MEMORY_GROWTH"
 
-    if [ ! -d "binary/web" ];
-        then mkdir -p "binary/web"
+    if [ ! -d "../../binary/web" ];
+        then mkdir -p "../../binary/web"
     fi
 
-    cd "binary/web"
+    cd "../../binary/web"
     emcc $libs $idir $cflg $lflg $defs ../../source/application.cpp -o game.html
 
     echo "----------------------------------------"
@@ -68,11 +68,11 @@ fi
 if [ "${args[0]}" == "tools" ]; then
     echo "----------------------------------------"
 
-    if [ ! -d "tools" ];
-        then mkdir -p "tools"
+    if [ ! -d "../../tools" ];
+        then mkdir -p "../../tools"
     fi
 
-    cd "tools"
+    cd "../../tools"
     g++ -std=c++11 ../source/tools/packer.cpp -I ../depends/nksdk/nklibs -I ../depends/stb -o packer
 
     echo "----------------------------------------"

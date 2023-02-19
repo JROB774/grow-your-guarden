@@ -1,7 +1,7 @@
-redist/win32/x016.png
-redist/win32/x032.png
-redist/win32/x048.png
-redist/win32/x064.png
-redist/win32/x096.png
-redist/win32/x128.png
-redist/win32/x256.png
+../../redist/win32/x016.png
+../../redist/win32/x032.png
+../../redist/win32/x048.png
+../../redist/win32/x064.png
+../../redist/win32/x096.png
+../../redist/win32/x128.png
+../../redist/win32/x256.png
