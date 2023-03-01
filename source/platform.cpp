@@ -35,7 +35,6 @@ struct PlatformContext
 {
     AppDesc       app_desc;
     SDL_Window*   window;
-    SDL_GLContext glcontext;
     nkBool        running;
     nkChar*       base_path;
     nkS32         window_x;
@@ -180,19 +179,7 @@ INTERNAL void main_init(void)
         fatal_error("Failed to create application window: %s", SDL_GetError());
     SDL_SetWindowMinimumSize(g_ctx.window, g_ctx.app_desc.window_min.x,g_ctx.app_desc.window_min.y);
 
-    g_ctx.glcontext = SDL_GL_CreateContext(g_ctx.window);
-    if(!g_ctx.glcontext)
-    {
-        fatal_error("Failed to create OpenGL context: %s", SDL_GetError());
-    }
-
     g_ctx.base_path = SDL_GetBasePath();
-
-    // Enable VSync by default, if we don't get it then oh well.
-    if(SDL_GL_SetSwapInterval(1) == 0)
-    {
-        printf("VSync Enabled!\n");
-    }
 
     init_render_system();
     init_audio_system();
@@ -221,7 +208,6 @@ INTERNAL void main_quit(void)
 
     SDL_free(g_ctx.base_path);
 
-    SDL_GL_DeleteContext(g_ctx.glcontext);
     SDL_DestroyWindow(g_ctx.window);
 
     SDL_Quit();
@@ -289,9 +275,9 @@ INTERNAL void main_loop(void)
         update_timer -= dt;
     }
 
-    do_render_frame();
+    app_draw();
 
-    SDL_GL_SwapWindow(g_ctx.window);
+    renderer_present();
 
     end_counter = SDL_GetPerformanceCounter();
     elapsed_counter = end_counter - last_counter;
@@ -345,6 +331,11 @@ int main(int argc, char** argv)
 
 /*////////////////////////////////////////////////////////////////////////////*/
 
+GLOBAL AppDesc* get_app_desc(void)
+{
+    return &g_ctx.app_desc;
+}
+
 GLOBAL nkChar* get_base_path(void)
 {
     return g_ctx.base_path;
@@ -353,11 +344,6 @@ GLOBAL nkChar* get_base_path(void)
 GLOBAL void* get_window(void)
 {
     return g_ctx.window;
-}
-
-GLOBAL void* get_context(void)
-{
-    return g_ctx.glcontext;
 }
 
 GLOBAL void terminate_app(void)

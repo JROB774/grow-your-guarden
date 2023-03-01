@@ -58,7 +58,7 @@ NK_ENUM(BlendMode, nkS32)
 GLOBAL void init_render_system     (void);
 GLOBAL void quit_render_system     (void);
 GLOBAL void setup_renderer_platform(void);
-GLOBAL void do_render_frame        (void);
+GLOBAL void renderer_present       (void);
 
 GLOBAL void set_viewport(nkF32 x, nkF32 y, nkF32 w, nkF32 h);
 

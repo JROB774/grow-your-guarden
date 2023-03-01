@@ -42,24 +42,42 @@ DEFINE_PRIVATE_TYPE(Texture)
     nkVec2 size;
 };
 
-INTERNAL GLuint g_vao;
+struct OpenGLContext
+{
+    SDL_GLContext context;
+    GLuint        vao;
+};
+
+INTERNAL OpenGLContext g_ogl;
 
 GLOBAL void init_render_system(void)
 {
+    g_ogl.context = SDL_GL_CreateContext(NK_CAST(SDL_Window*, get_window()));
+    if(!g_ogl.context)
+    {
+        fatal_error("Failed to create OpenGL context: %s", SDL_GetError());
+    }
+
+    // Enable VSync by default, if we don't get it then oh well.
+    if(SDL_GL_SetSwapInterval(1) == 0)
+    {
+        printf("[OpenGL]: VSync Enabled!\n");
+    }
+
     // Load OpenGL functions in a native build.
     #if defined(BUILD_NATIVE)
     glewInit();
     #endif // BUILD_NATIVE
 
-    printf("GPU Renderer   : %s\n", glGetString(GL_RENDERER));
-    printf("GPU Vendor     : %s\n", glGetString(GL_VENDOR));
-    printf("OpenGL Version : %s\n", glGetString(GL_VERSION));
-    printf("GLSL Version   : %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    printf("[OpenGL]: GPU Renderer   : %s\n", glGetString(GL_RENDERER));
+    printf("[OpenGL]: GPU Vendor     : %s\n", glGetString(GL_VENDOR));
+    printf("[OpenGL]: OpenGL Version : %s\n", glGetString(GL_VERSION));
+    printf("[OpenGL]: GLSL Version   : %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
     // We need one Vertex Attribute Object in order to render with modern OpenGL.
     #if defined(BUILD_NATIVE)
-    glGenVertexArrays(1, &g_vao);
-    glBindVertexArray(g_vao);
+    glGenVertexArrays(1, &g_ogl.vao);
+    glBindVertexArray(g_ogl.vao);
     #endif // BUILD_NATIVE
 
     set_blend_mode(BlendMode_Alpha);
@@ -68,8 +86,10 @@ GLOBAL void init_render_system(void)
 GLOBAL void quit_render_system(void)
 {
     #if defined(BUILD_NATIVE)
-    glDeleteVertexArrays(1, &g_vao);
+    glDeleteVertexArrays(1, &g_ogl.vao);
     #endif // BUILD_NATIVE
+
+    SDL_GL_DeleteContext(g_ogl.context);
 }
 
 GLOBAL void setup_renderer_platform(void)
@@ -86,9 +106,9 @@ GLOBAL void setup_renderer_platform(void)
     #endif // BUILD_WEB
 }
 
-GLOBAL void do_render_frame(void)
+GLOBAL void renderer_present(void)
 {
-    app_draw();
+    SDL_GL_SwapWindow(NK_CAST(SDL_Window*,get_window()));
 }
 
 GLOBAL void set_viewport(nkF32 x, nkF32 y, nkF32 w, nkF32 h)
@@ -345,7 +365,7 @@ INTERNAL GLuint compile_shader(const nkChar* source, nkU64 bytes, GLenum type)
         if(info_log)
         {
             glGetShaderInfoLog(shader, info_log_length, NULL, info_log);
-            printf("Failed to compile shader:\n%s\n", info_log);
+            printf("[OpenGL]: Failed to compile shader:\n%s\n", info_log);
             NK_FREE(info_log);
         }
         return GL_NONE;
@@ -383,7 +403,7 @@ GLOBAL Shader create_shader(void* data, nkU64 bytes)
         if(info_log)
         {
             glGetProgramInfoLog(shader->program, info_log_length, NULL, info_log);
-            printf("Failed to link shader:\n%s\n", info_log);
+            printf("[OpenGL]: Failed to link shader:\n%s\n", info_log);
             free(info_log);
         }
     }
@@ -408,7 +428,7 @@ GLOBAL void set_shader_bool(Shader shader, const nkChar* name, nkBool val)
 {
     NK_ASSERT(shader);
     GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("No shader uniform found: %s\n", name);
+    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
     glUniform1i(location, NK_CAST(nkS32, val));
 }
 
@@ -416,7 +436,7 @@ GLOBAL void set_shader_int(Shader shader, const nkChar* name, nkS32 val)
 {
     NK_ASSERT(shader);
     GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("No shader uniform found: %s\n", name);
+    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
     glUniform1i(location, val);
 }
 
@@ -424,7 +444,7 @@ GLOBAL void set_shader_float(Shader shader, const nkChar* name, nkF32 val)
 {
     NK_ASSERT(shader);
     GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("No shader uniform found: %s\n", name);
+    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
     glUniform1f(location, val);
 }
 
@@ -432,7 +452,7 @@ GLOBAL void set_shader_vec2(Shader shader, const nkChar* name, nkVec2 val)
 {
     NK_ASSERT(shader);
     GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("No shader uniform found: %s\n", name);
+    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
     glUniform2fv(location, 1, val.raw);
 }
 
@@ -440,7 +460,7 @@ GLOBAL void set_shader_vec3(Shader shader, const nkChar* name, nkVec3 val)
 {
     NK_ASSERT(shader);
     GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("No shader uniform found: %s\n", name);
+    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
     glUniform3fv(location, 1, val.raw);
 }
 
@@ -448,7 +468,7 @@ GLOBAL void set_shader_vec4(Shader shader, const nkChar* name, nkVec4 val)
 {
     NK_ASSERT(shader);
     GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("No shader uniform found: %s\n", name);
+    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
     glUniform4fv(location, 1, val.raw);
 }
 
@@ -456,7 +476,7 @@ GLOBAL void set_shader_mat2(Shader shader, const nkChar* name, nkMat2 val)
 {
     NK_ASSERT(shader);
     GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("No shader uniform found: %s\n", name);
+    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
     glUniformMatrix2fv(location, 1, GL_FALSE, val.raw);
 }
 
@@ -464,7 +484,7 @@ GLOBAL void set_shader_mat3(Shader shader, const nkChar* name, nkMat3 val)
 {
     NK_ASSERT(shader);
     GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("No shader uniform found: %s\n", name);
+    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
     glUniformMatrix3fv(location, 1, GL_FALSE, val.raw);
 }
 
@@ -472,7 +492,7 @@ GLOBAL void set_shader_mat4(Shader shader, const nkChar* name, nkMat4 val)
 {
     NK_ASSERT(shader);
     GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("No shader uniform found: %s\n", name);
+    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
     glUniformMatrix4fv(location, 1, GL_FALSE, val.raw);
 }
 

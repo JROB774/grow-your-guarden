@@ -14,7 +14,7 @@ echo ----------------------------------------
 set defs=-D BUILD_NATIVE -D _CRT_SECURE_NO_WARNINGS
 set idir=-I ..\..\depends\sdl\win32\include -I ..\..\depends\sdl_mixer\win32\include -I ..\..\depends\freetype\win32\include -I ..\..\depends\nksdk\nklibs -I ..\..\depends\glew\include -I ..\..\depends\glew\source -I ..\..\depends\stb
 set ldir=-libpath:..\..\depends\sdl\win32\lib -libpath:..\..\depends\sdl_mixer\win32\lib -libpath:..\..\depends\freetype\win32\lib
-set libs=SDL2main.lib SDL2.lib SDL2_mixer.lib freetype.lib opengl32.lib shell32.lib
+set libs=SDL2main.lib SDL2.lib SDL2_mixer.lib freetype.lib d3d11.lib shell32.lib
 set cflg=-std:c++14 -Zc:__cplusplus -W4 -wd4201 -wd4100 -wd4505
 set lflg=-incremental:no -ignore:4099
 

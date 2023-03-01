@@ -29,7 +29,6 @@
 #include <stb_image.h>
 
 #include "utility.hpp"
-#include "platform.hpp"
 #include "asset_manager.hpp"
 #include "audio.hpp"
 #include "input.hpp"
@@ -39,6 +38,7 @@
 #include "renderer.hpp"
 #include "imm.hpp"
 #include "application.hpp"
+#include "platform.hpp"
 #include "entity.hpp"
 #include "controller.hpp"
 #include "world.hpp"
@@ -186,8 +186,6 @@ GLOBAL void app_init(void)
 
     menu_init();
     game_init();
-
-    printf("Init Complete!\n");
 }
 
 GLOBAL void app_quit(void)
