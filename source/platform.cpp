@@ -7,7 +7,12 @@
 #include <SDL.h>
 #include <SDL_mixer.h>
 
+// On Windows we are using Direct3D so we do not want the OpenGL flag specified.
+#if defined(NK_OS_WIN32)
+INTERNAL constexpr nkU32 WINDOW_FLAGS = SDL_WINDOW_HIDDEN|SDL_WINDOW_RESIZABLE;
+#else
 INTERNAL constexpr nkU32 WINDOW_FLAGS = SDL_WINDOW_HIDDEN|SDL_WINDOW_RESIZABLE|SDL_WINDOW_OPENGL;
+#endif
 
 INTERNAL constexpr const nkChar* PROGRAM_STATE_FILE = "state.dat";
 
