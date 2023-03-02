@@ -18,7 +18,7 @@ DEFINE_PRIVATE_TYPE(VertexBuffer)
 
 DEFINE_PRIVATE_TYPE(RenderTarget)
 {
-    // @Incomplete: ...
+    // Not going to bother implementing as the game doesn't use it...
 };
 
 DEFINE_PRIVATE_TYPE(Shader)
