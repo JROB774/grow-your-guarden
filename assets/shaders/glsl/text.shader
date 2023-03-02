@@ -1,10 +1,12 @@
-uniform mat4 u_projection;
-uniform mat4 u_view;
-uniform mat4 u_model;
-
-uniform bool u_usetex;
-
 uniform sampler2D u_texture;
+
+layout(std140) uniform Uniforms
+{
+    mat4 u_projection;
+    mat4 u_view;
+    mat4 u_model;
+    bool u_usetex;
+};
 
 #ifdef VERT_SHADER /*/////////////////////////////////////////////////////////*/
 

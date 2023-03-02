@@ -2,6 +2,14 @@
 
 INTERNAL constexpr nkU32 IMM_INITIAL_VERTS = 16384;
 
+struct ImmUniforms
+{
+    nkMat4 projection;
+    nkMat4 view;
+    nkMat4 model;
+    nkBool usetex;
+};
+
 struct ImmContext
 {
     DrawMode           draw_mode;
@@ -100,10 +108,13 @@ GLOBAL void imm_end(void)
     bind_texture(g_imm.bound_texture, 0);
     bind_shader(g_imm.bound_shader);
 
-    set_shader_bool(g_imm.bound_shader, "u_usetex",    (g_imm.bound_texture != NULL));
-    set_shader_mat4(g_imm.bound_shader, "u_projection", g_imm.projection);
-    set_shader_mat4(g_imm.bound_shader, "u_view",       g_imm.view);
-    set_shader_mat4(g_imm.bound_shader, "u_model",      g_imm.model);
+    ImmUniforms uniforms = NK_ZERO_MEM;
+    uniforms.projection  = g_imm.projection;
+    uniforms.view        = g_imm.view;
+    uniforms.model       = g_imm.model;
+    uniforms.usetex      = (g_imm.bound_texture != NULL);
+
+    set_shader_uniforms(&uniforms, sizeof(uniforms));
 
     update_vertex_buffer(g_imm.buffer, g_imm.vertices.data, g_imm.vertices.length * sizeof(ImmVertex), BufferType_Dynamic);
     draw_vertex_buffer(g_imm.buffer, g_imm.draw_mode, g_imm.vertices.length);

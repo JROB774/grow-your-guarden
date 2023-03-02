@@ -1,7 +1,7 @@
 Texture2D    u_texture;
 SamplerState u_sampler;
 
-cbuffer imm: register(b0)
+cbuffer uniforms: register(b0)
 {
     float4x4 u_projection;
     float4x4 u_view;
@@ -26,7 +26,7 @@ struct FragInput
 FragInput vs_main(VertInput input)
 {
     FragInput output;
-    output.pos = mul(mul(mul(float4(input.pos,0,1), u_model), u_view), u_projection);
+    output.pos = mul(u_projection, mul(u_view, mul(u_model, float4(input.pos,0,1))));
     output.tex = input.tex;
     output.col = input.col;
     return output;

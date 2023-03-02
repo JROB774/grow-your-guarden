@@ -5,7 +5,7 @@
 #endif // BUILD_NATIVE
 
 #if defined(BUILD_WEB)
-#include <GLES2/gl2.h>
+#include <GLES3/gl3.h>
 #endif // BUILD_WEB
 
 DEFINE_PRIVATE_TYPE(VertexBuffer)
@@ -38,6 +38,7 @@ struct OpenGLContext
 {
     SDL_GLContext context;
     GLuint        vao;
+    GLuint        uniforms;
 };
 
 INTERNAL OpenGLContext g_ogl;
@@ -73,10 +74,15 @@ GLOBAL void init_render_system(void)
     #endif // BUILD_NATIVE
 
     set_blend_mode(BlendMode_Alpha);
+
+    // Setup the uniform buffer.
+    glGenBuffers(1, &g_ogl.uniforms);
 }
 
 GLOBAL void quit_render_system(void)
 {
+    glDeleteBuffers(1, &g_ogl.uniforms);
+
     #if defined(BUILD_NATIVE)
     glDeleteVertexArrays(1, &g_ogl.vao);
     #endif // BUILD_NATIVE
@@ -242,6 +248,7 @@ GLOBAL void draw_vertex_buffer(VertexBuffer vbuf, DrawMode draw_mode, nkU64 vert
     if(!vert_count) return;
 
     glBindBuffer(GL_ARRAY_BUFFER, vbuf->handle);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, g_ogl.uniforms);
 
     // Map the primitive type to the appropriate GL enum.
     GLenum primitive = GL_NONE;
@@ -416,80 +423,23 @@ GLOBAL void free_shader(Shader shader)
 
 GLOBAL void bind_shader(Shader shader)
 {
-    if(!shader) glUseProgram(GL_NONE);
-    else glUseProgram(shader->program);
+    if(!shader)
+    {
+        glUseProgram(GL_NONE);
+    }
+    else
+    {
+        GLuint location = glGetUniformBlockIndex(shader->program, "Uniforms");
+        glUseProgram(shader->program);
+        glUniformBlockBinding(shader->program, location, 0);
+    }
 }
 
-GLOBAL void set_shader_bool(Shader shader, const nkChar* name, nkBool val)
+GLOBAL void set_shader_uniforms(void* data, nkU64 bytes)
 {
-    NK_ASSERT(shader);
-    GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
-    glUniform1i(location, NK_CAST(nkS32, val));
-}
-
-GLOBAL void set_shader_int(Shader shader, const nkChar* name, nkS32 val)
-{
-    NK_ASSERT(shader);
-    GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
-    glUniform1i(location, val);
-}
-
-GLOBAL void set_shader_float(Shader shader, const nkChar* name, nkF32 val)
-{
-    NK_ASSERT(shader);
-    GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
-    glUniform1f(location, val);
-}
-
-GLOBAL void set_shader_vec2(Shader shader, const nkChar* name, nkVec2 val)
-{
-    NK_ASSERT(shader);
-    GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
-    glUniform2fv(location, 1, val.raw);
-}
-
-GLOBAL void set_shader_vec3(Shader shader, const nkChar* name, nkVec3 val)
-{
-    NK_ASSERT(shader);
-    GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
-    glUniform3fv(location, 1, val.raw);
-}
-
-GLOBAL void set_shader_vec4(Shader shader, const nkChar* name, nkVec4 val)
-{
-    NK_ASSERT(shader);
-    GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
-    glUniform4fv(location, 1, val.raw);
-}
-
-GLOBAL void set_shader_mat2(Shader shader, const nkChar* name, nkMat2 val)
-{
-    NK_ASSERT(shader);
-    GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
-    glUniformMatrix2fv(location, 1, GL_FALSE, val.raw);
-}
-
-GLOBAL void set_shader_mat3(Shader shader, const nkChar* name, nkMat3 val)
-{
-    NK_ASSERT(shader);
-    GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
-    glUniformMatrix3fv(location, 1, GL_FALSE, val.raw);
-}
-
-GLOBAL void set_shader_mat4(Shader shader, const nkChar* name, nkMat4 val)
-{
-    NK_ASSERT(shader);
-    GLint location = glGetUniformLocation(shader->program, name);
-    if(location == -1) printf("[OpenGL]: No shader uniform found: %s\n", name);
-    glUniformMatrix4fv(location, 1, GL_FALSE, val.raw);
+    glBindBuffer(GL_UNIFORM_BUFFER, g_ogl.uniforms);
+    glBufferData(GL_UNIFORM_BUFFER, bytes, data, GL_DYNAMIC_DRAW);
+    glBindBuffer(GL_UNIFORM_BUFFER, GL_NONE);
 }
 
 INTERNAL GLenum sampler_filter_to_gl(SamplerFilter filter)

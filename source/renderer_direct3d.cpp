@@ -5,6 +5,8 @@
 #include <d3d11.h>
 #include <d3dcompiler.h> // @Incomplete: Would we need to ship with the compiler?
 
+INTERNAL constexpr nkU64 MAX_CONSTANTS_SIZE = 256;
+
 DEFINE_PRIVATE_TYPE(VertexBuffer)
 {
     ID3D11Buffer* buffer;
@@ -46,6 +48,8 @@ struct Direct3DContext
     ID3D11Texture2D*        backbuffer_texture;
     ID3D11RasterizerState*  rasterizer_state;
     ID3D11BlendState*       blend_state;
+    ID3D11Buffer*           constants;
+    fRect                   viewport;
     ID3D11RenderTargetView* current_target;
     Shader                  current_shader;
     Texture                 current_texture[8];
@@ -186,8 +190,9 @@ GLOBAL void init_render_system(void)
 
     // Setup our rasterizer state object.
     D3D11_RASTERIZER_DESC rasterizer_desc = NK_ZERO_MEM;
-    rasterizer_desc.FillMode = D3D11_FILL_SOLID;
-    rasterizer_desc.CullMode = D3D11_CULL_NONE;
+    rasterizer_desc.FillMode              = D3D11_FILL_SOLID;
+    rasterizer_desc.CullMode              = D3D11_CULL_NONE;
+    rasterizer_desc.FrontCounterClockwise = NK_TRUE;
 
     res = g_d3d.device->CreateRasterizerState(&rasterizer_desc, &g_d3d.rasterizer_state);
     if(!SUCCEEDED(res))
@@ -200,10 +205,28 @@ GLOBAL void init_render_system(void)
 
     // Set the initial blend mode to be alpha.
     set_blend_mode(BlendMode_Alpha);
+
+    // Setup our constant buffer (we just have one fixed size buffer).
+    D3D11_BUFFER_DESC buffer_desc = NK_ZERO_MEM;
+    buffer_desc.ByteWidth      = MAX_CONSTANTS_SIZE;
+    buffer_desc.Usage          = D3D11_USAGE_DYNAMIC;
+    buffer_desc.BindFlags      = D3D11_BIND_CONSTANT_BUFFER;
+    buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+    res = g_d3d.device->CreateBuffer(&buffer_desc, NULL, &g_d3d.constants);
+    if(!SUCCEEDED(res))
+    {
+        fatal_error("Failed to create Direct3D constant buffer!");
+    }
 }
 
 GLOBAL void quit_render_system(void)
 {
+    if(g_d3d.constants)
+    {
+        g_d3d.constants->Release();
+        g_d3d.constants = NULL;
+    }
     if(g_d3d.rasterizer_state)
     {
         g_d3d.rasterizer_state->Release();
@@ -292,14 +315,7 @@ GLOBAL void renderer_present(void)
 
 GLOBAL void set_viewport(nkF32 x, nkF32 y, nkF32 w, nkF32 h)
 {
-    D3D11_VIEWPORT viewport = NK_ZERO_MEM;
-    viewport.TopLeftX = x;
-    viewport.TopLeftY = y;
-    viewport.Width    = w;
-    viewport.Height   = h;
-    viewport.MinDepth = 0.0f;
-    viewport.MaxDepth = 1.0f;
-    g_d3d.device_context->RSSetViewports(1, &viewport);
+    g_d3d.viewport = { x,y,w,h };
 }
 
 GLOBAL void set_blend_mode(BlendMode blend_mode)
@@ -513,14 +529,26 @@ GLOBAL void draw_vertex_buffer(VertexBuffer vbuf, DrawMode draw_mode, nkU64 vert
     UINT byte_stride = NK_CAST(UINT, vbuf->byte_stride);
     UINT offset = 0;
 
+    D3D11_VIEWPORT viewport = NK_ZERO_MEM;
+    viewport.TopLeftX = g_d3d.viewport.x;
+    viewport.TopLeftY = g_d3d.viewport.y;
+    viewport.Width    = g_d3d.viewport.w;
+    viewport.Height   = g_d3d.viewport.h;
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+
     g_d3d.device_context->IASetPrimitiveTopology(primitive);
     g_d3d.device_context->IASetInputLayout(input_layout);
     g_d3d.device_context->IASetVertexBuffers(0, 1, &vbuf->buffer, &byte_stride, &offset);
 
     g_d3d.device_context->RSSetState(g_d3d.rasterizer_state);
+    g_d3d.device_context->RSSetViewports(1, &viewport);
 
     g_d3d.device_context->VSSetShader(g_d3d.current_shader->vert_shader, NULL, 0);
     g_d3d.device_context->PSSetShader(g_d3d.current_shader->frag_shader, NULL, 0);
+
+    g_d3d.device_context->VSSetConstantBuffers(0, 1, &g_d3d.constants);
+    g_d3d.device_context->PSSetConstantBuffers(0, 1, &g_d3d.constants);
 
     for(nkS32 i=0,n=NK_ARRAY_SIZE(g_d3d.current_texture); i<n; ++i)
     {
@@ -542,23 +570,23 @@ GLOBAL void draw_vertex_buffer(VertexBuffer vbuf, DrawMode draw_mode, nkU64 vert
 
 GLOBAL RenderTarget create_render_target(nkS32 w, nkS32 h, SamplerFilter filter, SamplerWrap wrap)
 {
-    // @Incomplete: ...
+    // Not going to bother implementing as the game doesn't use it...
     return NULL;
 }
 
 GLOBAL void free_render_target(RenderTarget target)
 {
-    // @Incomplete: ...
+    // Not going to bother implementing as the game doesn't use it...
 }
 
 GLOBAL void resize_render_target(RenderTarget target, nkS32 w, nkS32 h)
 {
-    // @Incomplete: ...
+    // Not going to bother implementing as the game doesn't use it...
 }
 
 GLOBAL void bind_render_target(RenderTarget target)
 {
-    // @Incomplete: ...
+    // Not going to bother implementing as the game doesn't use it...
 }
 
 GLOBAL Shader create_shader(void* data, nkU64 bytes)
@@ -604,49 +632,12 @@ GLOBAL void bind_shader(Shader shader)
     g_d3d.current_shader = shader;
 }
 
-GLOBAL void set_shader_bool(Shader shader, const nkChar* name, nkBool val)
+GLOBAL void set_shader_uniforms(void* data, nkU64 bytes)
 {
-    // @Incomplete: ...
-}
-
-GLOBAL void set_shader_int(Shader shader, const nkChar* name, nkS32 val)
-{
-    // @Incomplete: ...
-}
-
-GLOBAL void set_shader_float(Shader shader, const nkChar* name, nkF32 val)
-{
-    // @Incomplete: ...
-}
-
-GLOBAL void set_shader_vec2(Shader shader, const nkChar* name, nkVec2 val)
-{
-    // @Incomplete: ...
-}
-
-GLOBAL void set_shader_vec3(Shader shader, const nkChar* name, nkVec3 val)
-{
-    // @Incomplete: ...
-}
-
-GLOBAL void set_shader_vec4(Shader shader, const nkChar* name, nkVec4 val)
-{
-    // @Incomplete: ...
-}
-
-GLOBAL void set_shader_mat2(Shader shader, const nkChar* name, nkMat2 val)
-{
-    // @Incomplete: ...
-}
-
-GLOBAL void set_shader_mat3(Shader shader, const nkChar* name, nkMat3 val)
-{
-    // @Incomplete: ...
-}
-
-GLOBAL void set_shader_mat4(Shader shader, const nkChar* name, nkMat4 val)
-{
-    // @Incomplete: ...
+    D3D11_MAPPED_SUBRESOURCE subres = NK_ZERO_MEM;
+    g_d3d.device_context->Map(g_d3d.constants, 0, D3D11_MAP_WRITE_DISCARD, 0, &subres);
+    memcpy(subres.pData, data, bytes);
+    g_d3d.device_context->Unmap(g_d3d.constants, 0);
 }
 
 GLOBAL Texture create_texture(nkS32 w, nkS32 h, nkS32 bpp, void* data, SamplerFilter filter, SamplerWrap wrap)

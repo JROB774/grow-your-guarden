@@ -95,18 +95,10 @@ GLOBAL void         free_render_target  (RenderTarget target);
 GLOBAL void         resize_render_target(RenderTarget target, nkS32 w, nkS32 h);
 GLOBAL void         bind_render_target  (RenderTarget target);
 
-GLOBAL Shader create_shader   (void* data, nkU64 bytes);
-GLOBAL void   free_shader     (Shader shader);
-GLOBAL void   bind_shader     (Shader shader);
-GLOBAL void   set_shader_bool (Shader shader, const nkChar* name, nkBool val);
-GLOBAL void   set_shader_int  (Shader shader, const nkChar* name, nkS32  val);
-GLOBAL void   set_shader_float(Shader shader, const nkChar* name, nkF32  val);
-GLOBAL void   set_shader_vec2 (Shader shader, const nkChar* name, nkVec2 val);
-GLOBAL void   set_shader_vec3 (Shader shader, const nkChar* name, nkVec3 val);
-GLOBAL void   set_shader_vec4 (Shader shader, const nkChar* name, nkVec4 val);
-GLOBAL void   set_shader_mat2 (Shader shader, const nkChar* name, nkMat2 val);
-GLOBAL void   set_shader_mat3 (Shader shader, const nkChar* name, nkMat3 val);
-GLOBAL void   set_shader_mat4 (Shader shader, const nkChar* name, nkMat4 val);
+GLOBAL Shader create_shader      (void* data, nkU64 bytes);
+GLOBAL void   free_shader        (Shader shader);
+GLOBAL void   bind_shader        (Shader shader);
+GLOBAL void   set_shader_uniforms(void* data, nkU64 bytes);
 
 GLOBAL Texture create_texture    (nkS32 w, nkS32 h, nkS32 bpp, void* data, SamplerFilter filter, SamplerWrap wrap);
 GLOBAL void    free_texture      (Texture texture);
