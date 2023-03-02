@@ -160,6 +160,7 @@ GLOBAL void app_main(AppDesc* desc)
 GLOBAL void app_init(void)
 {
     // Setup the necessary resources for rendering the off-screen target.
+    /*
     nkS32 ww = get_window_width();
     nkS32 wh = get_window_height();
 
@@ -169,6 +170,7 @@ GLOBAL void app_init(void)
 
     set_vertex_buffer_stride   (g_app.screen_buffer, sizeof(nkF32)*4);
     enable_vertex_buffer_attrib(g_app.screen_buffer, 0, AttribType_Float, 4, 0);
+    */
 
     // Setup the font.
     TrueTypeFontDesc font_desc;
@@ -193,8 +195,10 @@ GLOBAL void app_quit(void)
     game_quit();
     menu_quit();
 
+    /*
     free_vertex_buffer(g_app.screen_buffer);
     free_render_target(g_app.screen_target);
+    */
 }
 
 GLOBAL void app_tick(nkF32 dt)

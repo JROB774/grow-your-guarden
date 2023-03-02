@@ -22,9 +22,9 @@ GLOBAL void imm_init(void)
     g_imm.shader = asset_manager_load<Shader>("basic.shader");
     g_imm.buffer = create_vertex_buffer();
     set_vertex_buffer_stride   (g_imm.buffer, sizeof(ImmVertex));
-    enable_vertex_buffer_attrib(g_imm.buffer, 0, AttribType_Float, 2, offsetof(ImmVertex, pos));
-    enable_vertex_buffer_attrib(g_imm.buffer, 1, AttribType_Float, 2, offsetof(ImmVertex, tex));
-    enable_vertex_buffer_attrib(g_imm.buffer, 2, AttribType_Float, 4, offsetof(ImmVertex, col));
+    enable_vertex_buffer_attrib(g_imm.buffer, 0, AttribSemantic_Pos, AttribType_Float2, offsetof(ImmVertex, pos));
+    enable_vertex_buffer_attrib(g_imm.buffer, 1, AttribSemantic_Tex, AttribType_Float2, offsetof(ImmVertex, tex));
+    enable_vertex_buffer_attrib(g_imm.buffer, 2, AttribSemantic_Col, AttribType_Float4, offsetof(ImmVertex, col));
 
     g_imm.projection = nk_m4_identity();
     g_imm.view       = nk_m4_identity();

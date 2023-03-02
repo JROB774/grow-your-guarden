@@ -275,8 +275,8 @@ INTERNAL void main_loop(void)
         update_timer -= dt;
     }
 
+    begin_render_frame();
     app_draw();
-
     renderer_present();
 
     end_counter = SDL_GetPerformanceCounter();

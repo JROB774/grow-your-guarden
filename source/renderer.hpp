@@ -16,13 +16,19 @@ NK_ENUM(DrawMode, nkS32)
     DrawMode_Triangles
 };
 
+NK_ENUM(AttribSemantic, nkS32)
+{
+    AttribSemantic_Pos,
+    AttribSemantic_Tex,
+    AttribSemantic_Col,
+};
+
 NK_ENUM(AttribType, nkS32)
 {
-    AttribType_SignedByte,
-    AttribType_UnsignedByte,
-    AttribType_SignedInt,
-    AttribType_UnsignedInt,
-    AttribType_Float
+    AttribType_Float1,
+    AttribType_Float2,
+    AttribType_Float3,
+    AttribType_Float4,
 };
 
 NK_ENUM(BufferType, nkS32)
@@ -35,11 +41,7 @@ NK_ENUM(BufferType, nkS32)
 NK_ENUM(SamplerFilter, nkS32)
 {
     SamplerFilter_Nearest,
-    SamplerFilter_Linear,
-    SamplerFilter_NearestWithNearestMips,
-    SamplerFilter_LinearWithNearestMips,
-    SamplerFilter_NearestWithLinearMips,
-    SamplerFilter_LinearWithLinearMips
+    SamplerFilter_Linear
 };
 
 NK_ENUM(SamplerWrap, nkS32)
@@ -55,9 +57,18 @@ NK_ENUM(BlendMode, nkS32)
     BlendMode_PremultipliedAlpha
 };
 
+struct VertexAttrib
+{
+    nkBool         enabled;
+    AttribSemantic semantic;
+    AttribType     type;
+    nkU64          byte_offset;
+};
+
 GLOBAL void init_render_system     (void);
 GLOBAL void quit_render_system     (void);
 GLOBAL void setup_renderer_platform(void);
+GLOBAL void begin_render_frame     (void);
 GLOBAL void renderer_present       (void);
 
 GLOBAL void set_viewport(nkF32 x, nkF32 y, nkF32 w, nkF32 h);
@@ -74,7 +85,7 @@ GLOBAL void clear_screen(nkF32 r, nkF32 g, nkF32 b, nkF32 a = 1.0f);
 GLOBAL VertexBuffer create_vertex_buffer        (void);
 GLOBAL void         free_vertex_buffer          (VertexBuffer vbuf);
 GLOBAL void         set_vertex_buffer_stride    (VertexBuffer vbuf, nkU64 byte_stride);
-GLOBAL void         enable_vertex_buffer_attrib (VertexBuffer vbuf, nkU32 index, AttribType type, nkU32 comps, nkU64 byte_offset);
+GLOBAL void         enable_vertex_buffer_attrib (VertexBuffer vbuf, nkU32 index, AttribSemantic semantic, AttribType type, nkU64 byte_offset);
 GLOBAL void         disable_vertex_buffer_attrib(VertexBuffer vbuf, nkU32 index);
 GLOBAL void         update_vertex_buffer        (VertexBuffer vbuf, void* data, nkU64 bytes, BufferType type);
 GLOBAL void         draw_vertex_buffer          (VertexBuffer vbuf, DrawMode draw_mode, nkU64 vert_count);
@@ -119,7 +130,11 @@ void asset_free<Shader>(Asset<Shader>& asset)
 template<>
 const nkChar* asset_path<Shader>(void)
 {
-    return "shaders/";
+    #if defined(NK_OS_WIN32)
+    return "shaders/hlsl/";
+    #else
+    return "shaders/glsl/";
+    #endif
 }
 
 template<>

@@ -8,14 +8,6 @@
 #include <GLES2/gl2.h>
 #endif // BUILD_WEB
 
-struct VertexAttrib
-{
-    nkBool     enabled;
-    AttribType type;
-    nkU32      components;
-    nkU64      byte_offset;
-};
-
 DEFINE_PRIVATE_TYPE(VertexBuffer)
 {
     nkU64        byte_stride;
@@ -104,6 +96,11 @@ GLOBAL void setup_renderer_platform(void)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
     #endif // BUILD_WEB
+}
+
+GLOBAL void begin_render_frame(void)
+{
+    // Does nothing...
 }
 
 GLOBAL void renderer_present(void)
@@ -202,14 +199,14 @@ GLOBAL void set_vertex_buffer_stride(VertexBuffer vbuf, nkU64 byte_stride)
     vbuf->byte_stride = byte_stride;
 }
 
-GLOBAL void enable_vertex_buffer_attrib(VertexBuffer vbuf, nkU32 index, AttribType type, nkU32 comps, nkU64 byte_offset)
+GLOBAL void enable_vertex_buffer_attrib(VertexBuffer vbuf, nkU32 index, AttribSemantic semantic, AttribType type, nkU64 byte_offset)
 {
     NK_ASSERT(vbuf);
     NK_ASSERT(index < NK_ARRAY_SIZE(vbuf->attribs));
 
     vbuf->attribs[index].enabled = NK_TRUE;
+    vbuf->attribs[index].semantic = semantic;
     vbuf->attribs[index].type = type;
-    vbuf->attribs[index].components = comps;
     vbuf->attribs[index].byte_offset = byte_offset;
 }
 
@@ -265,17 +262,16 @@ GLOBAL void draw_vertex_buffer(VertexBuffer vbuf, DrawMode draw_mode, nkU64 vert
         VertexAttrib* attrib = &vbuf->attribs[i];
         if(attrib->enabled)
         {
-            GLenum attrib_type = GL_NONE;
+            GLint attrib_components = 0;
             switch(attrib->type)
             {
-                case AttribType_SignedByte: attrib_type = GL_BYTE; break;
-                case AttribType_UnsignedByte: attrib_type = GL_UNSIGNED_BYTE; break;
-                case AttribType_SignedInt: attrib_type = GL_INT; break;
-                case AttribType_UnsignedInt: attrib_type = GL_UNSIGNED_INT; break;
-                case AttribType_Float: attrib_type = GL_FLOAT; break;
+                case AttribType_Float1: attrib_components = 1; break;
+                case AttribType_Float2: attrib_components = 2; break;
+                case AttribType_Float3: attrib_components = 3; break;
+                case AttribType_Float4: attrib_components = 4; break;
             }
 
-            glVertexAttribPointer(NK_CAST(GLuint, i), attrib->components, attrib_type, GL_FALSE,
+            glVertexAttribPointer(NK_CAST(GLuint, i), attrib_components, GL_FLOAT, GL_FALSE,
                 NK_CAST(GLsizei, vbuf->byte_stride), NK_CAST(void*,attrib->byte_offset));
             glEnableVertexAttribArray(NK_CAST(GLuint, i));
         }
@@ -502,10 +498,6 @@ INTERNAL GLenum sampler_filter_to_gl(SamplerFilter filter)
     {
         case SamplerFilter_Nearest: return GL_NEAREST;
         case SamplerFilter_Linear: return GL_LINEAR;
-        case SamplerFilter_NearestWithNearestMips: return GL_NEAREST_MIPMAP_NEAREST;
-        case SamplerFilter_LinearWithNearestMips: return GL_LINEAR_MIPMAP_NEAREST;
-        case SamplerFilter_NearestWithLinearMips: return GL_NEAREST_MIPMAP_LINEAR;
-        case SamplerFilter_LinearWithLinearMips: return GL_LINEAR_MIPMAP_LINEAR;
         default:
         {
             // Unsupported texture filter.
@@ -544,7 +536,6 @@ INTERNAL GLenum bpp_to_gl_format(nkS32 bpp)
         case 2: return GL_LUMINANCE_ALPHA;
         #endif // BUILD_WEB
 
-        case 3: return GL_RGB;
         case 4: return GL_RGBA;
         default:
         {
@@ -573,11 +564,6 @@ GLOBAL Texture create_texture(nkS32 w, nkS32 h, nkS32 bpp, void* data, SamplerFi
 
     GLenum gl_format = bpp_to_gl_format(bpp);
     glTexImage2D(GL_TEXTURE_2D, 0, gl_format, w,h, 0, gl_format, GL_UNSIGNED_BYTE, data);
-
-    if(filter > SamplerFilter_Linear)
-    {
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
 
     texture->size.x = NK_CAST(nkF32, w);
     texture->size.y = NK_CAST(nkF32, h);
