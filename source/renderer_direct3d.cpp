@@ -3,7 +3,7 @@
 #include <SDL_syswm.h> // For getting the HWND from the SDL window.
 
 #include <d3d11.h>
-#include <d3dcompiler.h> // @Incomplete: Would we need to ship with the compiler?
+#include <d3dcompiler.h>
 
 INTERNAL constexpr nkU64 MAX_CONSTANTS_SIZE = 256;
 
@@ -50,6 +50,8 @@ struct Direct3DContext
     ID3D11BlendState*       blend_state;
     ID3D11Buffer*           constants;
     fRect                   viewport;
+    fRect                   scissor;
+    nkBool                  is_scissoring;
     ID3D11RenderTargetView* current_target;
     Shader                  current_shader;
     Texture                 current_texture[8];
@@ -193,6 +195,7 @@ GLOBAL void init_render_system(void)
     rasterizer_desc.FillMode              = D3D11_FILL_SOLID;
     rasterizer_desc.CullMode              = D3D11_CULL_NONE;
     rasterizer_desc.FrontCounterClockwise = NK_TRUE;
+    rasterizer_desc.ScissorEnable         = NK_TRUE; // We will just always scissor but if its not currently enabled the rect will be the whole viewport.
 
     res = g_d3d.device->CreateRasterizerState(&rasterizer_desc, &g_d3d.rasterizer_state);
     if(!SUCCEEDED(res))
@@ -369,12 +372,13 @@ GLOBAL void set_blend_mode(BlendMode blend_mode)
 
 GLOBAL void begin_scissor(nkF32 x, nkF32 y, nkF32 w, nkF32 h)
 {
-    // @Incomplete: ...
+    g_d3d.is_scissoring = NK_TRUE;
+    g_d3d.scissor = { x,y,w,h };
 }
 
 GLOBAL void end_scissor(void)
 {
-    // @Incomplete: ...
+    g_d3d.is_scissoring = NK_FALSE;
 }
 
 GLOBAL void clear_screen(nkVec4 color)
@@ -537,12 +541,19 @@ GLOBAL void draw_vertex_buffer(VertexBuffer vbuf, DrawMode draw_mode, nkU64 vert
     viewport.MinDepth = 0.0f;
     viewport.MaxDepth = 1.0f;
 
+    D3D11_RECT scissor = NK_ZERO_MEM;
+    scissor.left   = NK_CAST(nkS32,((g_d3d.is_scissoring) ? g_d3d.scissor.x : g_d3d.viewport.x));
+    scissor.top    = NK_CAST(nkS32,((g_d3d.is_scissoring) ? g_d3d.scissor.y : g_d3d.viewport.y));
+    scissor.right  = NK_CAST(nkS32,((g_d3d.is_scissoring) ? g_d3d.scissor.w : g_d3d.viewport.w)) + scissor.left;
+    scissor.bottom = NK_CAST(nkS32,((g_d3d.is_scissoring) ? g_d3d.scissor.h : g_d3d.viewport.h)) + scissor.top;
+
     g_d3d.device_context->IASetPrimitiveTopology(primitive);
     g_d3d.device_context->IASetInputLayout(input_layout);
     g_d3d.device_context->IASetVertexBuffers(0, 1, &vbuf->buffer, &byte_stride, &offset);
 
     g_d3d.device_context->RSSetState(g_d3d.rasterizer_state);
     g_d3d.device_context->RSSetViewports(1, &viewport);
+    g_d3d.device_context->RSSetScissorRects(1, &scissor);
 
     g_d3d.device_context->VSSetShader(g_d3d.current_shader->vert_shader, NULL, 0);
     g_d3d.device_context->PSSetShader(g_d3d.current_shader->frag_shader, NULL, 0);
