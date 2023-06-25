@@ -1,6 +1,3 @@
-[submodule "depends/nksdk"]
-	path = depends/nksdk
-	url = https://github.com/JROB774/nksdk.git
 [submodule "depends/emsdk"]
 	path = depends/emsdk
 	url = https://github.com/emscripten-core/emsdk.git
