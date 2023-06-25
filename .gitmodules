@@ -1,6 +1,3 @@
 [submodule "depends/emsdk"]
 	path = depends/emsdk
 	url = https://github.com/emscripten-core/emsdk.git
-[submodule "depends/makeicon"]
-	path = depends/makeicon
-	url = https://github.com/JROB774/makeicon.git
