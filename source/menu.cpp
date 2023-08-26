@@ -43,6 +43,8 @@ INTERNAL constexpr nkS32 MENU_TUTORIAL_PAGE_COUNT = 9;
 INTERNAL constexpr nkF32 STEAM_BUTTON_WIDTH  = 0.35f;
 INTERNAL constexpr nkF32 STEAM_BUTTON_HEIGHT = 0.38f;
 
+INTERNAL constexpr nkS32 VERSION_SIZE = 20;
+
 NK_ENUM(MenuScreen, nkS32)
 {
     MenuScreen_Main,
@@ -257,6 +259,18 @@ INTERNAL void menu_draw_main(void)
     ImmClip clip = { 0.0f, MENU_HEIGHT * 3, MENU_WIDTH, MENU_HEIGHT };
     imm_texture_ex(background, ww*0.5f, wh*0.5f, g_menu.scale,g_menu.scale, 0.0f, NULL, &clip);
 
+    // Do the version.
+    nkString version = format_string("v%d.%d.%d", VERSION_MAJOR,VERSION_MINOR,VERSION_PATCH);
+
+    TrueTypeFont font = get_font();
+    set_truetype_font_size(font, VERSION_SIZE);
+
+    nkF32 vx = g_menu.viewport.x + 10.0f;
+    nkF32 vy = g_menu.viewport.y + get_truetype_line_height(font);
+
+    draw_truetype_text(font, vx+5,vy+5, version.cstr, NK_V4_BLACK);
+    draw_truetype_text(font, vx,vy, version.cstr, { 0.5f,0.5f,0.5f,1.0f });
+
     // Do the main buttons.
     draw_menu_text_button(MENU_PLAY_TEXT, MENU_PLAY_YPOS, MENU_PLAY_SIZE);
     draw_menu_text_button(MENU_HOWTO_TEXT, MENU_HOWTO_YPOS, MENU_HOWTO_SIZE);
@@ -279,7 +293,7 @@ INTERNAL void menu_draw_main(void)
     draw_menu_toggle_button(HUD_CLIP_SOUND,      bx-(btn_width*1.1f),by, is_sound_on  ());
     draw_menu_toggle_button(HUD_CLIP_FULLSCREEN, bx-(btn_width*2.2f),by, is_fullscreen());
 
-    // Draw the Steam overlay.
+    // Do the Steam overlay.
     nkVec4 highlight_color = (g_menu.steam_area_hovered) ? nkVec4 { 2.2f,2.2f,2.2f,1.0f } : NK_V4_WHITE;
     imm_texture_ex(steam_overlay, ww*0.5f, wh*0.5f, g_menu.scale,g_menu.scale, 0.0f, NULL, NULL, highlight_color);
 }
