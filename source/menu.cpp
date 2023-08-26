@@ -40,8 +40,12 @@ INTERNAL constexpr nkF32 MENU_HEIGHT = 720.0f;
 INTERNAL constexpr nkS32 MENU_TUTORIAL_PAGE_COUNT = 9;
 
 // Calculated as a percentage of the viewport size.
-INTERNAL constexpr nkF32 STEAM_BUTTON_WIDTH  = 0.35f;
-INTERNAL constexpr nkF32 STEAM_BUTTON_HEIGHT = 0.38f;
+INTERNAL constexpr nkF32 STEAM_BUTTON_WIDTH   = 0.35f;
+INTERNAL constexpr nkF32 STEAM_BUTTON_HEIGHT  = 0.38f;
+
+// Calculated as a percentage of the viewport size.
+INTERNAL constexpr nkF32 SOCIAL_BUTTON_WIDTH  = 0.06f;
+INTERNAL constexpr nkF32 SOCIAL_BUTTON_HEIGHT = 0.10f;
 
 INTERNAL constexpr nkS32 VERSION_SIZE = 20;
 
@@ -71,7 +75,9 @@ struct MenuState
     nkF32      scale;
     nkS32      current_tutorial_page;
     Sound      page_flip_sound[11];
+    nkBool     youtube_area_hovered;
     nkBool     steam_area_hovered;
+    nkBool     twitter_area_hovered;
 };
 
 INTERNAL MenuState g_menu;
@@ -207,21 +213,58 @@ INTERNAL void menu_tick_main(nkF32 dt)
         if(tick_menu_toggle_button(HUD_CLIP_FULLSCREEN, bx-(btn_width*2.2f),by, is_fullscreen())) set_fullscreen(!is_fullscreen());
 
         // Is the mouse clicked in the Steam area then open the URL to the store page.
-        nkF32 w = STEAM_BUTTON_WIDTH  * g_menu.viewport.w;
-        nkF32 h = STEAM_BUTTON_HEIGHT * g_menu.viewport.h;
-        nkF32 x = g_menu.viewport.x + (g_menu.viewport.w - w);
-        nkF32 y = g_menu.viewport.y + (g_menu.viewport.h - h);
-
-        g_menu.steam_area_hovered = NK_FALSE;
-
-        if(point_vs_rect(get_window_mouse_pos(), x,y,w,h))
         {
-            g_menu.steam_area_hovered = NK_TRUE;
+            nkF32 w = STEAM_BUTTON_WIDTH  * g_menu.viewport.w;
+            nkF32 h = STEAM_BUTTON_HEIGHT * g_menu.viewport.h;
+            nkF32 x = g_menu.viewport.x + (g_menu.viewport.w - w);
+            nkF32 y = g_menu.viewport.y + (g_menu.viewport.h - h);
 
-            if(is_mouse_button_pressed(MouseButton_Left))
+            g_menu.steam_area_hovered = NK_FALSE;
+
+            if(point_vs_rect(get_window_mouse_pos(), x,y,w,h))
             {
-                open_url("https://store.steampowered.com/app/2570080/Grow_Your_Guarden");
-                play_sound(asset_manager_load<Sound>("click.wav"));
+                g_menu.steam_area_hovered = NK_TRUE;
+
+                if(is_mouse_button_pressed(MouseButton_Left))
+                {
+                    open_url("https://store.steampowered.com/app/2570080/Grow_Your_Guarden");
+                    play_sound(asset_manager_load<Sound>("click.wav"));
+                }
+            }
+        }
+
+        // Is the mouse clicked on any of the socials?
+        {
+            nkF32 w = SOCIAL_BUTTON_WIDTH  * g_menu.viewport.w;
+            nkF32 h = SOCIAL_BUTTON_HEIGHT * g_menu.viewport.h;
+            nkF32 x = g_menu.viewport.x +                     (w * 0.15f);
+            nkF32 y = g_menu.viewport.y + g_menu.viewport.h - (h * 1.30f);
+
+            g_menu.twitter_area_hovered = NK_FALSE;
+            g_menu.youtube_area_hovered = NK_FALSE;
+
+            if(point_vs_rect(get_window_mouse_pos(), x,y,w,h))
+            {
+                g_menu.twitter_area_hovered = NK_TRUE;
+
+                if(is_mouse_button_pressed(MouseButton_Left))
+                {
+                    open_url("https://twitter.com/intent/user?screen_name=jrobertson774");
+                    play_sound(asset_manager_load<Sound>("click.wav"));
+                }
+            }
+
+            y -= h * (1.3f);
+
+            if(point_vs_rect(get_window_mouse_pos(), x,y,w,h))
+            {
+                g_menu.youtube_area_hovered = NK_TRUE;
+
+                if(is_mouse_button_pressed(MouseButton_Left))
+                {
+                    open_url("https://www.youtube.com/channel/UCWOTkXnqzDDvhN-Y5dxzCvw?sub_confirmation=1");
+                    play_sound(asset_manager_load<Sound>("click.wav"));
+                }
             }
         }
     }
@@ -250,7 +293,10 @@ INTERNAL void menu_draw_main(void)
     if(g_menu.stage != MenuStage_Interactive) return;
 
     Texture background = asset_manager_load<Texture>("title.png");
+
+    Texture youtube_overlay = asset_manager_load<Texture>("social_youtube.png");
     Texture steam_overlay = asset_manager_load<Texture>("steam.png");
+    Texture twitter_overlay = asset_manager_load<Texture>("social_twitter.png");
 
     nkF32 ww = NK_CAST(nkF32, get_window_width());
     nkF32 wh = NK_CAST(nkF32, get_window_height());
@@ -293,9 +339,18 @@ INTERNAL void menu_draw_main(void)
     draw_menu_toggle_button(HUD_CLIP_SOUND,      bx-(btn_width*1.1f),by, is_sound_on  ());
     draw_menu_toggle_button(HUD_CLIP_FULLSCREEN, bx-(btn_width*2.2f),by, is_fullscreen());
 
-    // Do the Steam overlay.
-    nkVec4 highlight_color = (g_menu.steam_area_hovered) ? nkVec4 { 2.2f,2.2f,2.2f,1.0f } : NK_V4_WHITE;
+    // Do the overlays.
+    nkVec4 highlight_color;
+
+    // YouTube
+    highlight_color = (g_menu.youtube_area_hovered) ? nkVec4 { 2.2f,2.2f,2.2f,1.0f } : NK_V4_WHITE;
+    imm_texture_ex(youtube_overlay, ww*0.5f, wh*0.5f, g_menu.scale,g_menu.scale, 0.0f, NULL, NULL, highlight_color);
+    // Steam
+    highlight_color = (g_menu.steam_area_hovered) ? nkVec4 { 2.2f,2.2f,2.2f,1.0f } : NK_V4_WHITE;
     imm_texture_ex(steam_overlay, ww*0.5f, wh*0.5f, g_menu.scale,g_menu.scale, 0.0f, NULL, NULL, highlight_color);
+    // Twitter
+    highlight_color = (g_menu.twitter_area_hovered) ? nkVec4 { 2.2f,2.2f,2.2f,1.0f } : NK_V4_WHITE;
+    imm_texture_ex(twitter_overlay, ww*0.5f, wh*0.5f, g_menu.scale,g_menu.scale, 0.0f, NULL, NULL, highlight_color);
 }
 
 INTERNAL void menu_tick_tutorial(nkF32 dt)
