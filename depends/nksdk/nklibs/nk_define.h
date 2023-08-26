@@ -208,7 +208,7 @@ NK_STATIC_ASSERT(sizeof(nkF64 )==8, nkF64_is_not_the_correct_size);
 // code or STL headers. This needs to be in the std namespace or else it will
 // not work, so there is no real way to get around that issue.
 
-#if defined(NK_HAS_CPP) && NK_OS_WIN32 // ======================================
+#if defined(NK_HAS_CPP) && defined(NK_OS_WIN32) // =============================
 
 #if !defined(_INITIALIZER_LIST_)
 
