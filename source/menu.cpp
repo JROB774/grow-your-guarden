@@ -39,6 +39,10 @@ INTERNAL constexpr nkF32 MENU_HEIGHT = 720.0f;
 
 INTERNAL constexpr nkS32 MENU_TUTORIAL_PAGE_COUNT = 9;
 
+// Calculated as a percentage of the viewport size.
+INTERNAL constexpr nkF32 STEAM_BUTTON_WIDTH  = 0.35f;
+INTERNAL constexpr nkF32 STEAM_BUTTON_HEIGHT = 0.38f;
+
 NK_ENUM(MenuScreen, nkS32)
 {
     MenuScreen_Main,
@@ -65,6 +69,7 @@ struct MenuState
     nkF32      scale;
     nkS32      current_tutorial_page;
     Sound      page_flip_sound[11];
+    nkBool     steam_area_hovered;
 };
 
 INTERNAL MenuState g_menu;
@@ -198,6 +203,25 @@ INTERNAL void menu_tick_main(nkF32 dt)
         if(tick_menu_toggle_button(HUD_CLIP_MUSIC,      bx-(btn_width*0.0f),by, is_music_on  ())) set_music_volume((is_music_on()) ? 0.0f : 0.7f);
         if(tick_menu_toggle_button(HUD_CLIP_SOUND,      bx-(btn_width*1.1f),by, is_sound_on  ())) set_sound_volume((is_sound_on()) ? 0.0f : 0.8f);
         if(tick_menu_toggle_button(HUD_CLIP_FULLSCREEN, bx-(btn_width*2.2f),by, is_fullscreen())) set_fullscreen(!is_fullscreen());
+
+        // Is the mouse clicked in the Steam area then open the URL to the store page.
+        nkF32 w = STEAM_BUTTON_WIDTH  * g_menu.viewport.w;
+        nkF32 h = STEAM_BUTTON_HEIGHT * g_menu.viewport.h;
+        nkF32 x = g_menu.viewport.x + (g_menu.viewport.w - w);
+        nkF32 y = g_menu.viewport.y + (g_menu.viewport.h - h);
+
+        g_menu.steam_area_hovered = NK_FALSE;
+
+        if(point_vs_rect(get_window_mouse_pos(), x,y,w,h))
+        {
+            g_menu.steam_area_hovered = NK_TRUE;
+
+            if(is_mouse_button_pressed(MouseButton_Left))
+            {
+                open_url("https://store.steampowered.com/app/2570080/Grow_Your_Guarden");
+                play_sound(asset_manager_load<Sound>("click.wav"));
+            }
+        }
     }
     else
     {
@@ -224,6 +248,7 @@ INTERNAL void menu_draw_main(void)
     if(g_menu.stage != MenuStage_Interactive) return;
 
     Texture background = asset_manager_load<Texture>("title.png");
+    Texture steam_overlay = asset_manager_load<Texture>("steam.png");
 
     nkF32 ww = NK_CAST(nkF32, get_window_width());
     nkF32 wh = NK_CAST(nkF32, get_window_height());
@@ -253,6 +278,10 @@ INTERNAL void menu_draw_main(void)
     draw_menu_toggle_button(HUD_CLIP_MUSIC,      bx-(btn_width*0.0f),by, is_music_on  ());
     draw_menu_toggle_button(HUD_CLIP_SOUND,      bx-(btn_width*1.1f),by, is_sound_on  ());
     draw_menu_toggle_button(HUD_CLIP_FULLSCREEN, bx-(btn_width*2.2f),by, is_fullscreen());
+
+    // Draw the Steam overlay.
+    nkVec4 highlight_color = (g_menu.steam_area_hovered) ? nkVec4 { 2.2f,2.2f,2.2f,1.0f } : NK_V4_WHITE;
+    imm_texture_ex(steam_overlay, ww*0.5f, wh*0.5f, g_menu.scale,g_menu.scale, 0.0f, NULL, NULL, highlight_color);
 }
 
 INTERNAL void menu_tick_tutorial(nkF32 dt)
