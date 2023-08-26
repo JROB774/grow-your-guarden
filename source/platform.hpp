@@ -16,5 +16,6 @@ GLOBAL nkBool   is_cursor_visible (void);
 GLOBAL nkU64    get_system_time_ms(void);
 GLOBAL nkU64    get_system_time_us(void);
 GLOBAL nkU64    get_elapsed_ticks (void);
+GLOBAL void     open_url          (const nkChar* url);
 
 /*////////////////////////////////////////////////////////////////////////////*/

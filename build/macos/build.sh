@@ -49,7 +49,7 @@ if [ "${args[0]}" == "web" ]; then
 
     defs="-D BUILD_WEB"
     idir="-I ../../depends/nksdk/nklibs -I ../../depends/stb"
-    libs="-s WASM=1 -s USE_SDL=2 -s USE_SDL_MIXER=2 -s USE_OGG=1 -s USE_VORBIS=1 -s USE_FREETYPE=1 -s MIN_WEBGL_VERSION=2 -s MAX_WEBGL_VERSION=2 -lidbfs.js"
+    libs="-s WASM=1 -s USE_SDL=2 -s USE_SDL_MIXER=2 -s USE_OGG=1 -s USE_VORBIS=1 -s USE_FREETYPE=1 -s MIN_WEBGL_VERSION=2 -s MAX_WEBGL_VERSION=2 -lidbfs.js -lembind"
     cflg="-std=c++14"
     lflg=$"--preload-file ../../assets -s EXPORTED_FUNCTIONS=_main,_main_callback -s EXPORTED_RUNTIME_METHODS=ccall -s ALLOW_MEMORY_GROWTH"
 

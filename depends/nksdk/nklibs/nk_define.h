@@ -208,7 +208,7 @@ NK_STATIC_ASSERT(sizeof(nkF64 )==8, nkF64_is_not_the_correct_size);
 // code or STL headers. This needs to be in the std namespace or else it will
 // not work, so there is no real way to get around that issue.
 
-#if defined(NK_HAS_CPP) // =====================================================
+#if defined(NK_HAS_CPP) && NK_OS_WIN32 // ======================================
 
 #if !defined(_INITIALIZER_LIST_)
 
@@ -239,7 +239,13 @@ template<typename T> const T* end  (initializer_list<T> list) { return list.end(
 
 template<typename T> using nkInitializerList = std::initializer_list<T>;
 
-#endif // NK_HAS_CPP ===========================================================
+#else
+
+#include <initializer_list>
+
+template<typename T> using nkInitializerList = std::initializer_list<T>;
+
+#endif // NK_HAS_CPP && NK_OS_WIN32 ============================================
 
 // Custom implementation of move to avoid the need to include the STL headers.
 

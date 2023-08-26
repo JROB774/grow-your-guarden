@@ -2,6 +2,7 @@
 
 #if defined(BUILD_WEB)
 #include <emscripten.h>
+#include <emscripten/val.h>
 #endif // BUILD_WEB
 
 #include <SDL.h>
@@ -454,5 +455,22 @@ GLOBAL nkU64 get_elapsed_ticks(void)
 {
     return g_ctx.ticks;
 }
+
+#if defined(BUILD_NATIVE)
+GLOBAL void open_url(const nkChar* url)
+{
+    // Only implementing this for Windows because that's the only native platform we shipped anyway...
+    #if defined(NK_OS_WIN32)
+    ShellExecuteA(NULL, NULL, url, NULL, NULL, SW_SHOW);
+    #endif // NK_OS_WIN32
+}
+#endif // BUILD_NATIVE
+
+#if defined(BUILD_WEB)
+GLOBAL void open_url(const nkChar* url)
+{
+    emscripten::val::global("window").call<void>("open", std::string(url));
+}
+#endif // BUILD_WEB)
 
 /*////////////////////////////////////////////////////////////////////////////*/
