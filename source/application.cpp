@@ -28,6 +28,10 @@
 
 #include <stb_image.h>
 
+static constexpr nkS32 VERSION_MAJOR = 1;
+static constexpr nkS32 VERSION_MINOR = 0;
+static constexpr nkS32 VERSION_PATCH = 2;
+
 #include "utility.hpp"
 #include "asset_manager.hpp"
 #include "audio.hpp"
