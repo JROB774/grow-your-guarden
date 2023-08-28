@@ -122,11 +122,15 @@ void asset_free<Shader>(Asset<Shader>& asset)
 template<>
 const nkChar* asset_path<Shader>(void)
 {
-    #if defined(NK_OS_WIN32)
-    return "shaders/hlsl/";
-    #else
+    // :WindowsOpenGL
+    //
+    // We are just always using OpenGL even though we have the Direct3D backend, as that's what we originally shipped with.
+    //
+    // #if defined(NK_OS_WIN32)
+    // return "shaders/hlsl/";
+    // #else
     return "shaders/glsl/";
-    #endif
+    // #endif
 }
 
 template<>
