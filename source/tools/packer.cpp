@@ -12,7 +12,7 @@
 int main(int argc, char** argv)
 {
     printf("Packing game assets into npak... ");
-    nkBool res = nk_npak_pack("binary/win32/assets.npak", "assets");
+    nkBool res = nk_npak_pack("../../binary/win32/assets.npak", "../../assets");
     printf("%s!\n\n", res ? "successful" : "failure");
     return 0;
 }

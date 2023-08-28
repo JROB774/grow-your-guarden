@@ -24,7 +24,7 @@ if "%~2"=="release" (
 
     copy ..\..\redist\win32\credits.txt ..\..\binary\win32\credits.txt > NUL
 
-    if exist ..\..\tools\packer.exe tools\packer.exe
+    if exist ..\..\tools\packer.exe ..\..\tools\packer.exe
 ) else (
     set defs=%defs% -D BUILD_DEBUG -D NK_DEBUG -D SDL_MAIN_HANDLED
     set cflg=%cflg% -Z7
@@ -84,7 +84,7 @@ echo ----------------------------------------
 if not exist ..\..\tools mkdir ..\..\tools
 
 pushd ..\..\tools
-cl ..\source\tools\packer.cpp -I ..\depends\nksdk -I ..\depends\stb -Fe:packer.exe
+cl ..\source\tools\packer.cpp -I ..\depends\nksdk\nklibs -I ..\depends\stb -Fe:packer.exe
 del *.obj
 popd
 
